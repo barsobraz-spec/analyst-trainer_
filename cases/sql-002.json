@@ -1,0 +1,44 @@
+{
+  "caseId": "sql-002",
+  "module": "5.5",
+  "schemaVersion": 1,
+  "title": "Анализ активности пользователей",
+  "difficulty": "intermediate",
+  "skillTags": ["sql"],
+  "payload": {
+    "scenario": "Вы — продуктовый аналитик SaaS-сервиса. Команда хочет понять, кто и насколько активно пользуется продуктом, и есть ли «спящие» пользователи. В базе две таблицы: «users» (пользователи: тариф, страна, дата регистрации) и «events» (действия пользователей: вход, создание отчёта, экспорт — ссылаются на пользователя по user_id).\n\nПройдите анализ по шагам: для каждой подзадачи напишите SQL-запрос и нажмите «Проверить решение». Кнопкой «Выполнить» можно свободно осматриваться в данных.",
+    "question": "Решите все подзадачи анализа активности пользователей с помощью SQL.",
+    "datasetPath": "cases/datasets/sql-002.json",
+    "starterSql": "SELECT * FROM users;",
+    "subtasks": [
+      {
+        "id": "s1",
+        "prompt": "Сколько всего пользователей зарегистрировано?",
+        "orderSensitive": false,
+        "referenceSql": "SELECT COUNT(*) AS users_count FROM users;",
+        "explanation": "Базовый COUNT(*) по таблице users — всего 7 пользователей. Отправная точка анализа."
+      },
+      {
+        "id": "s2",
+        "prompt": "Сколько пользователей на каждом тарифе (plan)? Выведите тариф и число пользователей, отсортируйте по числу пользователей по убыванию.",
+        "orderSensitive": true,
+        "referenceSql": "SELECT plan, COUNT(*) AS cnt FROM users GROUP BY plan ORDER BY cnt DESC;",
+        "explanation": "GROUP BY plan + COUNT(*), сортировка ORDER BY cnt DESC. На тарифе free 4 пользователя, на pro — 3: бесплатных больше."
+      },
+      {
+        "id": "s3",
+        "prompt": "Выведите имя пользователя и число его событий для тех, у кого есть хотя бы одно событие. Отсортируйте по числу событий по убыванию.",
+        "orderSensitive": true,
+        "referenceSql": "SELECT u.name, COUNT(*) AS cnt FROM events e JOIN users u ON e.user_id = u.user_id GROUP BY u.user_id, u.name ORDER BY cnt DESC;",
+        "explanation": "JOIN events с users по user_id, GROUP BY пользователю, ORDER BY числу событий по убыванию. Самые активные — Елена (6) и Дмитрий (5)."
+      },
+      {
+        "id": "s4",
+        "prompt": "Найдите «спящих» пользователей — тех, кто не совершил ни одного события. Выведите их имя.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT name FROM users WHERE user_id NOT IN (SELECT user_id FROM events);",
+        "explanation": "Анти-джойн: пользователи, чьего user_id нет в таблице событий (NOT IN или LEFT JOIN ... IS NULL). Единственный «спящий» — Жанна, недавно зарегистрировалась и ещё ничего не сделала."
+      }
+    ]
+  }
+}

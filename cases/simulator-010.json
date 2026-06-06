@@ -1,0 +1,127 @@
+{
+  "caseId": "simulator-010",
+  "module": "5.6",
+  "schemaVersion": 1,
+  "title": "Финтех: fraud-фильтр без убийства хороших клиентов",
+  "difficulty": "advanced",
+  "skillTags": ["business-thinking"],
+  "payload": {
+    "scenario": "Финтех-сервис усиливает антифрод после роста мошеннических операций. Риск-команда предлагает максимально жёсткий фильтр. Продукт опасается false positives: хорошие клиенты получают отказ и уходят.\n\nВ каждом периоде вы выбираете строгость фильтра и объём ручной проверки. Жёсткость снижает fraud loss, но увеличивает потери от ложных отказов. Ручная проверка возвращает часть хороших операций, но стоит денег и имеет ограниченный эффект.",
+    "question": "Максимизируйте чистый доход за 3 периода. Найдите баланс между fraud loss и false positives.",
+    "metrics": [
+      { "key": "approved", "label": "Одобренные операции", "format": "int" },
+      { "key": "fraudLoss", "label": "Потери от fraud", "format": "money" },
+      { "key": "falsePositiveLoss", "label": "Потери от ложных отказов", "format": "money" },
+      { "key": "netRevenue", "label": "Чистый доход периода", "format": "money" },
+      { "key": "totalNetRevenue", "label": "Суммарный чистый доход", "format": "money" }
+    ],
+    "startState": {
+      "approved": 0,
+      "fraudLoss": 0,
+      "falsePositiveLoss": 0,
+      "netRevenue": 0,
+      "totalNetRevenue": 0
+    },
+    "target": {
+      "metric": "totalNetRevenue",
+      "value": 2100000,
+      "direction": "max",
+      "label": "Суммарный чистый доход"
+    },
+    "rounds": [
+      {
+        "title": "Период 1 — fraud вырос после акции",
+        "prompt": "120 000 операций, fraud rate 1,6%. Выберите строгость фильтра и режим ручной проверки.",
+        "decisions": [
+          {
+            "id": "review",
+            "type": "choice",
+            "label": "Ручная проверка",
+            "options": [
+              { "value": "none", "label": "Без ручной проверки", "desc": "Дешево, но false positives не возвращаются.", "params": { "reviewRecover": 0, "recoverRate": 0, "reviewCost": 0 } },
+              { "value": "sample", "label": "Проверять спорные операции", "desc": "Возвращает часть хороших клиентов.", "params": { "reviewRecover": 3, "recoverRate": 18, "reviewCost": 180000 } },
+              { "value": "heavy", "label": "Расширенная проверка", "desc": "Больше возврата и fraud recovery, но дорого.", "params": { "reviewRecover": 5, "recoverRate": 28, "reviewCost": 360000 } }
+            ]
+          },
+          { "id": "strictness", "type": "number", "label": "Строгость фильтра", "suffix": "%", "help": "0% — мягко; 100% — режем почти всё подозрительное, включая хороших клиентов.", "min": 0, "max": 100, "step": 10, "default": 50 }
+        ],
+        "model": [
+          { "key": "baseTx", "formula": "120000" },
+          { "key": "fraudRate", "formula": "1.6" },
+          { "key": "marginPerGood", "formula": "34" },
+          { "key": "fraudCost", "formula": "2200" },
+          { "key": "approved", "formula": "round(baseTx * clamp(0.94 - strictness * 0.0032 + reviewRecover / 100, 0.55, 0.98))" },
+          { "key": "fraudLoss", "formula": "round(baseTx * fraudRate / 100 * fraudCost * clamp(1 - strictness / 115, 0.05, 1) * (1 - recoverRate / 100))" },
+          { "key": "falsePositiveLoss", "formula": "round(baseTx * strictness * strictness / 10000 * 0.5 * marginPerGood)" },
+          { "key": "netRevenue", "formula": "round(approved * marginPerGood - fraudLoss - falsePositiveLoss - reviewCost)" },
+          { "key": "totalNetRevenue", "formula": "totalNetRevenue + netRevenue" }
+        ],
+        "explanation": "Мягкий фильтр оставляет fraud loss, слишком жёсткий режет хороших клиентов. Ручная проверка полезна только если её стоимость ниже возвращённой маржи и предотвращённого fraud."
+      },
+      {
+        "title": "Период 2 — мошенники адаптировались",
+        "prompt": "140 000 операций, fraud rate 2,1%. Риск вырос, но клиентский поток тоже важен.",
+        "decisions": [
+          {
+            "id": "review",
+            "type": "choice",
+            "label": "Ручная проверка",
+            "options": [
+              { "value": "none", "label": "Без ручной проверки", "desc": "Нет затрат, высокий риск ошибочных решений.", "params": { "reviewRecover": 0, "recoverRate": 0, "reviewCost": 0 } },
+              { "value": "sample", "label": "Проверять спорные операции", "desc": "Средняя стоимость, хороший баланс.", "params": { "reviewRecover": 3, "recoverRate": 20, "reviewCost": 210000 } },
+              { "value": "heavy", "label": "Расширенная проверка", "desc": "Сильнее снижает fraud, но дорого и медленно.", "params": { "reviewRecover": 5, "recoverRate": 32, "reviewCost": 420000 } }
+            ]
+          },
+          { "id": "strictness", "type": "number", "label": "Строгость фильтра", "suffix": "%", "min": 0, "max": 100, "step": 10, "default": 60 }
+        ],
+        "model": [
+          { "key": "baseTx", "formula": "140000" },
+          { "key": "fraudRate", "formula": "2.1" },
+          { "key": "marginPerGood", "formula": "35" },
+          { "key": "fraudCost", "formula": "2300" },
+          { "key": "approved", "formula": "round(baseTx * clamp(0.94 - strictness * 0.0032 + reviewRecover / 100, 0.55, 0.98))" },
+          { "key": "fraudLoss", "formula": "round(baseTx * fraudRate / 100 * fraudCost * clamp(1 - strictness / 115, 0.05, 1) * (1 - recoverRate / 100))" },
+          { "key": "falsePositiveLoss", "formula": "round(baseTx * strictness * strictness / 10000 * 0.5 * marginPerGood)" },
+          { "key": "netRevenue", "formula": "round(approved * marginPerGood - fraudLoss - falsePositiveLoss - reviewCost)" },
+          { "key": "totalNetRevenue", "formula": "totalNetRevenue + netRevenue" }
+        ],
+        "explanation": "При росте fraud rate оптимальная строгость может вырасти, но не до максимума: false positives масштабируются вместе с потоком операций."
+      },
+      {
+        "title": "Период 3 — поток стабилен, репутация под риском",
+        "prompt": "130 000 операций, fraud rate 1,8%. После жалоб клиентов важно не пережать фильтр.",
+        "decisions": [
+          {
+            "id": "review",
+            "type": "choice",
+            "label": "Ручная проверка",
+            "options": [
+              { "value": "none", "label": "Без проверки", "desc": "Дёшево, но спорные отказы не исправляются.", "params": { "reviewRecover": 0, "recoverRate": 0, "reviewCost": 0 } },
+              { "value": "sample", "label": "Спорные операции", "desc": "Баланс стоимости и восстановления хороших клиентов.", "params": { "reviewRecover": 3, "recoverRate": 20, "reviewCost": 200000 } },
+              { "value": "heavy", "label": "Расширенная проверка", "desc": "Дорого для нормализовавшегося риска.", "params": { "reviewRecover": 5, "recoverRate": 30, "reviewCost": 390000 } }
+            ]
+          },
+          { "id": "strictness", "type": "number", "label": "Строгость фильтра", "suffix": "%", "min": 0, "max": 100, "step": 10, "default": 50 }
+        ],
+        "model": [
+          { "key": "baseTx", "formula": "130000" },
+          { "key": "fraudRate", "formula": "1.8" },
+          { "key": "marginPerGood", "formula": "36" },
+          { "key": "fraudCost", "formula": "2200" },
+          { "key": "approved", "formula": "round(baseTx * clamp(0.94 - strictness * 0.0032 + reviewRecover / 100, 0.55, 0.98))" },
+          { "key": "fraudLoss", "formula": "round(baseTx * fraudRate / 100 * fraudCost * clamp(1 - strictness / 115, 0.05, 1) * (1 - recoverRate / 100))" },
+          { "key": "falsePositiveLoss", "formula": "round(baseTx * strictness * strictness / 10000 * 0.5 * marginPerGood)" },
+          { "key": "netRevenue", "formula": "round(approved * marginPerGood - fraudLoss - falsePositiveLoss - reviewCost)" },
+          { "key": "totalNetRevenue", "formula": "totalNetRevenue + netRevenue" }
+        ],
+        "explanation": "Когда риск нормализуется, прежняя максимальная строгость может стать вредной: fraud loss падает, а false positives остаются дорогими."
+      }
+    ],
+    "reference": [
+      "Ловушка — base rate и false positives. Даже хороший fraud-фильтр может навредить, если доля мошенничества невелика, а каждый процент ложных отказов режет много хороших операций.",
+      "Арифметика: net revenue = одобренные хорошие операции × маржа − fraud loss − false positive loss − review cost. Максимальная строгость не обязана максимизировать чистый доход.",
+      "Что проверить дальше: precision/recall фильтра, false positive rate по сегментам, ручную проверку спорной зоны и долгосрочный churn после ложных отказов.",
+      "Типичная ошибка: смотреть только на снижение fraud loss. Сильная стратегия балансирует риск и продуктовую конверсию, усиливая ручную проверку в спорной зоне."
+    ]
+  }
+}

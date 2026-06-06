@@ -1,0 +1,121 @@
+{
+  "caseId": "simulator-009",
+  "module": "5.6",
+  "schemaVersion": 1,
+  "title": "B2B-продажи: много лидов, мало выручки",
+  "difficulty": "advanced",
+  "skillTags": ["business-thinking"],
+  "payload": {
+    "scenario": "B2B-команда спорит о плане на квартал. Маркетинг предлагает увеличить число лидов через массовые вебинары и базы контактов. Sales говорит, что SDR тратят время на неподходящие компании, а pipeline раздувается без выручки.\n\nВ каждом месяце вы выбираете источник лидов и строгость квалификации. Слишком мягкая квалификация создаёт объём, но низкий win rate; слишком жёсткая может отрезать сделки. Цель — максимизировать чистый ARR после стоимости обработки pipeline.",
+    "question": "Постройте качественную B2B-воронку за 3 месяца. Оптимизируйте не MQL, а net ARR.",
+    "metrics": [
+      { "key": "leads", "label": "Лиды", "format": "int" },
+      { "key": "sqlRate", "label": "SQL rate", "format": "percent" },
+      { "key": "winRate", "label": "Win rate", "format": "percent" },
+      { "key": "monthNetArr", "label": "Net ARR месяца", "format": "money" },
+      { "key": "totalNetArr", "label": "Суммарный net ARR", "format": "money" }
+    ],
+    "startState": {
+      "leads": 0,
+      "sqlRate": 18,
+      "winRate": 12,
+      "monthNetArr": 0,
+      "totalNetArr": 0
+    },
+    "target": {
+      "metric": "totalNetArr",
+      "value": 16000000,
+      "direction": "max",
+      "label": "Суммарный net ARR"
+    },
+    "rounds": [
+      {
+        "title": "Месяц 1 — быстрый объём или ICP",
+        "prompt": "Выберите источник лидов и уровень квалификации SDR.",
+        "decisions": [
+          {
+            "id": "source",
+            "type": "choice",
+            "label": "Источник лидов",
+            "options": [
+              { "value": "list", "label": "Купленная база + cold email", "desc": "Много лидов, слабое попадание в ICP.", "params": { "baseLeads": 620, "quality": -30, "dealSize": 22000, "sourceCost": 500000 } },
+              { "value": "webinar", "label": "Массовый вебинар", "desc": "Средний объём, среднее качество.", "params": { "baseLeads": 360, "quality": 2, "dealSize": 110000, "sourceCost": 220000 } },
+              { "value": "abm", "label": "Account-based на ICP", "desc": "Меньше лидов, выше качество и чек.", "params": { "baseLeads": 210, "quality": 24, "dealSize": 230000, "sourceCost": 260000 } }
+            ]
+          },
+          { "id": "qualification", "type": "number", "label": "Строгость квалификации", "suffix": "%", "help": "0% — пропускаем почти всех; 100% — очень жёстко режем поток.", "min": 0, "max": 100, "step": 10, "default": 50 }
+        ],
+        "model": [
+          { "key": "leads", "formula": "round(baseLeads * (1 - qualification / 220))" },
+          { "key": "sqlRate", "formula": "clamp(18 + quality + qualification * 0.32, 5, 85)" },
+          { "key": "winRate", "formula": "clamp(10 + quality * 0.45 + qualification * 0.11, 3, 55)" },
+          { "key": "grossArr", "formula": "round(leads * sqlRate / 100 * winRate / 100 * dealSize)" },
+          { "key": "pipelineCost", "formula": "round(sourceCost + leads * 900 + qualification * 1800)" },
+          { "key": "monthNetArr", "formula": "grossArr - pipelineCost" },
+          { "key": "totalNetArr", "formula": "totalNetArr + monthNetArr" }
+        ],
+        "explanation": "MQL-объём может быть дешёвым, но он нагружает SDR и снижает win rate. Квалификация повышает качество, но при чрезмерной строгости режет объём."
+      },
+      {
+        "title": "Месяц 2 — продажи перегружены",
+        "prompt": "SDR жалуются на шум в pipeline. Источник и квалификация теперь особенно важны.",
+        "decisions": [
+          {
+            "id": "source",
+            "type": "choice",
+            "label": "Источник лидов",
+            "options": [
+              { "value": "list", "label": "Холодная база", "desc": "Максимальный объём, ещё ниже качество.", "params": { "baseLeads": 700, "quality": -32, "dealSize": 22000, "sourceCost": 540000 } },
+              { "value": "webinar", "label": "Вебинар по боли сегмента", "desc": "Средний объём, качество выше прошлого.", "params": { "baseLeads": 400, "quality": 5, "dealSize": 120000, "sourceCost": 240000 } },
+              { "value": "abm", "label": "ABM на целевые аккаунты", "desc": "Меньше лидов, но больше SQL и чек.", "params": { "baseLeads": 240, "quality": 26, "dealSize": 240000, "sourceCost": 280000 } }
+            ]
+          },
+          { "id": "qualification", "type": "number", "label": "Строгость квалификации", "suffix": "%", "min": 0, "max": 100, "step": 10, "default": 60 }
+        ],
+        "model": [
+          { "key": "leads", "formula": "round(baseLeads * (1 - qualification / 220))" },
+          { "key": "sqlRate", "formula": "clamp(18 + quality + qualification * 0.32, 5, 85)" },
+          { "key": "winRate", "formula": "clamp(10 + quality * 0.45 + qualification * 0.11, 3, 55)" },
+          { "key": "grossArr", "formula": "round(leads * sqlRate / 100 * winRate / 100 * dealSize)" },
+          { "key": "pipelineCost", "formula": "round(sourceCost + leads * 950 + qualification * 1900)" },
+          { "key": "monthNetArr", "formula": "grossArr - pipelineCost" },
+          { "key": "totalNetArr", "formula": "totalNetArr + monthNetArr" }
+        ],
+        "explanation": "Когда sales capacity ограничена, плохие лиды имеют двойную цену: прямую стоимость обработки и opportunity cost по хорошим аккаунтам."
+      },
+      {
+        "title": "Месяц 3 — закрываем квартал",
+        "prompt": "Нужно закрыть квартал по net ARR, не раздуть pipeline мусором.",
+        "decisions": [
+          {
+            "id": "source",
+            "type": "choice",
+            "label": "Источник лидов",
+            "options": [
+              { "value": "list", "label": "Дешёвый объём", "desc": "Много лидов на бумаге.", "params": { "baseLeads": 760, "quality": -35, "dealSize": 20000, "sourceCost": 560000 } },
+              { "value": "webinar", "label": "Сегментный вебинар", "desc": "Баланс объёма и качества.", "params": { "baseLeads": 430, "quality": 6, "dealSize": 125000, "sourceCost": 250000 } },
+              { "value": "abm", "label": "ABM + warm intro", "desc": "Самое высокое качество и чек.", "params": { "baseLeads": 260, "quality": 28, "dealSize": 250000, "sourceCost": 300000 } }
+            ]
+          },
+          { "id": "qualification", "type": "number", "label": "Строгость квалификации", "suffix": "%", "min": 0, "max": 100, "step": 10, "default": 60 }
+        ],
+        "model": [
+          { "key": "leads", "formula": "round(baseLeads * (1 - qualification / 220))" },
+          { "key": "sqlRate", "formula": "clamp(18 + quality + qualification * 0.32, 5, 85)" },
+          { "key": "winRate", "formula": "clamp(10 + quality * 0.45 + qualification * 0.11, 3, 55)" },
+          { "key": "grossArr", "formula": "round(leads * sqlRate / 100 * winRate / 100 * dealSize)" },
+          { "key": "pipelineCost", "formula": "round(sourceCost + leads * 950 + qualification * 2000)" },
+          { "key": "monthNetArr", "formula": "grossArr - pipelineCost" },
+          { "key": "totalNetArr", "formula": "totalNetArr + monthNetArr" }
+        ],
+        "explanation": "Финальный месяц часто провоцирует на объём любой ценой. Но net ARR учитывает и вероятность закрытия, и стоимость обработки."
+      }
+    ],
+    "reference": [
+      "Ловушка — MQL volume vs revenue quality. Большая верхняя воронка не создаёт ценность, если лиды не проходят SQL и не закрываются.",
+      "Арифметика: net ARR = leads × SQL rate × win rate × deal size − cost. У источника с меньшим lead volume может быть выше результат из-за качества и чека.",
+      "Что проверить дальше: conversion by source, sales capacity, win rate по ICP-fit, CAC/payback по сегментам и качество дисквалификаций.",
+      "Типичная ошибка: ставить план на MQL и заставлять sales разгребать шум. Сильная стратегия работает от ICP, умеренно квалифицирует и оптимизирует net ARR."
+    ]
+  }
+}

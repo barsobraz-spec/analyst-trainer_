@@ -1,0 +1,44 @@
+{
+  "caseId": "sql-005",
+  "module": "5.5",
+  "schemaVersion": 1,
+  "title": "Грязные названия каналов дробят отчёт",
+  "difficulty": "intermediate",
+  "skillTags": ["sql"],
+  "payload": {
+    "scenario": "Вы — маркетинг-аналитик. Лиды собираются из разных систем, и название канала пишется как попало: «Google», «google», «GOOGLE», « Google » с пробелами и даже с опечаткой «googel». Наивный GROUP BY channel раздробит один канал на кучу строк и исказит отчёт.\n\nВ таблице «leads» (лид, канал, дата) приведите названия к единому виду. Для каждой подзадачи напишите SQL и нажмите «Проверить решение»; кнопкой «Выполнить» можно осмотреться в данных.",
+    "question": "Решите подзадачи так, чтобы разные написания одного канала считались как один канал.",
+    "datasetPath": "cases/datasets/sql-005.json",
+    "starterSql": "SELECT DISTINCT channel FROM leads;",
+    "subtasks": [
+      {
+        "id": "s1",
+        "prompt": "Сколько РАЗЛИЧНЫХ написаний канала встречается в данных (наивно, как есть)?",
+        "orderSensitive": false,
+        "referenceSql": "SELECT COUNT(DISTINCT channel) AS raw_variants FROM leads;",
+        "explanation": "COUNT(DISTINCT channel) по сырым значениям даёт 12 «разных» каналов — хотя реальных всего четыре. Это и есть проблема: регистр, пробелы и опечатка плодят мнимые категории."
+      },
+      {
+        "id": "s2",
+        "prompt": "Сколько лидов по каждому каналу после приведения регистра и удаления пробелов? Выведите нормализованный канал и число лидов, отсортируйте по числу лидов по убыванию.",
+        "orderSensitive": true,
+        "referenceSql": "SELECT LOWER(TRIM(channel)) AS norm, COUNT(*) AS cnt FROM leads GROUP BY LOWER(TRIM(channel)) ORDER BY cnt DESC;",
+        "explanation": "LOWER(TRIM(channel)) убирает регистр и пробелы, поэтому «Google», «google», «GOOGLE», « Google » схлопываются в один «google» (14 лидов). Но опечатка «googel» (2) так и остаётся отдельной — её регистром не исправить."
+      },
+      {
+        "id": "s3",
+        "prompt": "Сколько всего лидов с Google С УЧЁТОМ всех вариантов написания, включая опечатку «googel»?",
+        "orderSensitive": false,
+        "referenceSql": "SELECT COUNT(*) AS google_leads FROM leads WHERE LOWER(TRIM(channel)) IN ('google', 'googel');",
+        "explanation": "Опечатку нормализацией не убрать — её нужно перечислить явно: LOWER(TRIM(channel)) IN ('google','googel'). Так в Google попадают все 16 лидов (14 + 2 с опечаткой), а не 14."
+      },
+      {
+        "id": "s4",
+        "prompt": "Соберите финальный чистый отчёт: число лидов по каналу, где опечатка «googel» отнесена к «google». Выведите канал и число лидов, отсортируйте по убыванию.",
+        "orderSensitive": true,
+        "referenceSql": "SELECT CASE WHEN LOWER(TRIM(channel)) IN ('google', 'googel') THEN 'google' ELSE LOWER(TRIM(channel)) END AS channel_clean, COUNT(*) AS cnt FROM leads GROUP BY channel_clean ORDER BY cnt DESC;",
+        "explanation": "CASE WHEN сводит и варианты регистра, и опечатку к единому «google». Итог — четыре реальных канала: google (16), yandex (8), direct (5), email (4). Только так отчёт по каналам становится корректным."
+      }
+    ]
+  }
+}

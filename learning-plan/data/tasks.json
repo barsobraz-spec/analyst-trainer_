@@ -1,0 +1,1006 @@
+{
+  "schemaVersion": 1,
+  "title": "Чек-лист практических задач",
+  "description": "100 практических задач до поиска работы. Это не теория, а список того, что нужно уметь делать руками.",
+  "sourceDocuments": [
+    "../source/План_Data_Analyst_7_месяцев_UPDATED.docx",
+    "../source/enhancement_pack.docx"
+  ],
+  "statuses": ["not_started", "in_progress", "done", "repeat"],
+  "skills": [
+    {
+      "id": "excel",
+      "title": "Excel",
+      "month": 1,
+      "range": [1, 15],
+      "trainerModules": ["5.3", "5.6"]
+    },
+    {
+      "id": "sql",
+      "title": "SQL",
+      "month": 2,
+      "range": [16, 50],
+      "trainerModules": ["5.5", "5.1"]
+    },
+    {
+      "id": "power-bi",
+      "title": "Power BI",
+      "month": 3,
+      "range": [51, 65],
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "statistics",
+      "title": "Статистика",
+      "month": 4,
+      "range": [66, 78],
+      "trainerModules": ["5.2", "5.4"]
+    },
+    {
+      "id": "python-pandas",
+      "title": "Python / pandas",
+      "month": 5,
+      "range": [79, 92],
+      "trainerModules": ["5.1", "5.5"]
+    },
+    {
+      "id": "product-banking",
+      "title": "Продуктовая и банковская аналитика",
+      "month": 6,
+      "range": [93, 96],
+      "trainerModules": ["5.6", "5.2", "5.4"]
+    },
+    {
+      "id": "github-communication",
+      "title": "Git / GitHub + коммуникация",
+      "month": 7,
+      "range": [97, 100],
+      "trainerModules": ["5.8"]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-001",
+      "number": 1,
+      "skill": "excel",
+      "month": 1,
+      "title": "Связать две таблицы через XLOOKUP/INDEX+MATCH",
+      "trainerModules": ["5.3", "5.6"]
+    },
+    {
+      "id": "task-002",
+      "number": 2,
+      "skill": "excel",
+      "month": 1,
+      "title": "Построить сводную таблицу с фильтрами и срезами",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-003",
+      "number": 3,
+      "skill": "excel",
+      "month": 1,
+      "title": "Очистить данные: дубликаты, пробелы (TRIM), типы",
+      "trainerModules": ["5.1"]
+    },
+    {
+      "id": "task-004",
+      "number": 4,
+      "skill": "excel",
+      "month": 1,
+      "title": "Сделать вложенный IF для категоризации",
+      "trainerModules": ["5.6"]
+    },
+    {
+      "id": "task-005",
+      "number": 5,
+      "skill": "excel",
+      "month": 1,
+      "title": "Посчитать метрики через SUMIFS/COUNTIFS",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-006",
+      "number": 6,
+      "skill": "excel",
+      "month": 1,
+      "title": "Построить дашборд из KPI и 3 графиков на одном листе",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-007",
+      "number": 7,
+      "skill": "excel",
+      "month": 1,
+      "title": "Импортировать и автоочистить данные в Power Query",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-008",
+      "number": 8,
+      "skill": "excel",
+      "month": 1,
+      "title": "Сделать сверку двух выгрузок и найти расхождения",
+      "trainerModules": ["5.1"]
+    },
+    {
+      "id": "task-009",
+      "number": 9,
+      "skill": "excel",
+      "month": 1,
+      "title": "Сгруппировать даты по месяцам/кварталам в сводной",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-010",
+      "number": 10,
+      "skill": "excel",
+      "month": 1,
+      "title": "Посчитать % от итога и динамику в сводной",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-011",
+      "number": 11,
+      "skill": "excel",
+      "month": 1,
+      "title": "Подсветить аномалии условным форматированием",
+      "trainerModules": ["5.3", "5.4"]
+    },
+    {
+      "id": "task-012",
+      "number": 12,
+      "skill": "excel",
+      "month": 1,
+      "title": "Извлечь часть текста через LEFT/MID/SUBSTITUTE",
+      "trainerModules": ["5.1"]
+    },
+    {
+      "id": "task-013",
+      "number": 13,
+      "skill": "excel",
+      "month": 1,
+      "title": "Посчитать средний чек и число заказов по сегментам",
+      "trainerModules": ["5.3", "5.6"]
+    },
+    {
+      "id": "task-014",
+      "number": 14,
+      "skill": "excel",
+      "month": 1,
+      "title": "Сделать самообновляемый отчёт: заменил файл -> пересчёт",
+      "trainerModules": ["5.3", "5.7"]
+    },
+    {
+      "id": "task-015",
+      "number": 15,
+      "skill": "excel",
+      "month": 1,
+      "title": "Найти клиентов без покупок за 90+ дней",
+      "trainerModules": ["5.1", "5.6"]
+    },
+    {
+      "id": "task-016",
+      "number": 16,
+      "skill": "sql",
+      "month": 2,
+      "title": "SELECT с WHERE, ORDER BY, LIMIT, DISTINCT",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-017",
+      "number": 17,
+      "skill": "sql",
+      "month": 2,
+      "title": "Фильтрация с BETWEEN, IN, LIKE, IS NULL",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-018",
+      "number": 18,
+      "skill": "sql",
+      "month": 2,
+      "title": "COUNT/SUM/AVG/MIN/MAX с GROUP BY",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-019",
+      "number": 19,
+      "skill": "sql",
+      "month": 2,
+      "title": "Фильтр агрегатов через HAVING",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-020",
+      "number": 20,
+      "skill": "sql",
+      "month": 2,
+      "title": "CASE WHEN для категоризации в запросе",
+      "trainerModules": ["5.5", "5.6"]
+    },
+    {
+      "id": "task-021",
+      "number": 21,
+      "skill": "sql",
+      "month": 2,
+      "title": "INNER JOIN двух таблиц",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-022",
+      "number": 22,
+      "skill": "sql",
+      "month": 2,
+      "title": "LEFT JOIN и поиск строк без пары",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-023",
+      "number": 23,
+      "skill": "sql",
+      "month": 2,
+      "title": "Соединение 3+ таблиц",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-024",
+      "number": 24,
+      "skill": "sql",
+      "month": 2,
+      "title": "Self-join, например сотрудник-менеджер",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-025",
+      "number": 25,
+      "skill": "sql",
+      "month": 2,
+      "title": "UNION / UNION ALL",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-026",
+      "number": 26,
+      "skill": "sql",
+      "month": 2,
+      "title": "Подзапрос в WHERE",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-027",
+      "number": 27,
+      "skill": "sql",
+      "month": 2,
+      "title": "Подзапрос в FROM",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-028",
+      "number": 28,
+      "skill": "sql",
+      "month": 2,
+      "title": "CTE (WITH) для читаемости",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-029",
+      "number": 29,
+      "skill": "sql",
+      "month": 2,
+      "title": "ROW_NUMBER для нумерации внутри групп",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-030",
+      "number": 30,
+      "skill": "sql",
+      "month": 2,
+      "title": "RANK / DENSE_RANK",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-031",
+      "number": 31,
+      "skill": "sql",
+      "month": 2,
+      "title": "LAG / LEAD для сравнения с предыдущим периодом",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-032",
+      "number": 32,
+      "skill": "sql",
+      "month": 2,
+      "title": "Накопительный итог через SUM() OVER",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-033",
+      "number": 33,
+      "skill": "sql",
+      "month": 2,
+      "title": "Доля строки от итога группы через OVER",
+      "trainerModules": ["5.5", "5.3"]
+    },
+    {
+      "id": "task-034",
+      "number": 34,
+      "skill": "sql",
+      "month": 2,
+      "title": "Топ-N товаров в каждой категории",
+      "trainerModules": ["5.5", "5.6"]
+    },
+    {
+      "id": "task-035",
+      "number": 35,
+      "skill": "sql",
+      "month": 2,
+      "title": "Выручка по месяцам с ростом MoM",
+      "trainerModules": ["5.5", "5.3"]
+    },
+    {
+      "id": "task-036",
+      "number": 36,
+      "skill": "sql",
+      "month": 2,
+      "title": "Когортный retention одним запросом",
+      "trainerModules": ["5.5", "5.6"]
+    },
+    {
+      "id": "task-037",
+      "number": 37,
+      "skill": "sql",
+      "month": 2,
+      "title": "RFM-сегментация",
+      "trainerModules": ["5.5", "5.6"]
+    },
+    {
+      "id": "task-038",
+      "number": 38,
+      "skill": "sql",
+      "month": 2,
+      "title": "Конверсия воронки по таблице событий",
+      "trainerModules": ["5.5", "5.6"]
+    },
+    {
+      "id": "task-039",
+      "number": 39,
+      "skill": "sql",
+      "month": 2,
+      "title": "DAU/MAU из таблицы активности",
+      "trainerModules": ["5.5", "5.6"]
+    },
+    {
+      "id": "task-040",
+      "number": 40,
+      "skill": "sql",
+      "month": 2,
+      "title": "Клиенты с падением выручки >30% к прошлому периоду",
+      "trainerModules": ["5.5", "5.1"]
+    },
+    {
+      "id": "task-041",
+      "number": 41,
+      "skill": "sql",
+      "month": 2,
+      "title": "Средний чек по сегментам клиентов",
+      "trainerModules": ["5.5", "5.6"]
+    },
+    {
+      "id": "task-042",
+      "number": 42,
+      "skill": "sql",
+      "month": 2,
+      "title": "Поиск дубликатов в таблице",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-043",
+      "number": 43,
+      "skill": "sql",
+      "month": 2,
+      "title": "Дедупликация через ROW_NUMBER",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-044",
+      "number": 44,
+      "skill": "sql",
+      "month": 2,
+      "title": "Работа с датами: DATE_TRUNC, EXTRACT",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-045",
+      "number": 45,
+      "skill": "sql",
+      "month": 2,
+      "title": "Заполнение пропусков через COALESCE",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-046",
+      "number": 46,
+      "skill": "sql",
+      "month": 2,
+      "title": "Pivot данных средствами SQL через CASE + агрегат",
+      "trainerModules": ["5.5", "5.3"]
+    },
+    {
+      "id": "task-047",
+      "number": 47,
+      "skill": "sql",
+      "month": 2,
+      "title": "Медиана/перцентили через PERCENTILE_CONT",
+      "trainerModules": ["5.5", "5.2"]
+    },
+    {
+      "id": "task-048",
+      "number": 48,
+      "skill": "sql",
+      "month": 2,
+      "title": "Антиджойн: клиенты без заказов",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-049",
+      "number": 49,
+      "skill": "sql",
+      "month": 2,
+      "title": "Решить 10 задач уровня LeetCode Medium на скорость",
+      "trainerModules": ["5.5"]
+    },
+    {
+      "id": "task-050",
+      "number": 50,
+      "skill": "sql",
+      "month": 2,
+      "title": "Оптимизировать медленный запрос",
+      "trainerModules": ["5.5", "5.7"]
+    },
+    {
+      "id": "task-051",
+      "number": 51,
+      "skill": "power-bi",
+      "month": 3,
+      "title": "Загрузить и почистить данные в Power Query",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-052",
+      "number": 52,
+      "skill": "power-bi",
+      "month": 3,
+      "title": "Построить звёздную схему из 3+ таблиц",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-053",
+      "number": 53,
+      "skill": "power-bi",
+      "month": 3,
+      "title": "Создать связи с корректной кардинальностью",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-054",
+      "number": 54,
+      "skill": "power-bi",
+      "month": 3,
+      "title": "Сделать календарную таблицу",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-055",
+      "number": 55,
+      "skill": "power-bi",
+      "month": 3,
+      "title": "Написать меру выручки с CALCULATE",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-056",
+      "number": 56,
+      "skill": "power-bi",
+      "month": 3,
+      "title": "Написать меру среднего чека",
+      "trainerModules": ["5.3", "5.6"]
+    },
+    {
+      "id": "task-057",
+      "number": 57,
+      "skill": "power-bi",
+      "month": 3,
+      "title": "Посчитать рост MoM и YoY через time intelligence",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-058",
+      "number": 58,
+      "skill": "power-bi",
+      "month": 3,
+      "title": "Посчитать % выполнения плана: план/факт",
+      "trainerModules": ["5.3", "5.6"]
+    },
+    {
+      "id": "task-059",
+      "number": 59,
+      "skill": "power-bi",
+      "month": 3,
+      "title": "Сделать KPI-карточки на странице обзора",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-060",
+      "number": 60,
+      "skill": "power-bi",
+      "month": 3,
+      "title": "Настроить drill-down регион -> город -> точка",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-061",
+      "number": 61,
+      "skill": "power-bi",
+      "month": 3,
+      "title": "Добавить срезы и кросс-фильтрацию визуалов",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-062",
+      "number": 62,
+      "skill": "power-bi",
+      "month": 3,
+      "title": "Сделать тепловую карту или матрицу",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-063",
+      "number": 63,
+      "skill": "power-bi",
+      "month": 3,
+      "title": "Собрать двухстраничный дашборд с навигацией",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-064",
+      "number": 64,
+      "skill": "power-bi",
+      "month": 3,
+      "title": "Добавить условное форматирование в таблице/матрице",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-065",
+      "number": 65,
+      "skill": "power-bi",
+      "month": 3,
+      "title": "Опубликовать отчёт и оформить скриншоты для портфолио",
+      "trainerModules": ["5.3", "5.8"]
+    },
+    {
+      "id": "task-066",
+      "number": 66,
+      "skill": "statistics",
+      "month": 4,
+      "title": "Среднее, медиана, перцентили: объяснить разницу",
+      "trainerModules": ["5.2"]
+    },
+    {
+      "id": "task-067",
+      "number": 67,
+      "skill": "statistics",
+      "month": 4,
+      "title": "Найти выбросы методом IQR",
+      "trainerModules": ["5.4"]
+    },
+    {
+      "id": "task-068",
+      "number": 68,
+      "skill": "statistics",
+      "month": 4,
+      "title": "Построить и прочитать гистограмму распределения",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-069",
+      "number": 69,
+      "skill": "statistics",
+      "month": 4,
+      "title": "Объяснить стандартное отклонение и его смысл",
+      "trainerModules": ["5.2"]
+    },
+    {
+      "id": "task-070",
+      "number": 70,
+      "skill": "statistics",
+      "month": 4,
+      "title": "Посчитать корреляцию двух метрик и интерпретировать результат",
+      "trainerModules": ["5.2", "5.4"]
+    },
+    {
+      "id": "task-071",
+      "number": 71,
+      "skill": "statistics",
+      "month": 4,
+      "title": "Привести пример ложной корреляции",
+      "trainerModules": ["5.2", "5.4"]
+    },
+    {
+      "id": "task-072",
+      "number": 72,
+      "skill": "statistics",
+      "month": 4,
+      "title": "Сформулировать нулевую и альтернативную гипотезу",
+      "trainerModules": ["5.2"]
+    },
+    {
+      "id": "task-073",
+      "number": 73,
+      "skill": "statistics",
+      "month": 4,
+      "title": "Объяснить p-value простыми словами",
+      "trainerModules": ["5.2"]
+    },
+    {
+      "id": "task-074",
+      "number": 74,
+      "skill": "statistics",
+      "month": 4,
+      "title": "Проверить значимость A/B-теста",
+      "trainerModules": ["5.2"]
+    },
+    {
+      "id": "task-075",
+      "number": 75,
+      "skill": "statistics",
+      "month": 4,
+      "title": "Посчитать доверительный интервал",
+      "trainerModules": ["5.2"]
+    },
+    {
+      "id": "task-076",
+      "number": 76,
+      "skill": "statistics",
+      "month": 4,
+      "title": "Определить нужный размер выборки",
+      "trainerModules": ["5.2"]
+    },
+    {
+      "id": "task-077",
+      "number": 77,
+      "skill": "statistics",
+      "month": 4,
+      "title": "Найти методическую ошибку в чужом A/B-тесте",
+      "trainerModules": ["5.2", "5.4"]
+    },
+    {
+      "id": "task-078",
+      "number": 78,
+      "skill": "statistics",
+      "month": 4,
+      "title": "Разобрать кейс Симпсон-парадокса",
+      "trainerModules": ["5.2", "5.4"]
+    },
+    {
+      "id": "task-079",
+      "number": 79,
+      "skill": "python-pandas",
+      "month": 5,
+      "title": "Загрузить CSV/Excel в DataFrame",
+      "trainerModules": ["5.1"]
+    },
+    {
+      "id": "task-080",
+      "number": 80,
+      "skill": "python-pandas",
+      "month": 5,
+      "title": "Использовать describe/info и словесно описать данные",
+      "trainerModules": ["5.1"]
+    },
+    {
+      "id": "task-081",
+      "number": 81,
+      "skill": "python-pandas",
+      "month": 5,
+      "title": "Фильтрация и выбор через loc/iloc",
+      "trainerModules": ["5.1"]
+    },
+    {
+      "id": "task-082",
+      "number": 82,
+      "skill": "python-pandas",
+      "month": 5,
+      "title": "groupby с несколькими агрегатами",
+      "trainerModules": ["5.1", "5.5"]
+    },
+    {
+      "id": "task-083",
+      "number": 83,
+      "skill": "python-pandas",
+      "month": 5,
+      "title": "merge как аналог JOIN двух таблиц",
+      "trainerModules": ["5.1", "5.5"]
+    },
+    {
+      "id": "task-084",
+      "number": 84,
+      "skill": "python-pandas",
+      "month": 5,
+      "title": "Обработка пропусков через fillna/dropna",
+      "trainerModules": ["5.1"]
+    },
+    {
+      "id": "task-085",
+      "number": 85,
+      "skill": "python-pandas",
+      "month": 5,
+      "title": "Удаление дубликатов",
+      "trainerModules": ["5.1"]
+    },
+    {
+      "id": "task-086",
+      "number": 86,
+      "skill": "python-pandas",
+      "month": 5,
+      "title": "Преобразование дат и создание новых признаков",
+      "trainerModules": ["5.1"]
+    },
+    {
+      "id": "task-087",
+      "number": 87,
+      "skill": "python-pandas",
+      "month": 5,
+      "title": "pivot_table",
+      "trainerModules": ["5.1", "5.3"]
+    },
+    {
+      "id": "task-088",
+      "number": 88,
+      "skill": "python-pandas",
+      "month": 5,
+      "title": "value_counts и частотный анализ",
+      "trainerModules": ["5.1"]
+    },
+    {
+      "id": "task-089",
+      "number": 89,
+      "skill": "python-pandas",
+      "month": 5,
+      "title": "Построить 5 графиков через matplotlib/seaborn",
+      "trainerModules": ["5.3"]
+    },
+    {
+      "id": "task-090",
+      "number": 90,
+      "skill": "python-pandas",
+      "month": 5,
+      "title": "Корреляционная матрица: heatmap",
+      "trainerModules": ["5.2", "5.3"]
+    },
+    {
+      "id": "task-091",
+      "number": 91,
+      "skill": "python-pandas",
+      "month": 5,
+      "title": "Полный EDA незнакомого датасета в ноутбуке",
+      "trainerModules": ["5.1", "5.3"]
+    },
+    {
+      "id": "task-092",
+      "number": 92,
+      "skill": "python-pandas",
+      "month": 5,
+      "title": "Скрипт, объединяющий несколько файлов в отчёт",
+      "trainerModules": ["5.7"]
+    },
+    {
+      "id": "task-093",
+      "number": 93,
+      "skill": "product-banking",
+      "month": 6,
+      "title": "Построить воронку от регистрации до целевого действия и найти самый слабый шаг",
+      "trainerModules": ["5.6", "5.2"]
+    },
+    {
+      "id": "task-094",
+      "number": 94,
+      "skill": "product-banking",
+      "month": 6,
+      "title": "Собрать retention-таблицу по когортам и объяснить, где проседает удержание",
+      "trainerModules": ["5.6", "5.3"]
+    },
+    {
+      "id": "task-095",
+      "number": 95,
+      "skill": "product-banking",
+      "month": 6,
+      "title": "Посчитать LTV/CAC или близкую экономическую метрику и связать вывод с решением бизнеса",
+      "trainerModules": ["5.6"]
+    },
+    {
+      "id": "task-096",
+      "number": 96,
+      "skill": "product-banking",
+      "month": 6,
+      "title": "Разобрать кредитный портфель по просрочке, когортам или риск-сегментам",
+      "trainerModules": ["5.4", "5.6"]
+    },
+    {
+      "id": "task-097",
+      "number": 97,
+      "skill": "github-communication",
+      "month": 7,
+      "title": "Оформить GitHub-репозиторий проекта: структура, .gitignore, commit и push",
+      "trainerModules": ["5.1", "5.8"]
+    },
+    {
+      "id": "task-098",
+      "number": 98,
+      "skill": "github-communication",
+      "month": 7,
+      "title": "Написать README, который объясняет бизнес-вопрос, методологию, выводы и рекомендации",
+      "trainerModules": ["5.8"]
+    },
+    {
+      "id": "task-099",
+      "number": 99,
+      "skill": "github-communication",
+      "month": 7,
+      "title": "Собрать презентацию проекта на 8 слайдов и 5-минутное видео-демо",
+      "trainerModules": ["5.8"]
+    },
+    {
+      "id": "task-100",
+      "number": 100,
+      "skill": "github-communication",
+      "month": 7,
+      "title": "Провести mock-собеседование и разобрать ошибки",
+      "trainerModules": ["5.8"]
+    }
+  ],
+  "supplementalTasks": [
+    {
+      "id": "excel-extra-001",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Дать выручку по менеджерам за квартал и выделить не выполнивших план."
+    },
+    {
+      "id": "excel-extra-002",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Почистить выгрузку на 5000 строк с дублями и пустыми ИНН и дать сводку по клиентам."
+    },
+    {
+      "id": "excel-extra-003",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Сделать отчёт, который сам пересчитывается при замене файла-выгрузки."
+    },
+    {
+      "id": "excel-extra-004",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Посчитать средний чек по месяцам и показать, где он просел."
+    },
+    {
+      "id": "excel-extra-005",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Найти топ-10 клиентов по обороту и их долю в общей выручке."
+    },
+    {
+      "id": "excel-extra-006",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Разделить клиентов на A/B/C по сумме покупок."
+    },
+    {
+      "id": "excel-extra-007",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Сверить выгрузку из 1С с отчётом платёжной системы и найти расхождения."
+    },
+    {
+      "id": "excel-extra-008",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Посчитать клиентов, которые не покупали 90+ дней."
+    },
+    {
+      "id": "excel-extra-009",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Посчитать конверсию лиды -> сделки по менеджерам."
+    },
+    {
+      "id": "excel-extra-010",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Собрать из 12 месячных листов один и дать годовую сводку."
+    },
+    {
+      "id": "excel-extra-011",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Выделить аномальные суммы условным форматированием."
+    },
+    {
+      "id": "excel-extra-012",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Посчитать долю каждой категории в выручке и построить корректный график."
+    },
+    {
+      "id": "excel-extra-013",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Извлечь город из адресного поля и сгруппировать продажи по городам."
+    },
+    {
+      "id": "excel-extra-014",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Дать динамику выручки месяц-к-месяцу в процентах."
+    },
+    {
+      "id": "excel-extra-015",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Найти заказы без клиента через антиджойн в Excel."
+    },
+    {
+      "id": "excel-extra-016",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Посчитать повторные покупки: сколько клиентов купили больше одного раза."
+    },
+    {
+      "id": "excel-extra-017",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Сделать отчёт план/факт по точкам с подсветкой отстающих."
+    },
+    {
+      "id": "excel-extra-018",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Превратить грязные даты-строки в настоящие даты и сгруппировать по неделям."
+    },
+    {
+      "id": "excel-extra-019",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Собрать дашборд из 4 KPI и 3 графиков на одном листе."
+    },
+    {
+      "id": "excel-extra-020",
+      "skill": "excel",
+      "month": 1,
+      "source": "enhancement_pack",
+      "title": "Написать 3 вывода для руководителя бизнес-языком."
+    }
+  ],
+  "completionGoal": "Закрыть все 100 задач до первого оффера, а не до первого отклика."
+}

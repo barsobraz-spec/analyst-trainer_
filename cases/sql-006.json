@@ -1,0 +1,44 @@
+{
+  "caseId": "sql-006",
+  "module": "5.5",
+  "schemaVersion": 1,
+  "title": "NULL в суммах платежей ломает подсчёты",
+  "difficulty": "intermediate",
+  "skillTags": ["sql"],
+  "payload": {
+    "scenario": "Вы — аналитик финтех-сервиса. В таблице «payments» у незавершённых платежей (pending/failed) сумма не заполнена — там NULL. NULL — это «значение неизвестно», и он ведёт себя не как ноль: COUNT(*) и COUNT(amount) дадут разное, AVG проигнорирует NULL, а условие amount = NULL вообще не сработает.\n\nПройдите анализ по шагам: для каждой подзадачи напишите SQL и нажмите «Проверить решение». Кнопкой «Выполнить» можно осмотреться в данных.",
+    "question": "Решите подзадачи, корректно обрабатывая NULL в суммах платежей.",
+    "datasetPath": "cases/datasets/sql-006.json",
+    "starterSql": "SELECT * FROM payments;",
+    "subtasks": [
+      {
+        "id": "s1",
+        "prompt": "Сколько всего записей о платежах в таблице?",
+        "orderSensitive": false,
+        "referenceSql": "SELECT COUNT(*) AS total_rows FROM payments;",
+        "explanation": "COUNT(*) считает ВСЕ строки, включая платежи с NULL-суммой, — всего 30 записей. Это полное число попыток платежа, независимо от того, известна сумма или нет."
+      },
+      {
+        "id": "s2",
+        "prompt": "По скольким платежам известна сумма (поле amount заполнено)?",
+        "orderSensitive": false,
+        "referenceSql": "SELECT COUNT(amount) AS known_amounts FROM payments;",
+        "explanation": "COUNT(amount) считает только строки, где amount НЕ NULL, — таких 22. В этом ключевое отличие: COUNT(*) = 30 (все строки), COUNT(столбец) = 22 (непустые значения). Разница 8 — это платежи без суммы."
+      },
+      {
+        "id": "s3",
+        "prompt": "Найдите платежи без указанной суммы. Выведите payment_id и статус. Помните: amount = NULL не работает.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT payment_id, status FROM payments WHERE amount IS NULL;",
+        "explanation": "Сравнение с NULL делается через IS NULL, а не = NULL (последнее всегда даёт «неизвестно» и не вернёт ни строки). Восемь платежей без суммы — все в статусах pending и failed."
+      },
+      {
+        "id": "s4",
+        "prompt": "Какова средняя сумма УСПЕШНОГО платежа (status = 'success')?",
+        "orderSensitive": false,
+        "referenceSql": "SELECT AVG(amount) AS avg_success FROM payments WHERE status = 'success';",
+        "explanation": "AVG автоматически игнорирует NULL (делит сумму на число НЕпустых значений, а не на все строки) — поэтому незавершённые платежи не занижают среднее как «нули». Здесь все success-платежи имеют сумму, и AVG считает честное среднее по ним."
+      }
+    ]
+  }
+}

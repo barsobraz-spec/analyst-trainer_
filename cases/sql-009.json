@@ -1,0 +1,44 @@
+{
+  "caseId": "sql-009",
+  "module": "5.5",
+  "schemaVersion": 1,
+  "title": "Сроки доставки: даты, NULL и просрочки",
+  "difficulty": "advanced",
+  "skillTags": ["sql"],
+  "payload": {
+    "scenario": "Вы — аналитик логистики. В таблице «shipments» даты хранятся текстом в формате ГГГГ-ММ-ДД (для ISO-дат это удобно: их можно сравнивать как строки). У отправлений «в пути» поле delivered_date пустое (NULL) — их нельзя считать доставленными. Время доставки в днях считается через julianday(delivered_date) − julianday(ship_date).\n\nДля каждой подзадачи напишите SQL и нажмите «Проверить решение»; кнопкой «Выполнить» можно осмотреться в данных.",
+    "question": "Решите подзадачи, аккуратно работая с датами и неотгруженными доставками.",
+    "datasetPath": "cases/datasets/sql-009.json",
+    "starterSql": "SELECT * FROM shipments;",
+    "subtasks": [
+      {
+        "id": "s1",
+        "prompt": "Сколько отправлений отгружено в марте 2024 (ship_date с 2024-03-01 по 2024-03-31)?",
+        "orderSensitive": false,
+        "referenceSql": "SELECT COUNT(*) AS march_shipments FROM shipments WHERE ship_date BETWEEN '2024-03-01' AND '2024-03-31';",
+        "explanation": "Для ISO-дат (ГГГГ-ММ-ДД) строковое сравнение совпадает с хронологическим, поэтому BETWEEN '2024-03-01' AND '2024-03-31' корректно отбирает март — 27 отправлений. Три февральских отгрузки в этот диапазон не попадают."
+      },
+      {
+        "id": "s2",
+        "prompt": "Сколько отправлений ещё в пути (не доставлены)?",
+        "orderSensitive": false,
+        "referenceSql": "SELECT COUNT(*) AS in_transit FROM shipments WHERE delivered_date IS NULL;",
+        "explanation": "«Не доставлено» = нет даты доставки: WHERE delivered_date IS NULL (именно IS NULL, не = NULL). В пути 4 отправления — их нельзя включать в расчёт времени доставки, иначе разность с NULL всё испортит."
+      },
+      {
+        "id": "s3",
+        "prompt": "Каково среднее время доставки в днях по уже доставленным отправлениям?",
+        "orderSensitive": false,
+        "referenceSql": "SELECT AVG(julianday(delivered_date) - julianday(ship_date)) AS avg_days FROM shipments WHERE delivered_date IS NOT NULL;",
+        "explanation": "julianday переводит дату в число дней, поэтому julianday(delivered_date) − julianday(ship_date) даёт срок доставки. Считаем только по доставленным (delivered_date IS NOT NULL), иначе NULL-разности исказят среднее. Получается ≈5,42 дня."
+      },
+      {
+        "id": "s4",
+        "prompt": "Сколько доставок шло дольше 5 дней, в разбивке по перевозчику? Выведите перевозчика и число таких доставок, отсортируйте по убыванию.",
+        "orderSensitive": true,
+        "referenceSql": "SELECT carrier, COUNT(*) AS slow FROM shipments WHERE delivered_date IS NOT NULL AND julianday(delivered_date) - julianday(ship_date) > 5 GROUP BY carrier ORDER BY slow DESC;",
+        "explanation": "Фильтруем доставленные с сроком > 5 дней и группируем по перевозчику. Дольше всех тянет «Почта» (8 медленных доставок), затем Boxberry (4). СДЭК в результат не попал вовсе — все его доставки уложились в 5 дней, поэтому строки по нему просто нет."
+      }
+    ]
+  }
+}

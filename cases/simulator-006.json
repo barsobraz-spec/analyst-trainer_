@@ -1,0 +1,133 @@
+{
+  "caseId": "simulator-006",
+  "module": "5.6",
+  "schemaVersion": 1,
+  "title": "Поддержка: средний SLA в норме, VIP горят",
+  "difficulty": "intermediate",
+  "skillTags": ["business-thinking"],
+  "payload": {
+    "scenario": "В поддержке среднее время ответа выглядит приемлемо, но крупные клиенты жалуются на просрочки. Операционный директор просит три дня перераспределять мощность команды между VIP и обычными тикетами. Часть решений снижает общий backlog, но может оставить дорогие VIP-просрочки.\n\nЦель — минимизировать штрафы и стоимость операций. В модели VIP-просрочка в 3 раза дороже обычной.",
+    "question": "Удержите штрафы за SLA под контролем. Не оптимизируйте среднее, если хвост дорогих VIP-тикетов растёт.",
+    "metrics": [
+      { "key": "backlogVip", "label": "VIP backlog", "format": "int" },
+      { "key": "backlogStd", "label": "Обычный backlog", "format": "int" },
+      { "key": "lateTickets", "label": "Взвешенные просрочки", "format": "int" },
+      { "key": "csat", "label": "CSAT", "format": "percent" },
+      { "key": "totalPenalty", "label": "Штрафы и затраты", "format": "money" }
+    ],
+    "startState": {
+      "backlogVip": 20,
+      "backlogStd": 120,
+      "lateTickets": 0,
+      "csat": 86,
+      "totalPenalty": 0
+    },
+    "target": {
+      "metric": "totalPenalty",
+      "value": 520000,
+      "direction": "min",
+      "label": "Максимально допустимые штрафы и затраты"
+    },
+    "rounds": [
+      {
+        "title": "День 1 — всплеск VIP-обращений",
+        "prompt": "Входящий поток: 80 VIP и 360 обычных тикетов. Базовая мощность 390 тикетов. Выберите действие и долю мощности на VIP.",
+        "decisions": [
+          {
+            "id": "action",
+            "type": "choice",
+            "label": "Операционное действие",
+            "options": [
+              { "value": "none", "label": "Работать как обычно", "desc": "Без допзатрат и без дополнительной мощности.", "params": { "extraCapacity": 0, "actionCost": 0, "deflectStd": 0 } },
+              { "value": "macro", "label": "Макросы для типовых вопросов", "desc": "+45 мощности, часть обычных тикетов закрывается быстрее.", "params": { "extraCapacity": 45, "actionCost": 50000, "deflectStd": 20 } },
+              { "value": "warroom", "label": "VIP war-room", "desc": "+55 мощности и ручная эскалация VIP, но дороже.", "params": { "extraCapacity": 55, "actionCost": 90000, "deflectStd": 0 } }
+            ]
+          },
+          { "id": "vipShare", "type": "number", "label": "Доля мощности на VIP", "suffix": "%", "help": "Слишком мало VIP — дорогой хвост. Слишком много VIP — растёт обычный backlog.", "min": 10, "max": 70, "step": 5, "default": 30 }
+        ],
+        "model": [
+          { "key": "incomingVip", "formula": "80" },
+          { "key": "incomingStd", "formula": "360 - deflectStd" },
+          { "key": "capacity", "formula": "390 + extraCapacity" },
+          { "key": "handledVip", "formula": "round(capacity * vipShare / 100)" },
+          { "key": "handledStd", "formula": "capacity - handledVip" },
+          { "key": "backlogVip", "formula": "clamp(backlogVip + incomingVip - handledVip, 0, 100000)" },
+          { "key": "backlogStd", "formula": "clamp(backlogStd + incomingStd - handledStd, 0, 100000)" },
+          { "key": "lateTickets", "formula": "round(backlogVip * 3 + backlogStd)" },
+          { "key": "roundPenalty", "formula": "lateTickets * 850 + actionCost" },
+          { "key": "totalPenalty", "formula": "totalPenalty + roundPenalty" },
+          { "key": "csat", "formula": "clamp(92 - lateTickets / 18, 0, 100)" }
+        ],
+        "explanation": "Средний backlog скрывает структуру: один VIP-тикет весит как три обычных. Важно выделить VIP достаточно мощности, но не устроить лавину обычных просрочек."
+      },
+      {
+        "title": "День 2 — обычный поток вырос",
+        "prompt": "Входящий поток: 70 VIP и 440 обычных. Базовая мощность 410. Проверьте баланс, а не только общий объём.",
+        "decisions": [
+          {
+            "id": "action",
+            "type": "choice",
+            "label": "Операционное действие",
+            "options": [
+              { "value": "none", "label": "Работать как обычно", "desc": "Без допзатрат.", "params": { "extraCapacity": 0, "actionCost": 0, "deflectStd": 0 } },
+              { "value": "macro", "label": "Макросы + автоответы", "desc": "+50 мощности и −35 обычных тикетов.", "params": { "extraCapacity": 50, "actionCost": 60000, "deflectStd": 35 } },
+              { "value": "warroom", "label": "VIP war-room", "desc": "+60 мощности, но без разгрузки обычной очереди.", "params": { "extraCapacity": 60, "actionCost": 95000, "deflectStd": 0 } }
+            ]
+          },
+          { "id": "vipShare", "type": "number", "label": "Доля мощности на VIP", "suffix": "%", "min": 10, "max": 70, "step": 5, "default": 30 }
+        ],
+        "model": [
+          { "key": "incomingVip", "formula": "70" },
+          { "key": "incomingStd", "formula": "440 - deflectStd" },
+          { "key": "capacity", "formula": "410 + extraCapacity" },
+          { "key": "handledVip", "formula": "round(capacity * vipShare / 100)" },
+          { "key": "handledStd", "formula": "capacity - handledVip" },
+          { "key": "backlogVip", "formula": "clamp(backlogVip + incomingVip - handledVip, 0, 100000)" },
+          { "key": "backlogStd", "formula": "clamp(backlogStd + incomingStd - handledStd, 0, 100000)" },
+          { "key": "lateTickets", "formula": "round(backlogVip * 3 + backlogStd)" },
+          { "key": "roundPenalty", "formula": "lateTickets * 850 + actionCost" },
+          { "key": "totalPenalty", "formula": "totalPenalty + roundPenalty" },
+          { "key": "csat", "formula": "clamp(92 - lateTickets / 18, 0, 100)" }
+        ],
+        "explanation": "Автоматизация типовых вопросов может быть лучше ручного war-room, если основной хвост сегодня в обычных тикетах. Но VIP-доля всё равно не должна падать слишком низко."
+      },
+      {
+        "title": "День 3 — закрываем хвост",
+        "prompt": "Входящий поток нормализуется: 55 VIP и 340 обычных. Важно не оставить хвост на конец недели.",
+        "decisions": [
+          {
+            "id": "action",
+            "type": "choice",
+            "label": "Операционное действие",
+            "options": [
+              { "value": "none", "label": "Без усиления", "desc": "Экономия сегодня, риск оставить backlog.", "params": { "extraCapacity": 0, "actionCost": 0, "deflectStd": 0 } },
+              { "value": "macro", "label": "Макросы", "desc": "+45 мощности и −30 обычных тикетов.", "params": { "extraCapacity": 45, "actionCost": 50000, "deflectStd": 30 } },
+              { "value": "warroom", "label": "Точечный war-room", "desc": "+70 мощности для закрытия хвоста, но дорого.", "params": { "extraCapacity": 70, "actionCost": 100000, "deflectStd": 0 } }
+            ]
+          },
+          { "id": "vipShare", "type": "number", "label": "Доля мощности на VIP", "suffix": "%", "min": 10, "max": 70, "step": 5, "default": 25 }
+        ],
+        "model": [
+          { "key": "incomingVip", "formula": "55" },
+          { "key": "incomingStd", "formula": "340 - deflectStd" },
+          { "key": "capacity", "formula": "400 + extraCapacity" },
+          { "key": "handledVip", "formula": "round(capacity * vipShare / 100)" },
+          { "key": "handledStd", "formula": "capacity - handledVip" },
+          { "key": "backlogVip", "formula": "clamp(backlogVip + incomingVip - handledVip, 0, 100000)" },
+          { "key": "backlogStd", "formula": "clamp(backlogStd + incomingStd - handledStd, 0, 100000)" },
+          { "key": "lateTickets", "formula": "round(backlogVip * 3 + backlogStd)" },
+          { "key": "roundPenalty", "formula": "lateTickets * 850 + actionCost" },
+          { "key": "totalPenalty", "formula": "totalPenalty + roundPenalty" },
+          { "key": "csat", "formula": "clamp(92 - lateTickets / 18, 0, 100)" }
+        ],
+        "explanation": "Финальный день показывает цену накопленного хвоста. Если первые два дня оптимизировали среднее, VIP backlog становится дорогим долгом."
+      }
+    ],
+    "reference": [
+      "Ловушка — среднее vs хвост распределения. Средний SLA может выглядеть нормально, пока дорогой сегмент клиентов получает систематические просрочки.",
+      "Механика: VIP backlog умножается на 3 в штрафах. Поэтому оптимизация только общего числа тикетов неверна; нужно учитывать стоимость просрочки по сегментам.",
+      "Что проверить дальше: SLA p90/p95 по сегментам, стоимость просрочки, причины входящего потока и эффективность макросов по темам.",
+      "Типичная ошибка: направить всю команду туда, где больше тикетов, и оставить VIP-хвост. Сильная стратегия балансирует мощность с учётом веса просрочки."
+    ]
+  }
+}

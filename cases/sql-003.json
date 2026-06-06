@@ -1,0 +1,51 @@
+{
+  "caseId": "sql-003",
+  "module": "5.5",
+  "schemaVersion": 1,
+  "title": "Выручка и подписки: разбор по клиентам",
+  "difficulty": "advanced",
+  "skillTags": ["sql"],
+  "payload": {
+    "scenario": "Вы — аналитик подписочного сервиса. Финансы просят разобрать выручку и состояние подписок: сколько денег приносят клиенты, как выручка распределена по странам, кто из клиентов самый ценный и сколько подписок сейчас активно. В базе три таблицы: «customers» (клиенты), «subscriptions» (подписки; активная подписка имеет end_date = NULL) и «payments» (платежи).\n\nЭто продвинутое расследование: понадобятся JOIN нескольких таблиц, агрегаты, обработка NULL и HAVING. Для каждой подзадачи напишите SQL и нажмите «Проверить решение»; кнопкой «Выполнить» можно свободно осматриваться.",
+    "question": "Решите все подзадачи разбора выручки и подписок с помощью SQL.",
+    "datasetPath": "cases/datasets/sql-003.json",
+    "starterSql": "SELECT * FROM payments;",
+    "subtasks": [
+      {
+        "id": "s1",
+        "prompt": "Какова суммарная выручка по всем платежам?",
+        "orderSensitive": false,
+        "referenceSql": "SELECT SUM(amount) AS total_revenue FROM payments;",
+        "explanation": "SUM(amount) по всей таблице payments даёт суммарную выручку — 20 000 ₽. Отправная точка разбора."
+      },
+      {
+        "id": "s2",
+        "prompt": "Как распределена выручка по странам? Выведите страну и суммарную выручку, отсортируйте по выручке по убыванию.",
+        "orderSensitive": true,
+        "referenceSql": "SELECT c.country, SUM(p.amount) AS revenue FROM payments p JOIN customers c ON p.customer_id = c.customer_id GROUP BY c.country ORDER BY revenue DESC;",
+        "explanation": "JOIN платежей с клиентами по customer_id, GROUP BY стране, SUM(amount), сортировка по убыванию. Львиная доля выручки приходится на RU (15 000 ₽), затем KZ (3000) и BY (2000)."
+      },
+      {
+        "id": "s3",
+        "prompt": "Сколько подписок сейчас активно? Активной считается подписка с end_date = NULL.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT COUNT(*) AS active_subs FROM subscriptions WHERE end_date IS NULL;",
+        "explanation": "Активность задаётся через NULL: фильтр WHERE end_date IS NULL (именно IS NULL, а не = NULL). Активных подписок — 5 из 6; одна (у Бориса) уже завершена."
+      },
+      {
+        "id": "s4",
+        "prompt": "Найдите клиентов, у которых больше одной подписки. Выведите имя клиента и число его подписок.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT c.name, COUNT(*) AS subs FROM subscriptions s JOIN customers c ON s.customer_id = c.customer_id GROUP BY s.customer_id, c.name HAVING COUNT(*) > 1;",
+        "explanation": "JOIN + GROUP BY клиенту + HAVING COUNT(*) > 1 (фильтр ПОСЛЕ агрегации, в отличие от WHERE). Несколько подписок только у Анны (2: pro и basic) — кандидат на разбор апсейла."
+      },
+      {
+        "id": "s5",
+        "prompt": "Кто принёс больше всего выручки? Выведите имя клиента и его суммарную выручку (одну строку — лидера).",
+        "orderSensitive": false,
+        "referenceSql": "SELECT c.name, SUM(p.amount) AS total FROM payments p JOIN customers c ON p.customer_id = c.customer_id GROUP BY c.customer_id, c.name ORDER BY total DESC LIMIT 1;",
+        "explanation": "Агрегация выручки по клиенту + ORDER BY total DESC LIMIT 1 выделяет лидера. Самый ценный клиент — Анна (9000 ₽): три pro-платежа плюс комбинированный платёж за две подписки."
+      }
+    ]
+  }
+}

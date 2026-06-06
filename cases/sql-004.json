@@ -1,0 +1,44 @@
+{
+  "caseId": "sql-004",
+  "module": "5.5",
+  "schemaVersion": 1,
+  "title": "Дубли в выгрузке заказов завышают выручку",
+  "difficulty": "intermediate",
+  "skillTags": ["sql"],
+  "payload": {
+    "scenario": "Вы — аналитик интернет-магазина. Финансы жалуются: выгрузка заказов даёт выручку выше, чем в кассе. Вы подозреваете дубли: из-за сбоя интеграции часть заказов выгрузилась дважды одной и той же строкой. В таблице «orders» (заказ, клиент, сумма, статус) один и тот же order_id может встречаться несколько раз.\n\nНаивный COUNT(*) и SUM(amount) посчитают дубли как отдельные заказы и завысят цифры. Пройдите анализ по шагам: для каждой подзадачи напишите SQL и нажмите «Проверить решение». Кнопкой «Выполнить» можно свободно осматриваться в данных.",
+    "question": "Решите подзадачи так, чтобы дубли строк не искажали результат.",
+    "datasetPath": "cases/datasets/sql-004.json",
+    "starterSql": "SELECT * FROM orders ORDER BY order_id;",
+    "subtasks": [
+      {
+        "id": "s1",
+        "prompt": "Сколько в таблице РАЗНЫХ заказов? Учтите, что строки могут дублироваться (один order_id встречается несколько раз).",
+        "orderSensitive": false,
+        "referenceSql": "SELECT COUNT(DISTINCT order_id) AS orders_count FROM orders;",
+        "explanation": "Наивный COUNT(*) посчитал бы 35 физических строк, но реальных заказов 30 — нужен COUNT(DISTINCT order_id). Это первый признак дублей: число строк больше числа уникальных заказов."
+      },
+      {
+        "id": "s2",
+        "prompt": "Найдите задвоенные заказы: выведите order_id и сколько раз он встречается, только для тех, что встречаются более одного раза.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT order_id, COUNT(*) AS cnt FROM orders GROUP BY order_id HAVING COUNT(*) > 1;",
+        "explanation": "GROUP BY order_id + HAVING COUNT(*) > 1 выявляет дубли. Задвоились заказы 3, 5, 10, 16 и 23 — каждый по 2 раза. Именно они и завышают выручку при наивном суммировании."
+      },
+      {
+        "id": "s3",
+        "prompt": "Посчитайте РЕАЛЬНУЮ суммарную выручку по уникальным заказам — без двойного счёта дублей.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT SUM(amount) AS total_revenue FROM (SELECT DISTINCT order_id, amount FROM orders);",
+        "explanation": "Сначала убираем дубли подзапросом SELECT DISTINCT order_id, amount, затем суммируем. Наивный SUM(amount) по всем строкам прибавил бы суммы пяти дублей (22000+18000+30000+16000+13500 = 99500) и завысил выручку."
+      },
+      {
+        "id": "s4",
+        "prompt": "Посчитайте реальную выручку только по ОПЛАЧЕННЫМ заказам (status = 'paid'), тоже без дублей.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT SUM(amount) AS paid_revenue FROM (SELECT DISTINCT order_id, amount FROM orders WHERE status = 'paid');",
+        "explanation": "Фильтр по статусу применяем ВНУТРИ дедупликации: сначала уникальные оплаченные заказы (DISTINCT order_id, amount при status='paid'), затем сумма. Так возвраты исключены, а дубли не задваивают выручку."
+      }
+    ]
+  }
+}

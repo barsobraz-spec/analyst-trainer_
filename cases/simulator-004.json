@@ -1,0 +1,124 @@
+{
+  "caseId": "simulator-004",
+  "module": "5.6",
+  "schemaVersion": 1,
+  "title": "Скидки подняли выручку: спасаем маржу интернет-магазина",
+  "difficulty": "intermediate",
+  "skillTags": ["business-thinking"],
+  "payload": {
+    "scenario": "Вы управляете промо-кампаниями интернет-магазина. Руководитель доволен: в прошлом месяце выручка выросла после большой скидки. Финансовый директор, наоборот, видит просадку валовой прибыли и просит в следующих трёх кампаниях максимизировать прибыль, а не красивую выручку.\n\nВ каждом раунде есть базовый трафик и средний чек. Вы выбираете тип промо и рекламный бюджет. Большая скидка поднимает заказы, но съедает маржу; точечный bundle даёт меньший всплеск, зато лучше держит прибыль.",
+    "question": "Проведите 3 кампании так, чтобы набрать максимальную суммарную прибыль. Не гонитесь за выручкой, если она покупается отрицательной маржой.",
+    "metrics": [
+      { "key": "traffic", "label": "Трафик кампании", "format": "int" },
+      { "key": "orders", "label": "Заказы", "format": "int" },
+      { "key": "revenue", "label": "Выручка", "format": "money" },
+      { "key": "campaignProfit", "label": "Прибыль кампании", "format": "money" },
+      { "key": "totalProfit", "label": "Суммарная прибыль", "format": "money" }
+    ],
+    "startState": {
+      "traffic": 0,
+      "orders": 0,
+      "revenue": 0,
+      "campaignProfit": 0,
+      "totalProfit": 0
+    },
+    "target": {
+      "metric": "totalProfit",
+      "value": 620000,
+      "direction": "max",
+      "label": "Суммарная прибыль за 3 кампании"
+    },
+    "rounds": [
+      {
+        "title": "Кампания 1 — сезонный спрос ещё умеренный",
+        "prompt": "Базовый трафик 10 000, конверсия 2,2%, средний чек 2400 ₽. Выберите промо и бюджет.",
+        "decisions": [
+          {
+            "id": "promo",
+            "type": "choice",
+            "label": "Тип промо",
+            "options": [
+              { "value": "none", "label": "Без скидки", "desc": "Меньше заказов, зато маржа 38%.", "params": { "demandLift": 0.38, "discount": 0, "marginPct": 38 } },
+              { "value": "blanket", "label": "Скидка 25% всем", "desc": "Заказы растут резко, но маржа падает до 16%.", "params": { "demandLift": 1.8, "discount": 25, "marginPct": 16 } },
+              { "value": "bundle", "label": "Точечный bundle −10%", "desc": "Умеренный рост заказов и рабочая маржа 34%.", "params": { "demandLift": 1.55, "discount": 10, "marginPct": 34 } }
+            ]
+          },
+          { "id": "adSpend", "type": "number", "label": "Рекламный бюджет", "suffix": "₽", "help": "Каждые 30 ₽ бюджета приводят примерно 1 дополнительный визит.", "min": 0, "max": 400000, "step": 50000, "default": 200000 }
+        ],
+        "model": [
+          { "key": "baseTraffic", "formula": "10000" },
+          { "key": "baseConversion", "formula": "2.2" },
+          { "key": "avgPrice", "formula": "2400" },
+          { "key": "traffic", "formula": "baseTraffic + round(adSpend / 30)" },
+          { "key": "orders", "formula": "round(traffic * baseConversion / 100 * demandLift)" },
+          { "key": "revenue", "formula": "round(orders * avgPrice * (1 - discount / 100))" },
+          { "key": "campaignProfit", "formula": "round(revenue * marginPct / 100 - adSpend)" },
+          { "key": "totalProfit", "formula": "totalProfit + campaignProfit" }
+        ],
+        "explanation": "Большая скидка красиво раздувает заказы и выручку, но прибыль считается после скидки, маржи и рекламного бюджета. Если маржа падает до 16%, дополнительный оборот легко становится дорогой иллюзией."
+      },
+      {
+        "title": "Кампания 2 — трафик дороже",
+        "prompt": "Базовый трафик 12 000, конверсия 2,0%, средний чек 2500 ₽. Рекламный трафик стал дороже: 1 визит за 38 ₽.",
+        "decisions": [
+          {
+            "id": "promo",
+            "type": "choice",
+            "label": "Тип промо",
+            "options": [
+              { "value": "none", "label": "Без скидки", "desc": "Меньше заказов, маржа 38%.", "params": { "demandLift": 0.38, "discount": 0, "marginPct": 38 } },
+              { "value": "blanket", "label": "Скидка 25% всем", "desc": "Заказы растут, маржа падает до 16%.", "params": { "demandLift": 1.75, "discount": 25, "marginPct": 16 } },
+              { "value": "bundle", "label": "Точечный bundle −10%", "desc": "Компромисс: спрос растёт без обвала маржи.", "params": { "demandLift": 1.5, "discount": 10, "marginPct": 34 } }
+            ]
+          },
+          { "id": "adSpend", "type": "number", "label": "Рекламный бюджет", "suffix": "₽", "help": "Каждые 38 ₽ бюджета приводят примерно 1 дополнительный визит.", "min": 0, "max": 450000, "step": 50000, "default": 200000 }
+        ],
+        "model": [
+          { "key": "baseTraffic", "formula": "12000" },
+          { "key": "baseConversion", "formula": "2.0" },
+          { "key": "avgPrice", "formula": "2500" },
+          { "key": "traffic", "formula": "baseTraffic + round(adSpend / 38)" },
+          { "key": "orders", "formula": "round(traffic * baseConversion / 100 * demandLift)" },
+          { "key": "revenue", "formula": "round(orders * avgPrice * (1 - discount / 100))" },
+          { "key": "campaignProfit", "formula": "round(revenue * marginPct / 100 - adSpend)" },
+          { "key": "totalProfit", "formula": "totalProfit + campaignProfit" }
+        ],
+        "explanation": "Когда трафик дорожает, ошибка становится сильнее: скидка увеличивает спрос, но каждый дополнительный заказ куплен рекламой и продан с меньшей маржей."
+      },
+      {
+        "title": "Кампания 3 — пик спроса",
+        "prompt": "Базовый трафик 15 000, конверсия 2,4%, средний чек 2600 ₽. В пиковый период можно заработать без тотальной распродажи.",
+        "decisions": [
+          {
+            "id": "promo",
+            "type": "choice",
+            "label": "Тип промо",
+            "options": [
+              { "value": "none", "label": "Без скидки", "desc": "Спрос есть и без распродажи, маржа 38%.", "params": { "demandLift": 0.44, "discount": 0, "marginPct": 38 } },
+              { "value": "blanket", "label": "Скидка 25% всем", "desc": "Максимум заказов, но маржа всего 16%.", "params": { "demandLift": 1.65, "discount": 25, "marginPct": 16 } },
+              { "value": "bundle", "label": "Точечный bundle −10%", "desc": "Умеренный стимул без распродажи всей базы.", "params": { "demandLift": 1.42, "discount": 10, "marginPct": 34 } }
+            ]
+          },
+          { "id": "adSpend", "type": "number", "label": "Рекламный бюджет", "suffix": "₽", "help": "В пике часть спроса органическая: проверьте, нужен ли большой бюджет.", "min": 0, "max": 500000, "step": 50000, "default": 150000 }
+        ],
+        "model": [
+          { "key": "baseTraffic", "formula": "15000" },
+          { "key": "baseConversion", "formula": "2.4" },
+          { "key": "avgPrice", "formula": "2600" },
+          { "key": "traffic", "formula": "baseTraffic + round(adSpend / 40)" },
+          { "key": "orders", "formula": "round(traffic * baseConversion / 100 * demandLift)" },
+          { "key": "revenue", "formula": "round(orders * avgPrice * (1 - discount / 100))" },
+          { "key": "campaignProfit", "formula": "round(revenue * marginPct / 100 - adSpend)" },
+          { "key": "totalProfit", "formula": "totalProfit + campaignProfit" }
+        ],
+        "explanation": "На пике спроса тотальная скидка особенно коварна: вы субсидируете клиентов, которые и так купили бы. Прибыль лучше держит умеренная механика или отказ от скидки."
+      }
+    ],
+    "reference": [
+      "Ловушка кейса — маржа vs выручка. Выручка может расти, пока прибыль падает: скидка уменьшает чек, снижает валовую маржу и часто требует рекламного бюджета.",
+      "Считать нужно contribution: выручка × маржа − реклама. Большая скидка даёт много заказов, но при марже 16% и платном трафике часть заказов становится убыточной.",
+      "Что проверить дальше: инкрементальность промо, долю клиентов, которые купили бы без скидки, и прибыль по когортам, а не только общий оборот.",
+      "Типичная ошибка: праздновать рост GMV/выручки и не смотреть на валовую прибыль. Сильная стратегия использует точечные механики там, где они добавляют прибыль, а не распродаёт всю базу."
+    ]
+  }
+}

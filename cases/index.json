@@ -1,0 +1,502 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "caseId": "detective-001",
+      "module": "5.1",
+      "path": "cases/detective-001.json",
+      "title": "Падение конверсии в корзине",
+      "difficulty": "basic"
+    },
+    {
+      "caseId": "detective-002",
+      "module": "5.1",
+      "path": "cases/detective-002.json",
+      "title": "Среднее время ответа поддержки выросло",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "detective-003",
+      "module": "5.1",
+      "path": "cases/detective-003.json",
+      "title": "Промокод поднял продажи, но прибыль упала",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "detective-004",
+      "module": "5.1",
+      "path": "cases/detective-004.json",
+      "title": "Кто из менеджеров продаёт лучше?",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "detective-005",
+      "module": "5.1",
+      "path": "cases/detective-005.json",
+      "title": "Средний перевод вырос — значит, клиенты богатеют?",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "detective-006",
+      "module": "5.1",
+      "path": "cases/detective-006.json",
+      "title": "«Наши клиенты обожают продукт» — так ли это?",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "detective-007",
+      "module": "5.1",
+      "path": "cases/detective-007.json",
+      "title": "Антифрод ловит 90% мошенников. Внедряем?",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "detective-008",
+      "module": "5.1",
+      "path": "cases/detective-008.json",
+      "title": "Январский провал продаж: пора бить тревогу?",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "detective-009",
+      "module": "5.1",
+      "path": "cases/detective-009.json",
+      "title": "Регистрации выросли на 40%, а выручки нет",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "detective-010",
+      "module": "5.1",
+      "path": "cases/detective-010.json",
+      "title": "Быстрый ответ повышает оценку поддержки?",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "_test-broken",
+      "module": "5.1",
+      "path": "cases/_test-broken.json",
+      "title": "Демонстрация ошибки контента: неизвестный тег навыка",
+      "difficulty": "basic"
+    },
+    {
+      "caseId": "hypothesis-001",
+      "module": "5.2",
+      "path": "cases/hypothesis-001.json",
+      "title": "Рост оттока в подписке",
+      "difficulty": "basic"
+    },
+    {
+      "caseId": "hypothesis-002",
+      "module": "5.2",
+      "path": "cases/hypothesis-002.json",
+      "title": "Падение повторных заказов в доставке еды",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "hypothesis-003",
+      "module": "5.2",
+      "path": "cases/hypothesis-003.json",
+      "title": "Мобильное приложение не подняло удержание",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "hypothesis-004",
+      "module": "5.2",
+      "path": "cases/hypothesis-004.json",
+      "title": "Выросли брошенные корзины в интернет-магазине",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "hypothesis-005",
+      "module": "5.2",
+      "path": "cases/hypothesis-005.json",
+      "title": "Email-рассылка «подняла» продажи",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "hypothesis-006",
+      "module": "5.2",
+      "path": "cases/hypothesis-006.json",
+      "title": "Время первого ответа упало, а клиенты недовольны",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "hypothesis-007",
+      "module": "5.2",
+      "path": "cases/hypothesis-007.json",
+      "title": "Просел трафик медиа-сайта",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "hypothesis-008",
+      "module": "5.2",
+      "path": "cases/hypothesis-008.json",
+      "title": "Отток B2B-клиентов вырос — но почему?",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "hypothesis-009",
+      "module": "5.2",
+      "path": "cases/hypothesis-009.json",
+      "title": "Привлекаем много, а база не растёт",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "hypothesis-010",
+      "module": "5.2",
+      "path": "cases/hypothesis-010.json",
+      "title": "Новая упаковка «бьёт» посылки?",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "dashboard-001",
+      "module": "5.3",
+      "path": "cases/dashboard-001.json",
+      "title": "Дашборд выручки интернет-магазина",
+      "difficulty": "basic"
+    },
+    {
+      "caseId": "dashboard-002",
+      "module": "5.3",
+      "path": "cases/dashboard-002.json",
+      "title": "Дашборд каналов лидогенерации",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "dashboard-003",
+      "module": "5.3",
+      "path": "cases/dashboard-003.json",
+      "title": "Здоровый ли это рост? Дашборд SaaS",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "dashboard-004",
+      "module": "5.3",
+      "path": "cases/dashboard-004.json",
+      "title": "Сезонный спад или реальное падение? Дашборд ритейла",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "dashboard-005",
+      "module": "5.3",
+      "path": "cases/dashboard-005.json",
+      "title": "Средний перевод растёт — а клиенты беднеют? Дашборд финтеха",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "dashboard-006",
+      "module": "5.3",
+      "path": "cases/dashboard-006.json",
+      "title": "Реклама «разгоняет» выручку? Дашборд маркетинга",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "dashboard-007",
+      "module": "5.3",
+      "path": "cases/dashboard-007.json",
+      "title": "Общий ARPU падает, а в сегментах растёт. Дашборд SaaS",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "dashboard-008",
+      "module": "5.3",
+      "path": "cases/dashboard-008.json",
+      "title": "Миллион пользователей! Дашборд мобильного приложения",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "dashboard-009",
+      "module": "5.3",
+      "path": "cases/dashboard-009.json",
+      "title": "Доля раздела растёт — успех? Дашборд медиа",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "dashboard-010",
+      "module": "5.3",
+      "path": "cases/dashboard-010.json",
+      "title": "Недельный KPI в норме, а клиенты в ярости. Дашборд поддержки",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "rca-001",
+      "module": "5.4",
+      "path": "cases/rca-001.json",
+      "title": "Падение выручки магазина на 15%",
+      "difficulty": "basic"
+    },
+    {
+      "caseId": "rca-002",
+      "module": "5.4",
+      "path": "cases/rca-002.json",
+      "title": "Рост брака на сборочной линии",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "rca-003",
+      "module": "5.4",
+      "path": "cases/rca-003.json",
+      "title": "Трёхчасовой сбой платежей в день распродажи",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "rca-004",
+      "module": "5.4",
+      "path": "cases/rca-004.json",
+      "title": "Отток новых клиентов SaaS вырос вдвое",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "rca-005",
+      "module": "5.4",
+      "path": "cases/rca-005.json",
+      "title": "Поддержка захлёбывается: время ответа выросло втрое",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "rca-006",
+      "module": "5.4",
+      "path": "cases/rca-006.json",
+      "title": "Сроки доставки поехали после переезда склада",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "rca-007",
+      "module": "5.4",
+      "path": "cases/rca-007.json",
+      "title": "Платежи стали чаще отклоняться",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "rca-008",
+      "module": "5.4",
+      "path": "cases/rca-008.json",
+      "title": "Всплеск возвратов одной модели обуви",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "rca-009",
+      "module": "5.4",
+      "path": "cases/rca-009.json",
+      "title": "Рейтинг приложения рухнул после релиза",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "rca-010",
+      "module": "5.4",
+      "path": "cases/rca-010.json",
+      "title": "Поток квалифицированных лидов обвалился",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "sql-001",
+      "module": "5.5",
+      "path": "cases/sql-001.json",
+      "title": "Расследование возвратов",
+      "difficulty": "basic"
+    },
+    {
+      "caseId": "sql-002",
+      "module": "5.5",
+      "path": "cases/sql-002.json",
+      "title": "Анализ активности пользователей",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "sql-003",
+      "module": "5.5",
+      "path": "cases/sql-003.json",
+      "title": "Выручка и подписки: разбор по клиентам",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "sql-004",
+      "module": "5.5",
+      "path": "cases/sql-004.json",
+      "title": "Дубли в выгрузке заказов завышают выручку",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "sql-005",
+      "module": "5.5",
+      "path": "cases/sql-005.json",
+      "title": "Грязные названия каналов дробят отчёт",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "sql-006",
+      "module": "5.5",
+      "path": "cases/sql-006.json",
+      "title": "NULL в суммах платежей ломает подсчёты",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "sql-007",
+      "module": "5.5",
+      "path": "cases/sql-007.json",
+      "title": "Тикеты без ответа теряются при INNER JOIN",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "sql-008",
+      "module": "5.5",
+      "path": "cases/sql-008.json",
+      "title": "Аккаунты выше среднего: ловушка агрегатов",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "sql-009",
+      "module": "5.5",
+      "path": "cases/sql-009.json",
+      "title": "Сроки доставки: даты, NULL и просрочки",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "sql-010",
+      "module": "5.5",
+      "path": "cases/sql-010.json",
+      "title": "Воронка курсов через условную агрегацию",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "simulator-001",
+      "module": "5.6",
+      "path": "cases/simulator-001.json",
+      "title": "Удержать выручку при росте затрат на привлечение",
+      "difficulty": "basic"
+    },
+    {
+      "caseId": "simulator-002",
+      "module": "5.6",
+      "path": "cases/simulator-002.json",
+      "title": "Кофейня: цена и качество при росте себестоимости",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "simulator-003",
+      "module": "5.6",
+      "path": "cases/simulator-003.json",
+      "title": "Распределение рекламного бюджета между каналами",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "simulator-004",
+      "module": "5.6",
+      "path": "cases/simulator-004.json",
+      "title": "Скидки подняли выручку: спасаем маржу интернет-магазина",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "simulator-005",
+      "module": "5.6",
+      "path": "cases/simulator-005.json",
+      "title": "SaaS: дырявое ведро роста",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "simulator-006",
+      "module": "5.6",
+      "path": "cases/simulator-006.json",
+      "title": "Поддержка: средний SLA в норме, VIP горят",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "simulator-007",
+      "module": "5.6",
+      "path": "cases/simulator-007.json",
+      "title": "Логистика: дешёвый склад съедает вклад задержками",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "simulator-008",
+      "module": "5.6",
+      "path": "cases/simulator-008.json",
+      "title": "Мобильное приложение: установки не равны пользователям",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "simulator-009",
+      "module": "5.6",
+      "path": "cases/simulator-009.json",
+      "title": "B2B-продажи: много лидов, мало выручки",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "simulator-010",
+      "module": "5.6",
+      "path": "cases/simulator-010.json",
+      "title": "Финтех: fraud-фильтр без убийства хороших клиентов",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "automation-001",
+      "module": "5.7",
+      "path": "cases/automation-001.json",
+      "title": "Автоматизировать обработку входящих заявок",
+      "difficulty": "basic"
+    },
+    {
+      "caseId": "automation-002",
+      "module": "5.7",
+      "path": "cases/automation-002.json",
+      "title": "Автоматизировать онбординг клиента после оплаты",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "automation-003",
+      "module": "5.7",
+      "path": "cases/automation-003.json",
+      "title": "Автоматизировать контроль просроченных платежей",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "automation-004",
+      "module": "5.7",
+      "path": "cases/automation-004.json",
+      "title": "Автоматизировать обработку возвратов товара",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "automation-005",
+      "module": "5.7",
+      "path": "cases/automation-005.json",
+      "title": "Автоматизировать скрининг кандидатов на вакансию",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "automation-006",
+      "module": "5.7",
+      "path": "cases/automation-006.json",
+      "title": "Автоматизировать эскалацию тикетов по SLA",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "automation-007",
+      "module": "5.7",
+      "path": "cases/automation-007.json",
+      "title": "Автоматизировать реактивацию спящих клиентов",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "automation-008",
+      "module": "5.7",
+      "path": "cases/automation-008.json",
+      "title": "Автоматизировать рассмотрение заявок на кредит",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "automation-009",
+      "module": "5.7",
+      "path": "cases/automation-009.json",
+      "title": "Автоматизировать уведомления о статусе заказа",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "automation-010",
+      "module": "5.7",
+      "path": "cases/automation-010.json",
+      "title": "Автоматизировать апсейл при достижении лимита тарифа",
+      "difficulty": "advanced"
+    }
+  ]
+}

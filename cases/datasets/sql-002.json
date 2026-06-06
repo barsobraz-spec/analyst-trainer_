@@ -1,0 +1,55 @@
+{
+  "tables": [
+    {
+      "name": "users",
+      "columns": [
+        { "name": "user_id", "type": "INTEGER" },
+        { "name": "name", "type": "TEXT" },
+        { "name": "country", "type": "TEXT" },
+        { "name": "plan", "type": "TEXT" },
+        { "name": "signup_date", "type": "TEXT" }
+      ],
+      "rows": [
+        [1, "Анна", "RU", "pro", "2024-01-10"],
+        [2, "Борис", "RU", "free", "2024-01-12"],
+        [3, "Виктор", "KZ", "pro", "2024-02-01"],
+        [4, "Галина", "BY", "free", "2024-02-05"],
+        [5, "Дмитрий", "RU", "free", "2024-02-10"],
+        [6, "Елена", "KZ", "free", "2024-03-01"],
+        [7, "Жанна", "RU", "pro", "2024-03-05"]
+      ]
+    },
+    {
+      "name": "events",
+      "columns": [
+        { "name": "event_id", "type": "INTEGER" },
+        { "name": "user_id", "type": "INTEGER" },
+        { "name": "action", "type": "TEXT" },
+        { "name": "event_date", "type": "TEXT" }
+      ],
+      "rows": [
+        [1, 1, "login", "2024-01-11"],
+        [2, 1, "create_report", "2024-01-12"],
+        [3, 1, "export", "2024-01-15"],
+        [4, 1, "login", "2024-01-20"],
+        [5, 2, "login", "2024-01-13"],
+        [6, 3, "login", "2024-02-02"],
+        [7, 3, "create_report", "2024-02-03"],
+        [8, 3, "login", "2024-02-10"],
+        [9, 4, "login", "2024-02-06"],
+        [10, 4, "export", "2024-02-08"],
+        [11, 5, "login", "2024-02-11"],
+        [12, 5, "create_report", "2024-02-12"],
+        [13, 5, "create_report", "2024-02-13"],
+        [14, 5, "export", "2024-02-15"],
+        [15, 5, "login", "2024-02-20"],
+        [16, 6, "login", "2024-03-02"],
+        [17, 6, "create_report", "2024-03-03"],
+        [18, 6, "export", "2024-03-04"],
+        [19, 6, "login", "2024-03-05"],
+        [20, 6, "create_report", "2024-03-06"],
+        [21, 6, "login", "2024-03-10"]
+      ]
+    }
+  ]
+}

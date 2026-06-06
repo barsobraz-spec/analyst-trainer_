@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analyst Trainer</title>
+  <!--
+    ВАЖНО: запускать только через локальный HTTP-сервер, например:
+        python3 -m http.server 8080
+    Открытие файла напрямую (file://) НЕ работает: браузер блокирует загрузку
+    ES-модулей, JSON-кейсов и WASM по same-origin policy (см. PRD §2, принцип 1).
+
+    Сторонние библиотеки лежат локально в vendor/ и подключаются ЛЕНИВО своими
+    модулями по мере надобности (sql.js → vendor/sql.js, Chart.js → глобал `Chart`,
+    expr-eval → глобал `exprEval`, CodeMirror 5 → глобал `CodeMirror`). На стартовой
+    странице они НЕ грузятся, чтобы консоль оставалась чистой.
+  -->
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./styles.css?v=practice-content-2">
+  <!--
+    Ранняя установка темы ДО отрисовки, чтобы не было вспышки (T10.3). Светлая тема —
+    ОСНОВНАЯ (как на макете): при отсутствии явного выбора ставим 'light'. Логика-
+    источник истины — core/theme.js; здесь продублирован лишь выбор сохранённой темы.
+    Атрибут ставится явно ('light'|'dark'), т.к. тёмная палитра живёт в :root.
+    Ключ localStorage должен совпадать с THEME_KEY.
+  -->
+  <script>
+    (function () {
+      var t = 'light';
+      try {
+        var s = localStorage.getItem('at-theme');
+        if (s === 'light' || s === 'dark') t = s;
+      } catch (e) { /* localStorage недоступен — остаётся светлая тема */ }
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#app">Перейти к содержимому</a>
+
+  <!--
+    Оболочка приложения (навигация в стиле буткемпов): постоянный сайдбар-навигатор
+    курса слева (на десктопе) + контент справа. На мобильном сайдбар сворачивается в
+    нижнюю навигацию и выдвижную шторку. Каркас сайдбара и нижней навигации заполняет
+    core/components/Sidebar.js (installNavigation в main.js); сюда же он переносит
+    слоты #data-controls и #theme-slot (экспорт/импорт и переключатель темы).
+  -->
+
+  <!-- Верхняя панель: видна только на мобильном (кнопка-гамбургер + название). -->
+  <header class="topbar">
+    <button id="nav-toggle" class="topbar__toggle" type="button"
+            aria-label="Открыть навигацию по курсу" aria-controls="sidebar" aria-expanded="false">
+      <span aria-hidden="true">☰</span>
+    </button>
+    <a class="topbar__brand" href="#/">Analyst Trainer</a>
+  </header>
+
+  <div class="layout">
+    <!-- Навигатор курса (Sidebar.js). На мобильном — выдвижная шторка. -->
+    <aside id="sidebar" class="sidebar" aria-label="Навигация по курсу"></aside>
+
+    <!-- Сюда роутер (T0.4) рендерит экраны. -->
+    <main id="app" tabindex="-1"><!-- экраны --></main>
+  </div>
+
+  <!-- Нижняя навигация (мобильная): Главная / Курс / Аналитика. Заполняет Sidebar.js. -->
+  <nav id="bottom-nav" class="bottom-nav" aria-label="Основная навигация"></nav>
+
+  <!-- Затемнение под выдвижной шторкой на мобильном. -->
+  <div id="nav-scrim" class="nav-scrim"></div>
+
+  <script type="module" src="./main.js?v=practice-content-2"></script>
+</body>
+</html>

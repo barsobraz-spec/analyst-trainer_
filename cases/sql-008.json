@@ -1,0 +1,44 @@
+{
+  "caseId": "sql-008",
+  "module": "5.5",
+  "schemaVersion": 1,
+  "title": "Аккаунты выше среднего: ловушка агрегатов",
+  "difficulty": "advanced",
+  "skillTags": ["sql"],
+  "payload": {
+    "scenario": "Вы — аналитик SaaS-сервиса. Финансы просят найти «крупных» клиентов и тарифы, которые тянут выручку. Загвоздка в том, что «выше среднего» нельзя написать как WHERE mrr > AVG(mrr) — агрегат в WHERE не работает; нужен подзапрос. А «тарифы выше общего среднего» требуют HAVING с подзапросом.\n\nВ таблице «accounts» (аккаунт, тариф, MRR — месячная выручка, число мест). Для каждой подзадачи напишите SQL и нажмите «Проверить решение»; кнопкой «Выполнить» можно осмотреться в данных.",
+    "question": "Решите подзадачи, корректно сравнивая значения со средним через подзапросы.",
+    "datasetPath": "cases/datasets/sql-008.json",
+    "starterSql": "SELECT * FROM accounts;",
+    "subtasks": [
+      {
+        "id": "s1",
+        "prompt": "Каков средний MRR по всем аккаунтам?",
+        "orderSensitive": false,
+        "referenceSql": "SELECT AVG(mrr) AS avg_mrr FROM accounts;",
+        "explanation": "AVG(mrr) по всей таблице даёт 9970 ₽. Это ориентир: дальше его придётся подставлять подзапросом, потому что напрямую в WHERE/HAVING агрегат использовать нельзя."
+      },
+      {
+        "id": "s2",
+        "prompt": "Выведите аккаунты с MRR выше среднего: имя и MRR.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT name, mrr FROM accounts WHERE mrr > (SELECT AVG(mrr) FROM accounts);",
+        "explanation": "Нельзя написать WHERE mrr > AVG(mrr) — агрегат в WHERE недопустим. Среднее вычисляется ПОДЗАПРОСОМ: WHERE mrr > (SELECT AVG(mrr) FROM accounts). Выше среднего (9970) оказались 8 аккаунтов — два pro и все шесть enterprise."
+      },
+      {
+        "id": "s3",
+        "prompt": "Найдите тарифы, чей средний MRR выше общего среднего по всем аккаунтам. Выведите тариф и его средний MRR.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT plan, AVG(mrr) AS avg_mrr FROM accounts GROUP BY plan HAVING AVG(mrr) > (SELECT AVG(mrr) FROM accounts);",
+        "explanation": "Фильтр по агрегату группы — это HAVING (не WHERE), а порог — снова подзапрос с общим средним. Выше общего среднего только enterprise (30000). Любопытно: pro (7958) ниже общего среднего, потому что несколько крупных enterprise задирают общую планку вверх."
+      },
+      {
+        "id": "s4",
+        "prompt": "Для каждого тарифа найдите аккаунт с максимальным MRR. Выведите тариф, имя аккаунта и его MRR.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT a.plan, a.name, a.mrr FROM accounts a WHERE a.mrr = (SELECT MAX(mrr) FROM accounts b WHERE b.plan = a.plan);",
+        "explanation": "Коррелированный подзапрос: для каждой строки сравниваем её MRR с максимумом ВНУТРИ её тарифа (SELECT MAX(mrr) ... WHERE b.plan = a.plan). Лидеры: basic — Дзета (3000), pro — Хи (12000), enterprise — Антарес (45000)."
+      }
+    ]
+  }
+}

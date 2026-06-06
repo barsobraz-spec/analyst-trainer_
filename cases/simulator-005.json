@@ -1,0 +1,112 @@
+{
+  "caseId": "simulator-005",
+  "module": "5.6",
+  "schemaVersion": 1,
+  "title": "SaaS: дырявое ведро роста",
+  "difficulty": "advanced",
+  "skillTags": ["business-thinking"],
+  "payload": {
+    "scenario": "SaaS-сервис стагнирует по MRR. Команда продаж предлагает резко увеличить привлечение: «если каждый месяц приводить больше клиентов, выручка вырастет». Customer Success показывает другое: новые клиенты плохо активируются и быстро уходят.\n\nВ каждом месяце вы выбираете фокус бюджета. Агрессивное привлечение даёт много новых клиентов, но повышает отток из-за слабого онбординга. Удержание приводит меньше новых клиентов сейчас, зато снижает churn и повышает ARPU через успешную активацию.",
+    "question": "Вырастите MRR за 3 месяца. Не заливайте в воронку больше воды, если снизу всё утекает.",
+    "metrics": [
+      { "key": "customers", "label": "Активные клиенты", "format": "int" },
+      { "key": "churnRate", "label": "Отток месяца", "format": "percent" },
+      { "key": "arpu", "label": "ARPU", "format": "money" },
+      { "key": "newCustomers", "label": "Новые клиенты", "format": "int" },
+      { "key": "mrr", "label": "MRR", "format": "money" }
+    ],
+    "startState": {
+      "customers": 1000,
+      "churnRate": 8,
+      "arpu": 1200,
+      "newCustomers": 0,
+      "mrr": 1200000
+    },
+    "target": {
+      "metric": "mrr",
+      "value": 1550000,
+      "direction": "max",
+      "label": "MRR после 3 месяцев"
+    },
+    "rounds": [
+      {
+        "title": "Месяц 1 — выбираем, что чинить первым",
+        "prompt": "База 1000 клиентов, churn 8%. Можно купить рост, улучшить онбординг или запустить lifecycle-кампании.",
+        "decisions": [
+          {
+            "id": "focus",
+            "type": "choice",
+            "label": "Фокус месяца",
+            "options": [
+              { "value": "acquisition", "label": "Performance-привлечение", "desc": "+220 клиентов, но churn растёт: приходят менее подходящие пользователи.", "params": { "acquired": 220, "churnChange": 5, "arpuChange": -90 } },
+              { "value": "onboarding", "label": "Онбординг и активация", "desc": "+90 клиентов, churn снижается, ARPU немного растёт.", "params": { "acquired": 90, "churnChange": -3, "arpuChange": 35 } },
+              { "value": "lifecycle", "label": "Lifecycle + апсейл", "desc": "+140 клиентов, churn снижается и ARPU растёт.", "params": { "acquired": 140, "churnChange": -2, "arpuChange": 55 } }
+            ]
+          }
+        ],
+        "model": [
+          { "key": "churnRate", "formula": "clamp(churnRate + churnChange, 2, 18)" },
+          { "key": "newCustomers", "formula": "acquired" },
+          { "key": "customers", "formula": "round(customers * (1 - churnRate / 100)) + newCustomers" },
+          { "key": "arpu", "formula": "max(900, arpu + arpuChange)" },
+          { "key": "mrr", "formula": "round(customers * arpu)" }
+        ],
+        "explanation": "Performance выглядит сильнее по новым клиентам, но одновременно ухудшает качество базы. Если churn растёт, часть новых клиентов просто заменяет ушедших."
+      },
+      {
+        "title": "Месяц 2 — эффект базы",
+        "prompt": "Теперь решение влияет на уже изменившуюся базу. Чем ниже churn, тем больше клиентов переносится в следующий месяц.",
+        "decisions": [
+          {
+            "id": "focus",
+            "type": "choice",
+            "label": "Фокус месяца",
+            "options": [
+              { "value": "acquisition", "label": "Performance-привлечение", "desc": "+250 клиентов, но churn +5 п.п. и ARPU −100 ₽.", "params": { "acquired": 250, "churnChange": 5, "arpuChange": -100 } },
+              { "value": "onboarding", "label": "Онбординг проблемных сегментов", "desc": "+110 клиентов, churn −3 п.п., ARPU +45 ₽.", "params": { "acquired": 110, "churnChange": -3, "arpuChange": 45 } },
+              { "value": "lifecycle", "label": "Lifecycle + апсейл", "desc": "+160 клиентов, churn −2 п.п., ARPU +65 ₽.", "params": { "acquired": 160, "churnChange": -2, "arpuChange": 65 } }
+            ]
+          }
+        ],
+        "model": [
+          { "key": "churnRate", "formula": "clamp(churnRate + churnChange, 2, 18)" },
+          { "key": "newCustomers", "formula": "acquired" },
+          { "key": "customers", "formula": "round(customers * (1 - churnRate / 100)) + newCustomers" },
+          { "key": "arpu", "formula": "max(900, arpu + arpuChange)" },
+          { "key": "mrr", "formula": "round(customers * arpu)" }
+        ],
+        "explanation": "Удержание накапливается: снижение churn на несколько пунктов применяется ко всей базе, а не только к новым клиентам. Поэтому эффект кажется медленным, но быстро становится крупным."
+      },
+      {
+        "title": "Месяц 3 — финальный рывок",
+        "prompt": "Нужно закрыть квартал по MRR. Выберите между объёмом привлечения и качеством базы.",
+        "decisions": [
+          {
+            "id": "focus",
+            "type": "choice",
+            "label": "Фокус месяца",
+            "options": [
+              { "value": "acquisition", "label": "Performance-привлечение", "desc": "+270 клиентов, churn +4 п.п., ARPU −90 ₽.", "params": { "acquired": 270, "churnChange": 4, "arpuChange": -90 } },
+              { "value": "onboarding", "label": "Онбординг + education", "desc": "+120 клиентов, churn −2 п.п., ARPU +50 ₽.", "params": { "acquired": 120, "churnChange": -2, "arpuChange": 50 } },
+              { "value": "lifecycle", "label": "Lifecycle + expansion", "desc": "+170 клиентов, churn −1 п.п., ARPU +80 ₽.", "params": { "acquired": 170, "churnChange": -1, "arpuChange": 80 } }
+            ]
+          }
+        ],
+        "model": [
+          { "key": "churnRate", "formula": "clamp(churnRate + churnChange, 2, 18)" },
+          { "key": "newCustomers", "formula": "acquired" },
+          { "key": "customers", "formula": "round(customers * (1 - churnRate / 100)) + newCustomers" },
+          { "key": "arpu", "formula": "max(900, arpu + arpuChange)" },
+          { "key": "mrr", "formula": "round(customers * arpu)" }
+        ],
+        "explanation": "Финальный MRR зависит от базы, churn и ARPU одновременно. Новые клиенты помогают, но если они приходят с плохой активацией, вы покупаете краткосрочную картинку и ухудшаете механику роста."
+      }
+    ],
+    "reference": [
+      "Ловушка — «дырявое ведро»: приток нельзя оценивать отдельно от оттока. Чистый рост = новые клиенты − ушедшие клиенты, и ушедшие считаются от всей базы.",
+      "Арифметика удержания нелинейна: снижение churn с 8% до 5% на базе около тысячи клиентов сохраняет десятки клиентов каждый месяц, а затем эти сохранённые клиенты тоже становятся базой следующего месяца.",
+      "Что проверить дальше: activation rate новых когорт, churn по источникам привлечения, payback CAC и expansion revenue. Performance может быть полезен, но только после закрытия утечки.",
+      "Типичная ошибка: мерить рост только числом новых клиентов. Сильная стратегия сначала снижает churn и поднимает ARPU через активацию/lifecycle, а уже затем масштабирует привлечение."
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "tables": [
+    {
+      "name": "customers",
+      "columns": [
+        { "name": "customer_id", "type": "INTEGER" },
+        { "name": "name", "type": "TEXT" },
+        { "name": "country", "type": "TEXT" },
+        { "name": "signup_date", "type": "TEXT" }
+      ],
+      "rows": [
+        [1, "Анна", "RU", "2024-01-05"],
+        [2, "Борис", "KZ", "2024-01-10"],
+        [3, "Виктор", "RU", "2024-02-01"],
+        [4, "Галина", "BY", "2024-02-15"],
+        [5, "Дмитрий", "RU", "2024-03-01"]
+      ]
+    },
+    {
+      "name": "subscriptions",
+      "columns": [
+        { "name": "sub_id", "type": "INTEGER" },
+        { "name": "customer_id", "type": "INTEGER" },
+        { "name": "plan", "type": "TEXT" },
+        { "name": "monthly_price", "type": "INTEGER" },
+        { "name": "start_date", "type": "TEXT" },
+        { "name": "end_date", "type": "TEXT" }
+      ],
+      "rows": [
+        [1, 1, "pro", 2000, "2024-01-05", null],
+        [2, 2, "basic", 1000, "2024-01-10", "2024-03-10"],
+        [3, 3, "pro", 2000, "2024-02-01", null],
+        [4, 4, "basic", 1000, "2024-02-15", null],
+        [5, 5, "pro", 2000, "2024-03-01", null],
+        [6, 1, "basic", 1000, "2024-04-01", null]
+      ]
+    },
+    {
+      "name": "payments",
+      "columns": [
+        { "name": "payment_id", "type": "INTEGER" },
+        { "name": "customer_id", "type": "INTEGER" },
+        { "name": "amount", "type": "INTEGER" },
+        { "name": "pay_date", "type": "TEXT" }
+      ],
+      "rows": [
+        [1, 1, 2000, "2024-01-05"],
+        [2, 1, 2000, "2024-02-05"],
+        [3, 1, 2000, "2024-03-05"],
+        [4, 2, 1000, "2024-01-10"],
+        [5, 2, 1000, "2024-02-10"],
+        [6, 2, 1000, "2024-03-10"],
+        [7, 3, 2000, "2024-02-01"],
+        [8, 3, 2000, "2024-03-01"],
+        [9, 4, 1000, "2024-02-15"],
+        [10, 4, 1000, "2024-03-15"],
+        [11, 5, 2000, "2024-03-01"],
+        [12, 1, 3000, "2024-04-05"]
+      ]
+    }
+  ]
+}

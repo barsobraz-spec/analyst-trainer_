@@ -1,0 +1,44 @@
+{
+  "caseId": "sql-010",
+  "module": "5.5",
+  "schemaVersion": 1,
+  "title": "Воронка курсов через условную агрегацию",
+  "difficulty": "intermediate",
+  "skillTags": ["sql"],
+  "payload": {
+    "scenario": "Вы — аналитик онлайн-школы. В таблице «enrollments» каждая запись на курс имеет статус: enrolled (учится), completed (завершил), dropped (бросил). Чтобы построить отчёт «по курсам: завершили / всего» в одной таблице, удобно не делать кучу отдельных запросов, а посчитать категории прямо внутри GROUP BY через условную агрегацию SUM(CASE WHEN … THEN 1 ELSE 0 END).\n\nДля каждой подзадачи напишите SQL и нажмите «Проверить решение»; кнопкой «Выполнить» можно осмотреться в данных.",
+    "question": "Решите подзадачи, считая статусы внутри групп через условную агрегацию.",
+    "datasetPath": "cases/datasets/sql-010.json",
+    "starterSql": "SELECT * FROM enrollments;",
+    "subtasks": [
+      {
+        "id": "s1",
+        "prompt": "Сколько всего записей на курсы?",
+        "orderSensitive": false,
+        "referenceSql": "SELECT COUNT(*) AS total FROM enrollments;",
+        "explanation": "COUNT(*) по всей таблице — 36 записей. Базовый знаменатель для дальнейших разрезов."
+      },
+      {
+        "id": "s2",
+        "prompt": "Сколько записей в каждом статусе? Выведите статус и число, отсортируйте по числу по убыванию.",
+        "orderSensitive": true,
+        "referenceSql": "SELECT status, COUNT(*) AS cnt FROM enrollments GROUP BY status ORDER BY cnt DESC;",
+        "explanation": "GROUP BY status + COUNT(*): completed 17, enrolled 10, dropped 9. Это «длинный» формат — по строке на статус."
+      },
+      {
+        "id": "s3",
+        "prompt": "Постройте отчёт по курсам: курс, число завершивших (completed) и всего записей. Отсортируйте по названию курса.",
+        "orderSensitive": true,
+        "referenceSql": "SELECT course, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) AS completed, COUNT(*) AS total FROM enrollments GROUP BY course ORDER BY course;",
+        "explanation": "Условная агрегация: SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) считает только завершивших, а COUNT(*) — всех, и обе колонки оказываются в ОДНОЙ строке на курс. Результат: Excel 6/12, Python 4/12, SQL 7/12. Так строят «широкие» отчёты-сводки."
+      },
+      {
+        "id": "s4",
+        "prompt": "Найдите курсы, где завершивших больше, чем бросивших. Выведите название курса.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT course FROM enrollments GROUP BY course HAVING SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) > SUM(CASE WHEN status = 'dropped' THEN 1 ELSE 0 END);",
+        "explanation": "Сравнить две категории внутри группы помогает HAVING с двумя условными суммами: completed-сумма > dropped-сумма. Условию отвечают SQL (7 против 2) и Excel (6 против 2); Python отсеивается — там бросивших (5) больше завершивших (4)."
+      }
+    ]
+  }
+}

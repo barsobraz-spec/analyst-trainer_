@@ -1,0 +1,44 @@
+{
+  "caseId": "sql-007",
+  "module": "5.5",
+  "schemaVersion": 1,
+  "title": "Тикеты без ответа теряются при INNER JOIN",
+  "difficulty": "advanced",
+  "skillTags": ["sql"],
+  "payload": {
+    "scenario": "Вы — аналитик службы поддержки. В базе две таблицы: «tickets» (обращения) и «responses» (ответы операторов, ссылаются на тикет по ticket_id). Самое важное для SLA — найти тикеты, на которые ВООБЩЕ не ответили. Но обычный (INNER) JOIN их просто выкинет: у них нет строк в responses, и они «исчезнут» из отчёта. Нужен LEFT JOIN и анти-джойн.\n\nПройдите анализ по шагам: для каждой подзадачи напишите SQL и нажмите «Проверить решение». Кнопкой «Выполнить» можно осмотреться в данных.",
+    "question": "Решите подзадачи, не потеряв тикеты без ответов.",
+    "datasetPath": "cases/datasets/sql-007.json",
+    "starterSql": "SELECT * FROM tickets;",
+    "subtasks": [
+      {
+        "id": "s1",
+        "prompt": "Сколько всего тикетов в таблице?",
+        "orderSensitive": false,
+        "referenceSql": "SELECT COUNT(*) AS total_tickets FROM tickets;",
+        "explanation": "COUNT(*) по tickets — 30 обращений. Это полный знаменатель: дальше важно, чтобы ни один из них не «потерялся» при соединении с ответами."
+      },
+      {
+        "id": "s2",
+        "prompt": "Сколько тикетов получили хотя бы один ответ?",
+        "orderSensitive": false,
+        "referenceSql": "SELECT COUNT(DISTINCT ticket_id) AS answered FROM responses;",
+        "explanation": "Отвечённые тикеты — это уникальные ticket_id в responses: COUNT(DISTINCT ticket_id) = 24. DISTINCT важен, потому что у одного тикета бывает несколько ответов. Значит, 30 − 24 = 6 тикетов остались без ответа."
+      },
+      {
+        "id": "s3",
+        "prompt": "Найдите тикеты, на которые НЕ ответили ни разу. Выведите ticket_id.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT t.ticket_id FROM tickets t LEFT JOIN responses r ON t.ticket_id = r.ticket_id WHERE r.ticket_id IS NULL;",
+        "explanation": "Анти-джойн: LEFT JOIN подставляет тикеты БЕЗ ответов с NULL в полях responses, а условие WHERE r.ticket_id IS NULL оставляет именно их. Это шесть «потерянных» тикетов (7, 13, 19, 22, 28, 30) — кандидаты на нарушение SLA. INNER JOIN их бы скрыл."
+      },
+      {
+        "id": "s4",
+        "prompt": "Для КАЖДОГО тикета выведите ticket_id и число ответов — включая тикеты с нулём ответов.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT t.ticket_id, COUNT(r.response_id) AS responses_count FROM tickets t LEFT JOIN responses r ON t.ticket_id = r.ticket_id GROUP BY t.ticket_id;",
+        "explanation": "LEFT JOIN сохраняет все тикеты, а COUNT(r.response_id) считает ответы и даёт 0 там, где их нет. Важная тонкость: COUNT(*) посчитал бы у тикета без ответов 1 (одна строка после LEFT JOIN с NULL), а COUNT(r.response_id) корректно даёт 0 — поэтому считают НЕ-NULL поле из правой таблицы."
+      }
+    ]
+  }
+}

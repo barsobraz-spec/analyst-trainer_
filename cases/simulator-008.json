@@ -1,0 +1,124 @@
+{
+  "caseId": "simulator-008",
+  "module": "5.6",
+  "schemaVersion": 1,
+  "title": "Мобильное приложение: установки не равны пользователям",
+  "difficulty": "intermediate",
+  "skillTags": ["business-thinking"],
+  "payload": {
+    "scenario": "Команда мобильного приложения радуется росту установок после рекламной кампании. Но продуктовый аналитик видит, что активные пользователи и выручка растут слабее, чем CPI-отчёт. Часть каналов даёт дешёвые установки, которые не доходят до активации.\n\nВ каждом раунде вы выбираете канал привлечения и глубину onboarding. Слишком дешёвый трафик снижает качество; слишком длинный onboarding улучшает активацию, но может отрезать часть пользователей на входе.",
+    "question": "Максимизируйте ценность активированных пользователей за 3 недели. Не оптимизируйте установки в отрыве от активации и удержания.",
+    "metrics": [
+      { "key": "installs", "label": "Установки", "format": "int" },
+      { "key": "activationRate", "label": "Активация", "format": "percent" },
+      { "key": "weekValue", "label": "Ценность недели", "format": "money" },
+      { "key": "totalValue", "label": "Суммарная ценность", "format": "money" },
+      { "key": "paybackIndex", "label": "Индекс окупаемости", "format": "number" }
+    ],
+    "startState": {
+      "installs": 0,
+      "activationRate": 24,
+      "weekValue": 0,
+      "totalValue": 0,
+      "paybackIndex": 0
+    },
+    "target": {
+      "metric": "totalValue",
+      "value": 5200000,
+      "direction": "max",
+      "label": "Суммарная ценность"
+    },
+    "rounds": [
+      {
+        "title": "Неделя 1 — старт кампании",
+        "prompt": "Бюджет ограничен. Выберите канал и глубину onboarding для первой волны пользователей.",
+        "decisions": [
+          {
+            "id": "channel",
+            "type": "choice",
+            "label": "Канал привлечения",
+            "options": [
+              { "value": "cheap", "label": "Дешёвая сетка", "desc": "Много установок, слабое качество.", "params": { "baseInstalls": 24000, "quality": -16, "cpi": 28, "ltv": 190 } },
+              { "value": "social", "label": "Социальные кампании", "desc": "Средний объём и качество.", "params": { "baseInstalls": 15000, "quality": 4, "cpi": 42, "ltv": 260 } },
+              { "value": "intent", "label": "Поисковый спрос", "desc": "Меньше установок, выше намерение.", "params": { "baseInstalls": 9000, "quality": 18, "cpi": 58, "ltv": 360 } }
+            ]
+          },
+          { "id": "onboardingDepth", "type": "number", "label": "Глубина onboarding", "suffix": "%", "help": "Больше объяснений повышает активацию, но снижает число дошедших до первого действия.", "min": 0, "max": 100, "step": 10, "default": 40 }
+        ],
+        "model": [
+          { "key": "installs", "formula": "round(baseInstalls * (1 - onboardingDepth / 260))" },
+          { "key": "activationRate", "formula": "clamp(24 + quality + onboardingDepth * 0.22, 5, 75)" },
+          { "key": "activatedUsers", "formula": "round(installs * activationRate / 100)" },
+          { "key": "retainedUsers", "formula": "round(activatedUsers * clamp(38 + quality * 0.4, 12, 70) / 100)" },
+          { "key": "acquisitionCost", "formula": "round(installs * cpi)" },
+          { "key": "weekValue", "formula": "round(retainedUsers * ltv - acquisitionCost)" },
+          { "key": "totalValue", "formula": "totalValue + weekValue" },
+          { "key": "paybackIndex", "formula": "round(retainedUsers * ltv / max(acquisitionCost, 1) * 100) / 100" }
+        ],
+        "explanation": "Дешёвые установки могут красиво выглядеть в acquisition-отчёте, но низкая активация и удержание быстро съедают экономию на CPI."
+      },
+      {
+        "title": "Неделя 2 — масштабирование",
+        "prompt": "Маркетинг предлагает увеличить объём. Проверьте, не ухудшит ли масштаб качество пользователей.",
+        "decisions": [
+          {
+            "id": "channel",
+            "type": "choice",
+            "label": "Канал привлечения",
+            "options": [
+              { "value": "cheap", "label": "Дешёвая сетка", "desc": "Максимальный масштаб, больше случайных пользователей.", "params": { "baseInstalls": 30000, "quality": -20, "cpi": 26, "ltv": 180 } },
+              { "value": "social", "label": "Lookalike-аудитории", "desc": "Объём выше, качество среднее.", "params": { "baseInstalls": 19000, "quality": 6, "cpi": 45, "ltv": 275 } },
+              { "value": "intent", "label": "Поиск + ретаргетинг", "desc": "Меньше установок, но выше намерение.", "params": { "baseInstalls": 11000, "quality": 20, "cpi": 62, "ltv": 380 } }
+            ]
+          },
+          { "id": "onboardingDepth", "type": "number", "label": "Глубина onboarding", "suffix": "%", "min": 0, "max": 100, "step": 10, "default": 50 }
+        ],
+        "model": [
+          { "key": "installs", "formula": "round(baseInstalls * (1 - onboardingDepth / 260))" },
+          { "key": "activationRate", "formula": "clamp(24 + quality + onboardingDepth * 0.22, 5, 75)" },
+          { "key": "activatedUsers", "formula": "round(installs * activationRate / 100)" },
+          { "key": "retainedUsers", "formula": "round(activatedUsers * clamp(38 + quality * 0.4, 12, 70) / 100)" },
+          { "key": "acquisitionCost", "formula": "round(installs * cpi)" },
+          { "key": "weekValue", "formula": "round(retainedUsers * ltv - acquisitionCost)" },
+          { "key": "totalValue", "formula": "totalValue + weekValue" },
+          { "key": "paybackIndex", "formula": "round(retainedUsers * ltv / max(acquisitionCost, 1) * 100) / 100" }
+        ],
+        "explanation": "Масштабирование усиливает исходную ошибку канала: хороший канал даёт больше ценности, плохой канал быстрее накапливает неокупаемые установки."
+      },
+      {
+        "title": "Неделя 3 — оптимизация качества",
+        "prompt": "После двух недель нужно выбрать, где добирать пользователей: объёмом или качеством.",
+        "decisions": [
+          {
+            "id": "channel",
+            "type": "choice",
+            "label": "Канал привлечения",
+            "options": [
+              { "value": "cheap", "label": "Дешёвые установки", "desc": "Дешево, но качество остаётся слабым.", "params": { "baseInstalls": 26000, "quality": -18, "cpi": 27, "ltv": 180 } },
+              { "value": "social", "label": "Оптимизация по событию", "desc": "Баланс цены и активации.", "params": { "baseInstalls": 17000, "quality": 9, "cpi": 48, "ltv": 290 } },
+              { "value": "intent", "label": "Высокое намерение", "desc": "Дороже, но ценнее после активации.", "params": { "baseInstalls": 10000, "quality": 22, "cpi": 64, "ltv": 400 } }
+            ]
+          },
+          { "id": "onboardingDepth", "type": "number", "label": "Глубина onboarding", "suffix": "%", "min": 0, "max": 100, "step": 10, "default": 50 }
+        ],
+        "model": [
+          { "key": "installs", "formula": "round(baseInstalls * (1 - onboardingDepth / 260))" },
+          { "key": "activationRate", "formula": "clamp(24 + quality + onboardingDepth * 0.22, 5, 75)" },
+          { "key": "activatedUsers", "formula": "round(installs * activationRate / 100)" },
+          { "key": "retainedUsers", "formula": "round(activatedUsers * clamp(38 + quality * 0.4, 12, 70) / 100)" },
+          { "key": "acquisitionCost", "formula": "round(installs * cpi)" },
+          { "key": "weekValue", "formula": "round(retainedUsers * ltv - acquisitionCost)" },
+          { "key": "totalValue", "formula": "totalValue + weekValue" },
+          { "key": "paybackIndex", "formula": "round(retainedUsers * ltv / max(acquisitionCost, 1) * 100) / 100" }
+        ],
+        "explanation": "На финальной неделе важно оценивать не installs, а путь до retained users. Оптимизация по качественному событию часто выигрывает у дешёвого объёма."
+      }
+    ],
+    "reference": [
+      "Ловушка — installs vs activated users. Установка не создаёт ценность, если пользователь не дошёл до первого полезного действия и не вернулся.",
+      "Арифметика: ценность = retained users × LTV − acquisition cost. CPI сам по себе не отвечает на вопрос окупаемости.",
+      "Что проверить дальше: activation funnel по каналам, D1/D7 retention, payback by cohort, качество события оптимизации и ложные установки.",
+      "Типичная ошибка: выбрать канал с минимальным CPI. Сильная стратегия смотрит на активацию, удержание и окупаемость когорты."
+    ]
+  }
+}

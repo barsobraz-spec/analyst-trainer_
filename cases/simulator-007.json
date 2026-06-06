@@ -1,0 +1,124 @@
+{
+  "caseId": "simulator-007",
+  "module": "5.6",
+  "schemaVersion": 1,
+  "title": "Логистика: дешёвый склад съедает вклад задержками",
+  "difficulty": "advanced",
+  "skillTags": ["business-thinking"],
+  "payload": {
+    "scenario": "Маркетплейс выбирает логистическую схему на три недели распродаж. Финансы предлагают централизовать отгрузку: цена доставки ниже. Операции предупреждают, что задержки увеличат отмены, возвраты и компенсации.\n\nВ каждом раунде меняется объём заказов и плотность спроса. Вы выбираете схему склада и страховой запас. Слишком дешёвая схема ухудшает on-time delivery; слишком большой запас замораживает деньги и повышает списания.",
+    "question": "Максимизируйте суммарный вклад за 3 недели. Не принимайте локальную экономию на доставке за бизнес-результат.",
+    "metrics": [
+      { "key": "orders", "label": "Заказы", "format": "int" },
+      { "key": "onTimePct", "label": "Доставка вовремя", "format": "percent" },
+      { "key": "lostOrders", "label": "Потерянные заказы", "format": "int" },
+      { "key": "weekContribution", "label": "Вклад недели", "format": "money" },
+      { "key": "totalContribution", "label": "Суммарный вклад", "format": "money" }
+    ],
+    "startState": {
+      "orders": 0,
+      "onTimePct": 88,
+      "lostOrders": 0,
+      "weekContribution": 0,
+      "totalContribution": 0
+    },
+    "target": {
+      "metric": "totalContribution",
+      "value": 12000000,
+      "direction": "max",
+      "label": "Суммарный вклад"
+    },
+    "rounds": [
+      {
+        "title": "Неделя 1 — старт распродажи",
+        "prompt": "Ожидается 18 000 заказов. Выберите схему отгрузки и страховой запас.",
+        "decisions": [
+          {
+            "id": "network",
+            "type": "choice",
+            "label": "Логистическая схема",
+            "options": [
+              { "value": "central", "label": "Один центральный склад", "desc": "Дешево на заказ, но ниже доставка вовремя.", "params": { "shipCost": 90, "speedBoost": -95, "damageRate": 2.8, "fixedCost": 120000 } },
+              { "value": "regional", "label": "Региональные склады", "desc": "Дороже, зато лучше on-time.", "params": { "shipCost": 130, "speedBoost": 12, "damageRate": 0.7, "fixedCost": 260000 } },
+              { "value": "hybrid", "label": "Гибрид: топ-SKU регионально", "desc": "Баланс стоимости и скорости.", "params": { "shipCost": 112, "speedBoost": 7, "damageRate": 0.8, "fixedCost": 180000 } }
+            ]
+          },
+          { "id": "bufferStock", "type": "number", "label": "Страховой запас", "suffix": "%", "help": "Запас повышает on-time, но добавляет хранение и списания.", "min": 0, "max": 30, "step": 5, "default": 10 }
+        ],
+        "model": [
+          { "key": "orders", "formula": "18000" },
+          { "key": "marginPerOrder", "formula": "420" },
+          { "key": "onTimePct", "formula": "clamp(84 + speedBoost + bufferStock * 0.55, 0, 99)" },
+          { "key": "lostOrders", "formula": "round(orders * (100 - onTimePct) / 100 * 1.35)" },
+          { "key": "returns", "formula": "round(orders * damageRate / 100)" },
+          { "key": "shippingCost", "formula": "round(orders * (shipCost + bufferStock * 2.2))" },
+          { "key": "weekContribution", "formula": "round((orders - lostOrders - returns) * marginPerOrder - shippingCost - fixedCost)" },
+          { "key": "totalContribution", "formula": "totalContribution + weekContribution" }
+        ],
+        "explanation": "Центральный склад выглядит дешёвым по cost per order, но on-time падает, а потерянные заказы вычитаются из маржинальной базы. Экономия может проиграть потере вклада."
+      },
+      {
+        "title": "Неделя 2 — пик нагрузки",
+        "prompt": "Пик: 25 000 заказов. Задержки становятся заметнее для клиентов.",
+        "decisions": [
+          {
+            "id": "network",
+            "type": "choice",
+            "label": "Логистическая схема",
+            "options": [
+              { "value": "central", "label": "Один центральный склад", "desc": "Минимальный ship cost, максимальный риск задержек.", "params": { "shipCost": 92, "speedBoost": -105, "damageRate": 3.0, "fixedCost": 130000 } },
+              { "value": "regional", "label": "Региональные склады", "desc": "Дорого, но устойчиво в пик.", "params": { "shipCost": 138, "speedBoost": 15, "damageRate": 0.7, "fixedCost": 300000 } },
+              { "value": "hybrid", "label": "Гибрид", "desc": "Топ-SKU ближе к спросу, long-tail централизован.", "params": { "shipCost": 118, "speedBoost": 10, "damageRate": 0.8, "fixedCost": 210000 } }
+            ]
+          },
+          { "id": "bufferStock", "type": "number", "label": "Страховой запас", "suffix": "%", "min": 0, "max": 30, "step": 5, "default": 15 }
+        ],
+        "model": [
+          { "key": "orders", "formula": "25000" },
+          { "key": "marginPerOrder", "formula": "430" },
+          { "key": "onTimePct", "formula": "clamp(80 + speedBoost + bufferStock * 0.6, 0, 99)" },
+          { "key": "lostOrders", "formula": "round(orders * (100 - onTimePct) / 100 * 1.45)" },
+          { "key": "returns", "formula": "round(orders * damageRate / 100)" },
+          { "key": "shippingCost", "formula": "round(orders * (shipCost + bufferStock * 2.4))" },
+          { "key": "weekContribution", "formula": "round((orders - lostOrders - returns) * marginPerOrder - shippingCost - fixedCost)" },
+          { "key": "totalContribution", "formula": "totalContribution + weekContribution" }
+        ],
+        "explanation": "В пик задержка дороже: больше заказов попадает в риск, поэтому маленькая просадка on-time превращается в крупную потерю вклада."
+      },
+      {
+        "title": "Неделя 3 — спрос нормализуется",
+        "prompt": "Ожидается 16 000 заказов. После пика важно не переплатить за избыточную сеть и не оставить плохой сервис.",
+        "decisions": [
+          {
+            "id": "network",
+            "type": "choice",
+            "label": "Логистическая схема",
+            "options": [
+              { "value": "central", "label": "Центральный склад", "desc": "Дёшево, но медленно.", "params": { "shipCost": 88, "speedBoost": -85, "damageRate": 2.5, "fixedCost": 120000 } },
+              { "value": "regional", "label": "Региональные склады", "desc": "Сервис высокий, цена тоже.", "params": { "shipCost": 132, "speedBoost": 10, "damageRate": 0.7, "fixedCost": 260000 } },
+              { "value": "hybrid", "label": "Гибрид", "desc": "Сохранить топ-SKU ближе к клиентам.", "params": { "shipCost": 110, "speedBoost": 7, "damageRate": 0.8, "fixedCost": 180000 } }
+            ]
+          },
+          { "id": "bufferStock", "type": "number", "label": "Страховой запас", "suffix": "%", "min": 0, "max": 30, "step": 5, "default": 10 }
+        ],
+        "model": [
+          { "key": "orders", "formula": "16000" },
+          { "key": "marginPerOrder", "formula": "420" },
+          { "key": "onTimePct", "formula": "clamp(86 + speedBoost + bufferStock * 0.5, 0, 99)" },
+          { "key": "lostOrders", "formula": "round(orders * (100 - onTimePct) / 100 * 1.25)" },
+          { "key": "returns", "formula": "round(orders * damageRate / 100)" },
+          { "key": "shippingCost", "formula": "round(orders * (shipCost + bufferStock * 2.0))" },
+          { "key": "weekContribution", "formula": "round((orders - lostOrders - returns) * marginPerOrder - shippingCost - fixedCost)" },
+          { "key": "totalContribution", "formula": "totalContribution + weekContribution" }
+        ],
+        "explanation": "После пика региональная сеть может стать избыточной, но полная централизация всё ещё режет сервис. Важно пересчитать вклад, а не копировать прошлое решение."
+      }
+    ],
+    "reference": [
+      "Ловушка — локальная экономия vs общий вклад. Дешёвый склад снижает cost per order, но ухудшает on-time delivery, увеличивает отмены и возвраты.",
+      "Арифметика: вклад = выполненные заказы × маржа − доставка − фиксированные затраты. Потерянные заказы надо вычитать из маржинальной базы, а не считать доставку отдельно.",
+      "Что проверить дальше: on-time по регионам и SKU, отмены из-за задержек, возвраты из-за повреждений, вклад по логистическим сценариям.",
+      "Типичная ошибка: выбрать минимальную стоимость доставки на заказ. Сильная стратегия меняет сеть под нагрузку: гибрид/региональная схема в пик и более аккуратный запас вне пика."
+    ]
+  }
+}

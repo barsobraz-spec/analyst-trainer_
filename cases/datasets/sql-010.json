@@ -1,0 +1,52 @@
+{
+  "tables": [
+    {
+      "name": "enrollments",
+      "columns": [
+        { "name": "enroll_id", "type": "INTEGER" },
+        { "name": "student_id", "type": "INTEGER" },
+        { "name": "course", "type": "TEXT" },
+        { "name": "status", "type": "TEXT" },
+        { "name": "country", "type": "TEXT" }
+      ],
+      "rows": [
+        [1, 701, "SQL", "completed", "RU"],
+        [2, 702, "SQL", "completed", "KZ"],
+        [3, 703, "SQL", "completed", "RU"],
+        [4, 704, "SQL", "completed", "BY"],
+        [5, 705, "SQL", "completed", "RU"],
+        [6, 706, "SQL", "completed", "KZ"],
+        [7, 707, "SQL", "completed", "RU"],
+        [8, 708, "SQL", "enrolled", "RU"],
+        [9, 709, "SQL", "enrolled", "KZ"],
+        [10, 710, "SQL", "enrolled", "BY"],
+        [11, 711, "SQL", "dropped", "RU"],
+        [12, 712, "SQL", "dropped", "KZ"],
+        [13, 713, "Python", "completed", "RU"],
+        [14, 714, "Python", "completed", "KZ"],
+        [15, 715, "Python", "completed", "RU"],
+        [16, 716, "Python", "completed", "BY"],
+        [17, 717, "Python", "enrolled", "RU"],
+        [18, 718, "Python", "enrolled", "KZ"],
+        [19, 719, "Python", "enrolled", "RU"],
+        [20, 720, "Python", "dropped", "BY"],
+        [21, 721, "Python", "dropped", "RU"],
+        [22, 722, "Python", "dropped", "KZ"],
+        [23, 723, "Python", "dropped", "RU"],
+        [24, 724, "Python", "dropped", "KZ"],
+        [25, 725, "Excel", "completed", "RU"],
+        [26, 726, "Excel", "completed", "KZ"],
+        [27, 727, "Excel", "completed", "RU"],
+        [28, 728, "Excel", "completed", "BY"],
+        [29, 729, "Excel", "completed", "RU"],
+        [30, 730, "Excel", "completed", "KZ"],
+        [31, 731, "Excel", "enrolled", "RU"],
+        [32, 732, "Excel", "enrolled", "KZ"],
+        [33, 733, "Excel", "enrolled", "BY"],
+        [34, 734, "Excel", "enrolled", "RU"],
+        [35, 735, "Excel", "dropped", "RU"],
+        [36, 736, "Excel", "dropped", "KZ"]
+      ]
+    }
+  ]
+}

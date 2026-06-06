@@ -1,0 +1,44 @@
+{
+  "caseId": "sql-001",
+  "module": "5.5",
+  "schemaVersion": 1,
+  "title": "Расследование возвратов",
+  "difficulty": "basic",
+  "skillTags": ["sql"],
+  "payload": {
+    "scenario": "Вы — аналитик интернет-магазина. Руководитель заметил рост возвратов и просит разобраться: кто и почему возвращает товары. В базе две таблицы — «orders» (заказы) и «returns» (возвраты, ссылаются на заказ по order_id).\n\nПройдите расследование по шагам: для каждой подзадачи напишите SQL-запрос в редакторе и нажмите «Проверить решение». Результат сверится с эталоном автоматически. Можно свободно выполнять любые запросы кнопкой «Выполнить», чтобы осмотреться.",
+    "question": "Решите все подзадачи расследования возвратов с помощью SQL.",
+    "datasetPath": "cases/datasets/sql-001.json",
+    "starterSql": "SELECT * FROM returns;",
+    "subtasks": [
+      {
+        "id": "s1",
+        "prompt": "Сколько всего возвратов в таблице returns?",
+        "orderSensitive": false,
+        "referenceSql": "SELECT COUNT(*) AS returns_count FROM returns;",
+        "explanation": "Базовая агрегация COUNT(*) по всей таблице возвратов — отправная точка расследования."
+      },
+      {
+        "id": "s2",
+        "prompt": "Сколько возвратов по каждой причине? Выведите причину и число возвратов, отсортируйте по числу возвратов по убыванию.",
+        "orderSensitive": true,
+        "referenceSql": "SELECT reason, COUNT(*) AS cnt FROM returns GROUP BY reason ORDER BY cnt DESC;",
+        "explanation": "GROUP BY reason + COUNT(*), сортировка ORDER BY cnt DESC. Видно, что лидирует причина «Брак» (3 возврата) — это и есть главный сигнал."
+      },
+      {
+        "id": "s3",
+        "prompt": "В какой категории товаров больше всего возвратов? Выведите категорию и число возвратов (одну строку — лидера).",
+        "orderSensitive": false,
+        "referenceSql": "SELECT o.category, COUNT(*) AS returns_count FROM returns r JOIN orders o ON r.order_id = o.order_id GROUP BY o.category ORDER BY returns_count DESC LIMIT 1;",
+        "explanation": "Чтобы связать возврат с категорией, нужно соединить returns с orders по order_id. Больше всего возвратов в «Электронике» (5) — на неё и стоит смотреть."
+      },
+      {
+        "id": "s4",
+        "prompt": "Какие клиенты сделали 2 и более возвратов? Выведите customer_id и число их возвратов.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT o.customer_id, COUNT(*) AS returns_count FROM returns r JOIN orders o ON r.order_id = o.order_id GROUP BY o.customer_id HAVING COUNT(*) >= 2;",
+        "explanation": "JOIN + GROUP BY customer_id + HAVING COUNT(*) >= 2. Выделяется клиент 101 (3 возврата электроники с причиной «Брак») — кандидат на ручной разбор."
+      }
+    ]
+  }
+}
