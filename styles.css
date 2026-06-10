@@ -523,7 +523,7 @@ input, textarea, select { accent-color: var(--accent); }
 
 /* --- Нижняя навигация (мобильная) --- */
 .bottom-nav {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 0.45rem;
   position: fixed;
@@ -584,6 +584,12 @@ input, textarea, select { accent-color: var(--accent); }
 }
 .bottom-nav__icon { display: inline-flex; }
 .bottom-nav__icon svg { width: 22px; height: 22px; display: block; }
+.bottom-nav__label {
+  max-width: 100%;
+  line-height: 1.05;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
 
 /* --- Затемнение под выдвижной шторкой --- */
 .nav-scrim {
@@ -598,7 +604,9 @@ input, textarea, select { accent-color: var(--accent); }
 @media (max-width: 899px) {
   .layout { grid-template-columns: minmax(0, 1fr); }
   .topbar { display: flex; }
+  .screen { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0)); }
   .bottom-nav {
+    display: flex;
     left: 0.7rem;
     right: 0.7rem;
     bottom: max(0.65rem, env(safe-area-inset-bottom, 0));
@@ -3092,15 +3100,6 @@ button:active:not(:disabled) { transform: translateY(1px) scale(0.985); }
 .home-hero__cta--ghost:hover { border-color: var(--accent); color: var(--accent); }
 .home-hero__cta:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-ring); }
 
-.home-hero__art {
-  flex: none;
-  width: 150px;
-  height: 150px;
-  color: var(--accent);
-  opacity: 0.85;
-}
-.home-hero__art svg { width: 100%; height: 100%; }
-
 /* Общий горизонтальный прогресс-бар на дашборде. */
 .home-progressbar {
   height: 8px;
@@ -3116,109 +3115,70 @@ button:active:not(:disabled) { transform: translateY(1px) scale(0.985); }
   transition: width 0.45s ease;
 }
 
-/* --- Дашборд: рекомендуемый путь --- */
-.home-path { margin-top: 1.75rem; }
-.home-path__head {
+/* --- Дашборд: быстрый вход --- */
+.home-focus { margin-top: 1.25rem; }
+.home-focus__head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
 }
-.home-path__sub { margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.9rem; }
 
-.home-path__track {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
+.home-focus__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
 }
-.home-step { flex: 1 1 0; min-width: 0; display: flex; align-items: center; }
-.home-step:not(:last-child)::after {
-  content: "›";
-  flex: none;
-  color: var(--text-faint);
-  font-size: 1.4rem;
-  padding: 0 0.1rem;
-}
-.home-step__card {
-  position: relative;
-  flex: 1;
-  min-width: 0;
+
+.home-focus-card {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.35rem;
-  padding: 1rem 0.6rem 0.85rem;
+  gap: 0.45rem;
+  min-height: 9.6rem;
+  padding: 1rem;
   border-radius: var(--radius);
   background: var(--surface);
   border: 1px solid var(--border);
-  text-decoration: none;
   color: var(--text);
+  text-decoration: none;
   transition: border-color 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
 }
-.home-step__card:hover {
+
+.home-focus-card:hover {
   border-color: var(--accent);
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.14);
 }
-.home-step.is-current .home-step__card {
-  border-color: var(--accent);
-  background: linear-gradient(180deg, var(--accent-tint), var(--surface));
-}
-.home-step__num {
-  position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
-  width: 1.3rem;
-  height: 1.3rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-full);
-  background: var(--surface-3);
-  color: var(--text-muted);
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-.home-step.is-current .home-step__num { background: var(--accent); color: var(--accent-contrast); }
-.home-step__icon {
-  width: 2.6rem;
-  height: 2.6rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-full);
+
+.home-focus-card__label {
+  align-self: flex-start;
+  padding: 0.14rem 0.5rem;
+  border-radius: 8px;
   background: var(--accent-tint);
-  font-size: 1.3rem;
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 800;
 }
-.home-step__id { font-size: 0.74rem; font-weight: 700; color: var(--text-muted); }
-.home-step__title {
-  font-size: 0.84rem;
-  font-weight: 600;
+
+.home-focus-card__title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 820;
   line-height: 1.25;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
 }
-.home-step__tag {
-  margin-top: 0.15rem;
-  font-size: 0.66rem;
-  font-weight: 700;
-  color: var(--success);
-  background: var(--success-bg);
-  border-radius: var(--radius-full);
-  padding: 0.1rem 0.55rem;
+
+.home-focus-card__text {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
 }
 
 /* --- Дашборд: нижние виджеты --- */
 .home-widgets {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
   margin-top: 1.75rem;
 }
@@ -3234,60 +3194,6 @@ button:active:not(:disabled) { transform: translateY(1px) scale(0.985); }
 }
 .home-widget__title { margin: 0; font-size: 1rem; }
 .home-widget__link { margin-top: auto; align-self: flex-start; }
-
-/* Виджет учебной системы: компактный вход в "Сегодня" и "План" (T7.6). */
-.home-widget--learning { min-height: 100%; }
-.home-learning__summary { display: flex; flex-direction: column; gap: 0.25rem; }
-.home-learning__status {
-  align-self: flex-start;
-  padding: 0.14rem 0.5rem;
-  border-radius: 8px;
-  background: var(--accent-tint);
-  color: var(--accent);
-  font-size: 0.7rem;
-  font-weight: 800;
-}
-.home-learning__title {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 820;
-}
-.home-learning__detail {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.84rem;
-  line-height: 1.45;
-}
-.home-learning__progress { margin-top: auto; }
-.home-learning__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-}
-.home-learning__cta {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.15rem;
-  padding: 0.45rem 0.75rem;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--text);
-  text-decoration: none;
-  font-size: 0.82rem;
-  font-weight: 760;
-}
-.home-learning__cta:hover { border-color: var(--accent); color: var(--accent); }
-.home-learning__cta--primary {
-  background: var(--btn-primary-bg);
-  border-color: var(--btn-primary-bg);
-  color: var(--btn-primary-fg);
-}
-.home-learning__cta--primary:hover {
-  background: var(--btn-primary-hover);
-  border-color: var(--btn-primary-hover);
-  color: var(--btn-primary-fg);
-}
 
 /* Виджет «Ваш прогресс». */
 .home-bars { display: flex; flex-direction: column; gap: 0.85rem; }
@@ -3337,14 +3243,8 @@ button:active:not(:disabled) { transform: translateY(1px) scale(0.985); }
   .home-widgets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 899px) {
+  .home-focus__grid,
   .home-widgets { grid-template-columns: 1fr; }
-  .home-hero__art { display: none; }
-  .home-path__track {
-    overflow-x: auto;
-    padding-bottom: 0.5rem;
-    scroll-snap-type: x proximity;
-  }
-  .home-step { flex: 0 0 9.5rem; scroll-snap-align: start; }
 }
 @media (max-width: 480px) {
   .home-greet__title { font-size: 1.35rem; }
@@ -3572,8 +3472,8 @@ button:active:not(:disabled) { transform: translateY(1px) scale(0.985); }
 .sidebar__brand-name { font-family: var(--font-sans); font-weight: 700; }
 
 /* Первичные CTA: тёмно-синяя «чернильная» заливка на светлой теме, золотая — на
-   тёмной (через --btn-primary-*). Исключение — «Да, заменить» в подвале сайдбара:
-   там фон уже тёмный, поэтому кнопка остаётся золотой (см. .data-controls__confirm-yes). */
+   тёмной (через --btn-primary-*). Исключение — «Да, заменить» в импорте данных:
+   кнопка остаётся золотой как явное подтверждение замены. */
 .home-hero__cta--primary,
 .catalog__hero-cta,
 .done-notice__next,
@@ -3609,9 +3509,6 @@ button:active:not(:disabled) { transform: translateY(1px) scale(0.985); }
   filter: none;
 }
 
-/* «Текущий» в рекомендуемом пути — янтарная пилюля (как на макете). */
-.home-step__tag { color: var(--warning-fg); background: var(--warning-bg); }
-
 .home-greet {
   margin-bottom: 1.1rem;
 }
@@ -3628,7 +3525,7 @@ button:active:not(:disabled) { transform: translateY(1px) scale(0.985); }
 
 .home-hero,
 .home-widget,
-.home-step__card {
+.home-focus-card {
   border-color: rgba(var(--accent-rgb), 0.16);
 }
 
@@ -3652,19 +3549,6 @@ button:active:not(:disabled) { transform: translateY(1px) scale(0.985); }
   min-height: 2.65rem;
   border-radius: 8px;
   font-weight: 760;
-}
-
-.home-step__icon {
-  border-radius: 10px;
-  color: var(--accent);
-  font-size: 0.76rem;
-  font-weight: 850;
-  letter-spacing: 0;
-}
-
-.home-step.is-current .home-step__icon {
-  color: var(--accent-contrast);
-  background: var(--accent);
 }
 
 .home-widget {
@@ -3934,7 +3818,37 @@ a.resource-item__label:hover { text-decoration: underline; }
 .about-version__value { font-weight: 600; font-variant-numeric: tabular-nums; }
 
 /* --- Практика --- */
-.practice__slot { margin-top: 0.5rem; }
+.practice {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.practice-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+  padding: 0.9rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.practice-filter {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.practice-filter__label {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.practice__slot { margin-top: 0; }
 .practice-card {
   position: relative;
   max-width: 580px;
@@ -3979,6 +3893,98 @@ a.resource-item__label:hover { text-decoration: underline; }
 .practice-card__another:hover { border-color: var(--accent); color: var(--accent); }
 .practice-card__start:focus-visible,
 .practice-card__another:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-ring); }
+.practice-empty {
+  margin: 0;
+  padding: 1rem;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+}
+
+.practice-linked {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.practice-linked > .practice-linked-card__title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.practice-linked__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.85rem;
+}
+
+.practice-linked-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+}
+
+.practice-linked-card__eyebrow {
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.practice-linked-card__title {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.practice-linked-card__text {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.practice-linked-card__meta,
+.practice-linked-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.practice-linked-card__meta span {
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  font-size: 0.75rem;
+  font-weight: 750;
+}
+
+.practice-linked-card__actions a {
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.32rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 780;
+}
+
+.practice-linked-card__actions a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
 
 /* --- Адаптив новых разделов --- */
 @media (max-width: 480px) {
@@ -4298,10 +4304,64 @@ a.resource-item__label:hover { text-decoration: underline; }
   border-color: var(--btn-primary-hover);
 }
 
+.learning-button.is-disabled {
+  opacity: 0.48;
+  pointer-events: none;
+}
+
 .learning-button--small {
   min-height: 1.9rem;
   padding: 0.28rem 0.55rem;
   font-size: 0.78rem;
+}
+
+.learning-topic-picker {
+  gap: 0.95rem;
+}
+
+.learning-topic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.65rem;
+}
+
+.learning-topic-button {
+  min-width: 0;
+  min-height: 5.2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.85rem;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+.learning-topic-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.learning-topic-button__title {
+  overflow-wrap: anywhere;
+  line-height: 1.2;
+}
+
+.learning-topic-button__meta {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.learning-topic-current {
+  gap: 0.7rem;
+}
+
+.learning-topic-current .learning-button {
+  align-self: flex-start;
 }
 
 .learning-actions,
@@ -4338,6 +4398,7 @@ a.resource-item__label:hover { text-decoration: underline; }
 .learning-task-group,
 .learning-career-months,
 .learning-months,
+.learning-plan-browser,
 .learning-projects-grid {
   display: flex;
   flex-direction: column;
@@ -4414,6 +4475,227 @@ a.resource-item__label:hover { text-decoration: underline; }
   font-weight: 700;
 }
 
+.learning-plan-nav {
+  gap: 0.9rem;
+}
+
+.learning-plan-step {
+  gap: 1rem;
+}
+
+.learning-focus-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.9rem;
+  align-items: start;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.learning-focus-head__copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.learning-focus-head__title {
+  margin: 0;
+  font-size: 1.3rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.learning-focus-head__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.learning-disclosure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.learning-disclosure > summary {
+  cursor: pointer;
+  color: var(--text);
+  font-weight: 850;
+  list-style-position: outside;
+}
+
+.learning-disclosure > summary::marker {
+  color: var(--accent);
+}
+
+.learning-disclosure > summary span {
+  margin-left: 0.25rem;
+}
+
+.learning-disclosure[open] > summary {
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.learning-disclosure > :not(summary) {
+  margin-top: 0.75rem;
+}
+
+.learning-plan-overview {
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.learning-plan-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.learning-segmented {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.learning-segmented a,
+.learning-day-pill {
+  min-height: 2.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.42rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 0.84rem;
+}
+
+.learning-segmented a:hover,
+.learning-day-pill:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.learning-segmented a.is-current,
+.learning-day-pill.is-current {
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.learning-day-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.9rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.learning-day-detail.is-rest-day {
+  background: var(--surface-2);
+}
+
+.learning-day-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.learning-day-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.learning-day-fact p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.learning-day-blocks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.65rem;
+}
+
+.learning-day-block,
+.learning-day-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.learning-day-block {
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.learning-day-block__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.learning-day-block__head span {
+  flex: none;
+  padding: 0.12rem 0.45rem;
+  border-radius: var(--radius-full);
+  color: var(--accent);
+  background: var(--accent-tint);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.learning-day-block .learning-list {
+  margin-top: 0.1rem;
+}
+
+.learning-day-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.55rem;
+}
+
+.learning-day-pill {
+  min-height: 4.3rem;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: left;
+}
+
+.learning-day-pill span {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.learning-day-pill strong {
+  color: inherit;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
 .learning-month,
 .learning-project-card,
 .learning-career-actions,
@@ -4466,6 +4748,20 @@ a.resource-item__label:hover { text-decoration: underline; }
   box-shadow: none;
 }
 
+.learning-mini-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.learning-sprint.is-current {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+}
+
 .learning-exam {
   display: flex;
   flex-direction: column;
@@ -4504,6 +4800,25 @@ a.resource-item__label:hover { text-decoration: underline; }
   grid-template-columns: minmax(0, 1.2fr) minmax(120px, 0.45fr);
   align-items: center;
   gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .learning-focus-head {
+    grid-template-columns: 1fr;
+  }
+
+  .learning-focus-head__actions {
+    justify-content: stretch;
+  }
+
+  .learning-focus-head__actions .learning-button {
+    flex: 1 1 8rem;
+  }
+
+  .learning-day-facts,
+  .learning-day-blocks {
+    grid-template-columns: 1fr;
+  }
 }
 
 .learning-level__head {
@@ -4731,6 +5046,10 @@ a.resource-item__label:hover { text-decoration: underline; }
 }
 
 @media (max-width: 720px) {
+  .learning-topic-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .learning-day-item,
   .learning-task-row,
   .learning-mock-section-row,

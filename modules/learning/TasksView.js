@@ -6,7 +6,6 @@ import { moduleButton } from '../../core/learningLinks.js';
 import { navigate } from '../../core/router.js';
 import { LearningRemindersPanel, REMINDER_SUGGESTIONS } from './LearningReminders.js';
 import {
-  LearningSearchPanel,
   TASK_STATUS_LABELS,
   card,
   emptyPanel,
@@ -28,18 +27,29 @@ export function LearningTasksView() {
 async function renderTasks(content) {
   const section = screen('learning learning-tasks');
   section.append(
-    learningHeader('Задачи', 'Практический чек-лист из основного плана и enhancement pack. Статусы хранятся только в IndexedDB.'),
-    LearningSearchPanel(content),
+    learningHeader('Задачи', 'Выберите тему, затем работайте только с ее задачами. Статусы хранятся только в IndexedDB.'),
   );
 
   const progressRows = await getAllTaskProgress().catch(() => []);
   const progress = toProgressMap(progressRows);
-  section.append(topSummary(content, progressRows));
-  section.append(filters(content));
+  const params = currentFilters();
+  const selectedSkill = params.skill || skillByTaskId(content, params.task);
 
-  const filtered = filterTasks(content, progress);
-  const weakGroups = groupWeakSpots(content.allTasks, progressRows, content.tasks.skills);
-  section.append(taskList(content, filtered, progress));
+  if (!selectedSkill) {
+    section.append(topicPicker(content, progressRows));
+    return section;
+  }
+
+  section.append(topicHeader(content, progressRows, selectedSkill));
+  section.append(filters(selectedSkill));
+
+  const filtered = filterTasks(content, progress, selectedSkill);
+  const weakGroups = groupWeakSpots(
+    content.allTasks.filter((task) => task.skill === selectedSkill),
+    progressRows,
+    content.tasks.skills,
+  );
+  section.append(taskList(content, filtered, progress, selectedSkill));
   section.append(weakSpots(weakGroups));
   section.append(await LearningRemindersPanel({
     title: 'Напоминания по повторению',
@@ -50,37 +60,68 @@ async function renderTasks(content) {
   return section;
 }
 
-function topSummary(content, progressRows) {
-  const box = card('learning-tasks-summary');
-  const checklist = calculateChecklistProgress(content.allTasks, progressRows);
-  box.append(text('h2', 'learning-card__title', 'Прогресс чек-листа'), progressBar(checklist, `${checklist.completed}/${checklist.total} задач готово`));
+function topicPicker(content, progressRows) {
+  const box = card('learning-topic-picker');
+  box.append(
+    text('h2', 'learning-card__title', 'Выберите тему'),
+    text('p', 'learning-muted', 'Сначала откройте направление, например Excel. Длинный список задач появится только внутри выбранной темы.'),
+  );
+
+  const grid = document.createElement('div');
+  grid.className = 'learning-topic-grid';
+  for (const skill of content.tasks.skills || []) {
+    const tasks = content.allTasks.filter((task) => task.skill === skill.id);
+    const progress = calculateChecklistProgress(tasks, progressRows);
+    grid.append(topicButton(skill, tasks.length, progress));
+  }
+  box.append(grid);
   return box;
 }
 
-function filters(content) {
+function topicButton(skill, taskCount, progress) {
+  const a = document.createElement('a');
+  a.className = 'learning-topic-button';
+  a.href = `#/learning/tasks?skill=${encodeURIComponent(skill.id)}`;
+  a.append(
+    text('strong', 'learning-topic-button__title', skill.title),
+    text('span', 'learning-topic-button__meta', `${taskCount} задач · ${progress.completed} готово`),
+  );
+  return a;
+}
+
+function topicHeader(content, progressRows, selectedSkill) {
+  const skill = content.skillsById.get(selectedSkill);
+  const title = skill?.title || selectedSkill;
+  const topicTasks = content.allTasks.filter((task) => task.skill === selectedSkill);
+  const box = card('learning-tasks-summary learning-topic-current');
+  const checklist = calculateChecklistProgress(topicTasks, progressRows);
+  const back = document.createElement('a');
+  back.className = 'learning-button learning-button--small';
+  back.href = '#/learning/tasks';
+  back.textContent = 'Назад к темам';
+  box.append(
+    back,
+    text('h2', 'learning-card__title', title),
+    progressBar(checklist, `${checklist.completed}/${checklist.total} задач готово`),
+  );
+  return box;
+}
+
+function filters(selectedSkill) {
   const params = currentFilters();
   const form = document.createElement('form');
   form.className = 'learning-filters';
 
+  const skill = document.createElement('input');
+  skill.type = 'hidden';
+  skill.name = 'skill';
+  skill.value = selectedSkill;
+
   const search = document.createElement('input');
   search.type = 'search';
   search.name = 'q';
-  search.placeholder = 'Поиск по задачам';
+  search.placeholder = 'Поиск внутри темы';
   search.value = params.q;
-
-  const month = document.createElement('select');
-  month.name = 'month';
-  month.append(option('', 'Все месяцы', params.month));
-  for (const item of content.plan.months || []) {
-    month.append(option(String(item.month), `Месяц ${item.month}`, params.month));
-  }
-
-  const skill = document.createElement('select');
-  skill.name = 'skill';
-  skill.append(option('', 'Все навыки', params.skill));
-  for (const item of content.tasks.skills || []) {
-    skill.append(option(item.id, item.title, params.skill));
-  }
 
   const status = document.createElement('select');
   status.name = 'status';
@@ -89,11 +130,11 @@ function filters(content) {
     status.append(option(key, TASK_STATUS_LABELS[key], params.status));
   }
 
-  for (const control of [search, month, skill, status]) {
+  for (const control of [search, status]) {
     control.addEventListener('change', () => submitFilters(form));
     if (control === search) control.addEventListener('input', () => submitFilters(form));
   }
-  form.append(field('Поиск', search), field('Месяц', month), field('Навык', skill), field('Статус', status));
+  form.append(skill, field('Поиск', search), field('Статус', status));
   return form;
 }
 
@@ -106,12 +147,11 @@ function submitFilters(form) {
   location.hash = `#/learning/tasks${params.toString() ? `?${params}` : ''}`;
 }
 
-function filterTasks(content, progress) {
+function filterTasks(content, progress, selectedSkill = '') {
   const params = currentFilters();
   const q = params.q.toLowerCase().replace(/ё/g, 'е');
   return content.allTasks.filter((task) => {
-    if (params.month && String(task.month) !== params.month) return false;
-    if (params.skill && task.skill !== params.skill) return false;
+    if (selectedSkill && task.skill !== selectedSkill) return false;
     const status = progress.get(task.id)?.status || TASK_STATUS.notStarted;
     if (params.status && status !== params.status) return false;
     if (!q) return true;
@@ -133,9 +173,11 @@ function filterTasks(content, progress) {
   });
 }
 
-function taskList(content, tasks, progress) {
+function taskList(content, tasks, progress, selectedSkill = '') {
   const wrap = card('learning-task-list');
-  wrap.append(text('h2', 'learning-card__title', `Найдено задач: ${tasks.length}`));
+  const skill = content.skillsById.get(selectedSkill);
+  const title = skill ? `${skill.title}: ${tasks.length} задач` : `Найдено задач: ${tasks.length}`;
+  wrap.append(text('h2', 'learning-card__title', title));
   if (tasks.length === 0) {
     wrap.append(emptyPanel('По текущим фильтрам задач нет.'));
     return wrap;
@@ -326,10 +368,15 @@ function currentFilters() {
   const params = new URLSearchParams(query);
   return {
     q: params.get('q') || '',
-    month: params.get('month') || '',
     skill: params.get('skill') || '',
     status: params.get('status') || '',
+    task: params.get('task') || '',
   };
+}
+
+function skillByTaskId(content, taskId) {
+  if (!taskId) return '';
+  return content.allTasks.find((task) => task.id === taskId)?.skill || '';
 }
 
 function option(value, label, selected) {

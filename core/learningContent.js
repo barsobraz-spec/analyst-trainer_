@@ -61,24 +61,79 @@ function normalizeContent(raw) {
   }));
 
   const skillsById = new Map((tasks.skills || []).map((skill) => [skill.id, skill]));
-  const practicesByTaskId = new Map((practiceContent.items || []).map((item) => [item.taskId, item]));
+  const practiceItems = (practiceContent.items || []).map((item, index) => ({
+    ...item,
+    id: item.id || `practice-${item.taskId || index + 1}`,
+    taskIds: normalizeStringList(item.taskIds || [item.taskId]),
+    moduleIds: normalizeStringList(item.moduleIds || item.trainerModules || item.modules?.map((module) => module.id)),
+  }));
+  const practicesByTaskId = new Map();
+  const practicesById = new Map();
+  for (const item of practiceItems) {
+    practicesById.set(item.id, item);
+    for (const taskId of item.taskIds) {
+      if (taskId && !practicesByTaskId.has(taskId)) practicesByTaskId.set(taskId, item);
+    }
+  }
   const monthsByNumber = new Map((plan.months || []).map((month) => [month.month, month]));
   const careerActionsByMonth = new Map((career.monthlyActions || []).map((item) => [item.month, item]));
   const projectsById = new Map((projects.projects || []).map((project) => [project.id, project]));
+  const daysById = new Map();
+  for (const month of plan.months || []) {
+    for (const week of month.weeks || []) {
+      for (const day of normalizeWeekDays(week, month)) {
+        if (day.id) daysById.set(day.id, day);
+      }
+    }
+  }
 
   return {
     plan,
     tasks,
-    practiceContent,
+    practiceContent: { ...practiceContent, items: practiceItems },
     projects,
     career,
     allTasks,
+    practiceItems,
     skillsById,
     practicesByTaskId,
+    practicesById,
+    daysById,
     monthsByNumber,
     careerActionsByMonth,
     projectsById,
   };
+}
+
+function normalizeWeekDays(week, month) {
+  const rows = [];
+  const sourceDays = Array.isArray(week.days) ? week.days : [];
+  for (const [index, day] of sourceDays.entries()) {
+    const dayNumber = Number.isInteger(day?.day) ? day.day : index + 1;
+    rows.push(normalizePlanDay(day, month, week, dayNumber));
+  }
+  if (week.restDay) rows.push(normalizePlanDay(week.restDay, month, week, 7));
+  return rows;
+}
+
+function normalizePlanDay(day, month, week, fallbackDay) {
+  return {
+    ...day,
+    id: day?.id || `m${month.month}-w${week.week}-d${fallbackDay}`,
+    month: day?.month || month.month,
+    week: day?.week || week.week,
+    day: day?.day || fallbackDay,
+    taskIds: normalizeStringList(day?.taskIds),
+    practiceIds: normalizeStringList(day?.practiceIds),
+    caseIds: normalizeStringList(day?.caseIds),
+  };
+}
+
+function normalizeStringList(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => String(item || '').trim())
+    .filter(Boolean);
 }
 
 export function safeContentFallback(error) {

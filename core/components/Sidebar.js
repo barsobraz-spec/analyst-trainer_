@@ -1,16 +1,13 @@
 // core/components/Sidebar.js — постоянный навигатор приложения (сайдбар + нижняя навигация).
 //
-// Структура навигации в стиле обучающей платформы: компактный бренд сверху, затем
-// сгруппированные разделы меню и карточка цели
-// «Junior Analyst» с кольцевым прогрессом в подвале. Сайдбар виден всегда на десктопе;
-// на мобильном сворачивается в нижнюю навигацию и выдвижную шторку (drawer).
+// Структура навигации приходит из core/navigation.js: компактный бренд сверху,
+// главное меню, свернутые вторичные группы и карточка цели «Junior Analyst» в
+// подвале. Сайдбар виден всегда на десктопе; на мобильном сворачивается в нижнюю
+// навигацию и выдвижную шторку (drawer).
 //
 // Сайдбар живёт ВНЕ #app, поэтому переживает перерисовки роутера. Он сам слушает
 // hashchange (подсветка активного пункта) и событие at:progress-changed из event.js
 // (обновление кольца цели после прохождения кейса — без перезагрузки).
-//
-// Слоты #data-controls и #theme-slot (экспорт/импорт и тема) создаются в подвале
-// сайдбара — main.js монтирует в них свои компоненты ПОСЛЕ installNavigation().
 //
 // Числа берутся из IndexedDB (loadProgressMap + getOutline) — логика хранилища и
 // модулей не трогается. При сбое БД карточка цели показывает 0% (навигатор остаётся
@@ -20,53 +17,9 @@
 
 import { getOutline, caseHash } from '../courseNav.js';
 import { getModule } from '../modules.js';
+import { BOTTOM_NAV_ITEMS, NAV_GROUPS } from '../navigation.js';
 import { loadProgressMap, moduleProgress, getResumeTarget } from '../progress.js';
 import { ProgressRing } from './ProgressRing.js';
-
-// Пункты меню по разделам. `match` (необязателен) делает пункт «активным» по
-// текущему хешу: exact — точное совпадение пути, prefix — совпадение по префиксу.
-// Пункты без match никогда не подсвечиваются автоматически (но навигируют).
-const LEARNING_NAV_STORAGE_KEY = 'at:sidebar:learning-open';
-
-const NAV_GROUPS = [
-  {
-    heading: 'Главная',
-    items: [
-      { label: 'Dashboard', icon: 'home', href: '#/', match: { exact: '/' } },
-    ],
-  },
-  {
-    heading: 'Обучение',
-    collapsible: true,
-    icon: 'book',
-    storageKey: LEARNING_NAV_STORAGE_KEY,
-    items: [
-      { label: 'Сегодня', icon: 'calendar', href: '#/learning/today', match: { exact: '/learning/today' } },
-      { label: 'План обучения', icon: 'map', href: '#/learning/plan', match: { exact: '/learning/plan' } },
-      { label: 'Маршрут курса', icon: 'map', href: '#/modules', match: { exact: '/modules', prefix: '/module' } },
-      { label: 'Практика', icon: 'target', href: '#/practice', match: { exact: '/practice' } },
-      { label: 'Проекты', icon: 'folder', href: '#/learning/projects', match: { exact: '/learning/projects' } },
-      { label: 'Mock Interview', icon: 'target', href: '#/learning/mock-interview', match: { exact: '/learning/mock-interview' } },
-      { label: 'Карьера', icon: 'briefcase', href: '#/learning/career', match: { exact: '/learning/career' } },
-    ],
-  },
-  {
-    heading: 'Прогресс',
-    items: [
-      { label: 'Аналитика', icon: 'chart', href: '#/analytics', match: { exact: '/analytics' } },
-      { label: 'История', icon: 'clock', href: '#/history', match: { exact: '/history' } },
-    ],
-  },
-  {
-    heading: 'Дополнительно',
-    items: [
-      { label: 'Избранное', icon: 'star', href: '#/favorites', match: { exact: '/favorites' } },
-      { label: 'Ресурсы', icon: 'book', href: '#/resources', match: { exact: '/resources' } },
-      { label: 'Настройки', icon: 'settings', href: '#/settings', match: { exact: '/settings' } },
-      { label: 'О проекте', icon: 'info', href: '#/about', match: { exact: '/about' } },
-    ],
-  },
-];
 
 // Точка входа: заполняет каркас оболочки (index.html) и подключает поведение.
 // Возвращает { refresh }. Если каркаса нет — тихо выходит.
@@ -160,7 +113,7 @@ export function installNavigation() {
   }
   scroll.append(quickAction, nav);
 
-  // --- Подвал: карточка цели + слоты темы и экспорта/импорта -----------------
+  // --- Подвал: карточка цели --------------------------------------------------
   const foot = document.createElement('div');
   foot.className = 'sidebar__foot';
 
@@ -172,36 +125,24 @@ export function installNavigation() {
   goalText.className = 'sb-goal__text';
   goalText.append(
     spanText('sb-goal__title', 'Цель: Junior Analyst'),
-    spanText('sb-goal__hint', 'Держи темп! Ты на верном пути.'),
+    spanText('sb-goal__hint', 'Прогресс по всему курсу'),
   );
   goal.append(goalRing, goalText);
 
-  const slots = document.createElement('div');
-  slots.className = 'sidebar__slots';
-  const themeSlot = document.createElement('div');
-  themeSlot.id = 'theme-slot';
-  themeSlot.className = 'sidebar__theme';
-  const dataSlot = document.createElement('div');
-  dataSlot.id = 'data-controls';
-  dataSlot.className = 'sidebar__data';
-  slots.append(themeSlot, dataSlot);
-
-  foot.append(goal, slots);
+  foot.append(goal);
 
   sidebar.replaceChildren(brand, scroll, foot);
 
   // --- Нижняя навигация (мобильная) ------------------------------------------
-  let courseTab = null;
   let continueTab = null;
   if (bottomNav) {
-    const home = bottomNavLink('#/', 'home', 'Главная', 'home');
-    continueTab = bottomNavLink('#/modules', 'play', 'Дальше', 'continue');
-    courseTab = bottomNavButton('grid', 'Обучение');
-    const analytics = bottomNavLink('#/analytics', 'chart', 'Аналитика', 'analytics');
+    const home = bottomNavLink(BOTTOM_NAV_ITEMS.home);
+    continueTab = bottomNavLink(BOTTOM_NAV_ITEMS.continue);
+    const practice = bottomNavLink(BOTTOM_NAV_ITEMS.practice);
+    const plan = bottomNavLink(BOTTOM_NAV_ITEMS.plan);
     const actions = document.createElement('div');
     actions.className = 'bottom-nav__actions';
-    actions.append(continueTab, courseTab, analytics);
-    courseTab.addEventListener('click', () => setDrawer(!document.body.classList.contains('nav-open')));
+    actions.append(continueTab, practice, plan);
     bottomNav.replaceChildren(home, actions);
   }
 
@@ -249,8 +190,8 @@ export function installNavigation() {
       const m = item.dataset.match;
       let active = false;
       if (m === 'home') active = path === '/';
-      else if (m === 'analytics') active = path === '/analytics';
-      else if (m === 'course') active = path === '/modules' || path.startsWith('/learning') || path === '/practice' || (path.startsWith('/module') && !path.includes('/case/'));
+      else if (m === 'practice') active = path === '/practice';
+      else if (m === 'plan') active = path === '/learning/plan';
       else if (m === 'continue') active = path.startsWith('/module/') && path.includes('/case/');
       item.classList.toggle('is-current', active);
       if (active) item.setAttribute('aria-current', 'page');
@@ -350,22 +291,13 @@ function spanText(className, text) {
   return span;
 }
 
-function bottomNavLink(href, icon, label, match) {
+function bottomNavLink(item) {
   const a = document.createElement('a');
   a.className = 'bottom-nav__item';
-  a.href = href;
-  a.dataset.match = match;
-  a.append(iconEl(icon, 'bottom-nav__icon'), spanText('bottom-nav__label', label));
+  a.href = item.href;
+  a.dataset.match = item.match;
+  a.append(iconEl(item.icon, 'bottom-nav__icon'), spanText('bottom-nav__label', item.label));
   return a;
-}
-
-function bottomNavButton(icon, label) {
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = 'bottom-nav__item';
-  btn.dataset.match = 'course';
-  btn.append(iconEl(icon, 'bottom-nav__icon'), spanText('bottom-nav__label', label));
-  return btn;
 }
 
 // Встроенные линейные SVG-иконки (единый стиль, без эмодзи).

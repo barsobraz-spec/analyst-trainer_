@@ -14,9 +14,14 @@ const PROJECT_STATUS_FIELDS = ['status', 'githubUrl', 'readmeReady', 'screenshot
 const CAREER_REQUIRED_FIELDS = ['company', 'role', 'status'];
 
 const problems = [];
+const warnings = [];
 
 function fail(message) {
   problems.push(message);
+}
+
+function warn(message) {
+  warnings.push(message);
 }
 
 function expect(condition, message) {
@@ -51,6 +56,35 @@ function uniqueValues(values) {
   return new Set(values).size === values.length;
 }
 
+function validatePlanDay(fileName, context, day, { minDay, maxDay }) {
+  expect(Number.isInteger(day?.day) && day.day >= minDay && day.day <= maxDay, `${fileName}: ${context}: некорректный day ${day?.day}`);
+  expect(hasNonEmptyString(day, 'title'), `${fileName}: ${context}: день без title`);
+  if (day.monthDay !== undefined) {
+    expect(Number.isInteger(day.monthDay) && day.monthDay >= 1 && day.monthDay <= 28, `${fileName}: ${context}: некорректный monthDay ${day.monthDay}`);
+  }
+  if (day.summary !== undefined) {
+    expect(typeof day.summary === 'string', `${fileName}: ${context}: summary должен быть строкой`);
+  }
+  if (day.topics !== undefined) {
+    expect(Array.isArray(day.topics) && day.topics.length > 0, `${fileName}: ${context}: topics должен быть непустым массивом`);
+  }
+  if (day.blocks !== undefined) {
+    expect(Array.isArray(day.blocks), `${fileName}: ${context}: blocks должен быть массивом`);
+    for (const [index, block] of (day.blocks || []).entries()) {
+      expect(hasNonEmptyString(block, 'title'), `${fileName}: ${context}: block ${index + 1} без title`);
+      if (block.durationMinutes !== undefined) {
+        expect(Number.isInteger(block.durationMinutes) && block.durationMinutes > 0, `${fileName}: ${context}: block ${index + 1} содержит некорректный durationMinutes`);
+      }
+      expect(Array.isArray(block.items) && block.items.length > 0, `${fileName}: ${context}: block ${index + 1} должен иметь items`);
+    }
+  }
+  for (const key of ['controlQuestions', 'checklist', 'completionCriteria', 'commonMistakes']) {
+    if (day[key] !== undefined) {
+      expect(Array.isArray(day[key]), `${fileName}: ${context}: ${key} должен быть массивом`);
+    }
+  }
+}
+
 function assertSourceDocuments(fileName, doc) {
   expect(Array.isArray(doc?.sourceDocuments), `${fileName}: нет sourceDocuments`);
   for (const source of doc?.sourceDocuments || []) {
@@ -65,7 +99,16 @@ function assertModuleLinks(fileName, owner, modules) {
   }
 }
 
-function validatePlan(plan) {
+function assertOptionalIdList(fileName, owner, obj, key, knownIds, label) {
+  if (obj?.[key] === undefined) return;
+  expect(Array.isArray(obj[key]), `${fileName}: ${owner}: ${key} должен быть массивом`);
+  for (const id of obj[key] || []) {
+    expect(typeof id === 'string' && id.trim().length > 0, `${fileName}: ${owner}: ${key} содержит пустой ID`);
+    expect(knownIds.has(id), `${fileName}: ${owner}: ${key} ссылается на неизвестный ${label} ${id}`);
+  }
+}
+
+function validatePlan(plan, refs = {}) {
   if (!plan) return;
   expect(plan.schemaVersion === 1, 'plan.json: schemaVersion должен быть 1');
   assertSourceDocuments('plan.json', plan);
@@ -93,6 +136,30 @@ function validatePlan(plan) {
       expect(Number.isInteger(week.week), `plan.json: месяц ${month.month} содержит неделю без номера`);
       expect(hasNonEmptyString(week, 'title'), `plan.json: месяц ${month.month}, неделя ${week.week} без title`);
       expect(Array.isArray(week.topics) && week.topics.length > 0, `plan.json: месяц ${month.month}, неделя ${week.week} без тем`);
+      if (month.month >= 2 && (!Array.isArray(week.days) || week.days.length < 6)) {
+        warn(`plan.json: месяц ${month.month}, неделя ${week.week}: подробные days неполные или отсутствуют; UI должен использовать fallback.`);
+      }
+      if (week.days !== undefined) {
+        expect(Array.isArray(week.days), `plan.json: месяц ${month.month}, неделя ${week.week}: days должен быть массивом`);
+        expect(week.days.length > 0 && week.days.length <= 6, `plan.json: месяц ${month.month}, неделя ${week.week}: days должен содержать от 1 до 6 дней`);
+        const dayNumbers = [];
+        for (const day of week.days || []) {
+          dayNumbers.push(day.day);
+          validatePlanDay('plan.json', `месяц ${month.month}, неделя ${week.week}, день ${day.day}`, day, { minDay: 1, maxDay: 6 });
+          if (day.id !== undefined) expect(hasNonEmptyString(day, 'id'), `plan.json: месяц ${month.month}, неделя ${week.week}, день ${day.day}: id должен быть строкой`);
+          assertOptionalIdList('plan.json', `месяц ${month.month}, неделя ${week.week}, день ${day.day}`, day, 'taskIds', refs.taskIds || new Set(), 'taskId');
+          assertOptionalIdList('plan.json', `месяц ${month.month}, неделя ${week.week}, день ${day.day}`, day, 'practiceIds', refs.practiceIds || new Set(), 'practiceId');
+          assertOptionalIdList('plan.json', `месяц ${month.month}, неделя ${week.week}, день ${day.day}`, day, 'caseIds', refs.caseIds || new Set(), 'caseId');
+        }
+        expect(uniqueValues(dayNumbers), `plan.json: месяц ${month.month}, неделя ${week.week}: номера дней должны быть уникальными`);
+      }
+      if (week.restDay !== undefined) {
+        validatePlanDay('plan.json', `месяц ${month.month}, неделя ${week.week}, restDay`, week.restDay, { minDay: 7, maxDay: 7 });
+        if (week.restDay.id !== undefined) expect(hasNonEmptyString(week.restDay, 'id'), `plan.json: месяц ${month.month}, неделя ${week.week}, restDay: id должен быть строкой`);
+        assertOptionalIdList('plan.json', `месяц ${month.month}, неделя ${week.week}, restDay`, week.restDay, 'taskIds', refs.taskIds || new Set(), 'taskId');
+        assertOptionalIdList('plan.json', `месяц ${month.month}, неделя ${week.week}, restDay`, week.restDay, 'practiceIds', refs.practiceIds || new Set(), 'practiceId');
+        assertOptionalIdList('plan.json', `месяц ${month.month}, неделя ${week.week}, restDay`, week.restDay, 'caseIds', refs.caseIds || new Set(), 'caseId');
+      }
     }
 
     const trainerLinks = (month.trainerLinks || []).map((link) => link.module);
@@ -153,6 +220,57 @@ function validateTasks(tasksDoc, plan) {
   for (const month of planMonths) {
     expect(taskMonths.has(month), `tasks.json: месяц ${month} не покрыт обязательными задачами`);
   }
+}
+
+function collectTaskIds(tasksDoc) {
+  return new Set([
+    ...(tasksDoc?.tasks || []).map((task) => task.id),
+    ...(tasksDoc?.supplementalTasks || []).map((task) => task.id),
+  ].filter(Boolean));
+}
+
+function collectPracticeIds(practiceDoc) {
+  return new Set((practiceDoc?.items || []).map((item, index) => (
+    item.id || `practice-${item.taskId || index + 1}`
+  )).filter(Boolean));
+}
+
+async function collectCaseIds() {
+  try {
+    const file = path.join(root, '..', 'cases', 'index.json');
+    const index = JSON.parse(await readFile(file, 'utf8'));
+    return new Set((index.cases || index.entries || []).map((item) => item.caseId).filter(Boolean));
+  } catch (err) {
+    fail(`cases/index.json: не читается для проверки ссылок (${err.message})`);
+    return new Set();
+  }
+}
+
+function validatePracticeContent(practiceDoc, tasksDoc) {
+  if (!practiceDoc) return;
+  expect(practiceDoc.schemaVersion === 1, 'practiceContent.json: schemaVersion должен быть 1');
+  expect(Array.isArray(practiceDoc.items), 'practiceContent.json: items должен быть массивом');
+  const taskIds = collectTaskIds(tasksDoc);
+  const ids = [];
+
+  for (const [index, item] of (practiceDoc.items || []).entries()) {
+    const owner = `item ${index + 1}`;
+    const practiceId = item.id || `practice-${item.taskId || index + 1}`;
+    ids.push(practiceId);
+    if (item.id !== undefined) expect(hasNonEmptyString(item, 'id'), `practiceContent.json: ${owner}: id должен быть строкой`);
+    expect(hasNonEmptyString(item, 'taskId'), `practiceContent.json: ${owner}: нет taskId`);
+    if (item.taskId) expect(taskIds.has(item.taskId), `practiceContent.json: ${owner}: taskId ${item.taskId} не найден в tasks.json`);
+    if (item.taskIds !== undefined) {
+      assertOptionalIdList('practiceContent.json', owner, item, 'taskIds', taskIds, 'taskId');
+    }
+    const modules = item.trainerModules || item.moduleIds || item.modules?.map((module) => module.id) || [];
+    assertModuleLinks('practiceContent.json', owner, modules);
+    if (item.autoCheck !== undefined) expect(isPlainObject(item.autoCheck), `practiceContent.json: ${owner}: autoCheck должен быть объектом`);
+    if (item.rubric !== undefined) expect(Array.isArray(item.rubric), `practiceContent.json: ${owner}: rubric должен быть массивом`);
+    if (item.submissionSchema !== undefined) expect(isPlainObject(item.submissionSchema), `practiceContent.json: ${owner}: submissionSchema должен быть объектом`);
+  }
+
+  expect(uniqueValues(ids), 'practiceContent.json: id практик должны быть уникальными');
 }
 
 function validateProjects(projectsDoc) {
@@ -261,11 +379,18 @@ async function validateScheduleModel() {
 
 const plan = await readJson('plan.json');
 const tasks = await readJson('tasks.json');
+const practiceContent = await readJson('practiceContent.json');
 const projects = await readJson('projects.json');
 const career = await readJson('career.json');
+const caseIds = await collectCaseIds();
 
-validatePlan(plan);
 validateTasks(tasks, plan);
+validatePracticeContent(practiceContent, tasks);
+validatePlan(plan, {
+  taskIds: collectTaskIds(tasks),
+  practiceIds: collectPracticeIds(practiceContent),
+  caseIds,
+});
 validateProjects(projects);
 validateCareer(career);
 await validateReadme();
@@ -275,6 +400,11 @@ if (problems.length > 0) {
   console.error('Learning data validation failed:');
   for (const problem of problems) console.error(`- ${problem}`);
   process.exit(1);
+}
+
+if (warnings.length > 0) {
+  console.warn('Learning data validation warnings:');
+  for (const warning of warnings) console.warn(`- ${warning}`);
 }
 
 console.log('Learning data validation passed.');

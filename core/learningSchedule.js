@@ -83,9 +83,13 @@ export function buildDailyPlan(content, position, mode = 'regular') {
   const topics = Array.isArray(week?.topics) ? week.topics : [];
   const studyDayOfWeek = Math.min(Math.max(position.dayOfWeek || 1, 1), STUDY_DAYS_PER_WEEK);
   const isRestDay = Boolean(position.restDay);
-  const topic = topics.length > 0
+  const detailedDay = pickDetailedDay(week, position);
+  const topic = detailedDay?.title || (topics.length > 0
     ? topics[(studyDayOfWeek - 1) % topics.length]
-    : week?.title || month?.focus || 'Учебная тема дня';
+    : week?.title || month?.focus || 'Учебная тема дня');
+  const topicDetail = detailedDay?.summary || (isRestDay
+    ? 'Закройте хвосты, повторите слабые места или просто восстановите ресурс.'
+    : week?.title || month?.title);
 
   const monthTasks = content.allTasks
     .filter((task) => task.month === position.month)
@@ -109,10 +113,8 @@ export function buildDailyPlan(content, position, mode = 'regular') {
     {
       id: 'topic',
       type: 'topic',
-      title: position.restDay ? 'Свободное повторение' : topic,
-      detail: position.restDay
-        ? 'Закройте хвосты, повторите слабые места или просто восстановите ресурс.'
-        : week?.title || month?.title,
+      title: topic,
+      detail: topicDetail,
       active: true,
     },
     ...tasks.map((task) => ({
@@ -154,7 +156,7 @@ export function buildDailyPlan(content, position, mode = 'regular') {
     },
   ].filter((item) => item.active !== false);
 
-  return { month, week, topic, tasks, practiceModules, project, careerAction, items };
+  return { month, week, topic, detailedDay, tasks, practiceModules, project, careerAction, items };
 }
 
 export function dayKeyForStudyDay(studyDay) {
@@ -163,6 +165,14 @@ export function dayKeyForStudyDay(studyDay) {
 
 export function restDayKeyForWeek(weekNumber) {
   return `learning-rest-week-${Math.max(0, Number(weekNumber) || 0)}`;
+}
+
+function pickDetailedDay(week, position) {
+  if (!week) return null;
+  if (position.restDay) return week.restDay || null;
+  if (!Array.isArray(week.days)) return null;
+  const dayOfWeek = Math.min(Math.max(position.dayOfWeek || 1, 1), STUDY_DAYS_PER_WEEK);
+  return week.days.find((day) => day.day === dayOfWeek) || week.days[dayOfWeek - 1] || null;
 }
 
 function pickDailyTasks(tasks, dayInMonth, count) {

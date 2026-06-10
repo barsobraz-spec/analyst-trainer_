@@ -1,8 +1,8 @@
 // modules/learning/PlanView.js — полный 7-месячный план обучения (T4.1).
 
 import { getAllMonthlyExamProgress, saveMonthlyExamProgress } from '../../core/db.js';
-import { moduleButton } from '../../core/learningLinks.js';
 import { buildMonthlyExamChecklist, calculateMonthlyExamProgress } from '../../core/learningProgress.js';
+import { DayDetail, buildWeekDays, dayLabel } from './plan/DayDetail.js';
 import {
   LearningSearchPanel,
   card,
@@ -27,17 +27,23 @@ async function renderPlan(content) {
   const section = screen('learning learning-plan');
   section.append(
     learningHeader('План обучения', 'Семь месяцев, четырнадцать спринтов, недели, проекты, карьерные действия и связи с тренажером.'),
-    LearningSearchPanel(content),
+    searchPanel(content),
     overview(content),
     monthsRoadmap(content, examsByMonth),
   );
   return section;
 }
 
+function searchPanel(content) {
+  const box = disclosurePanel('Поиск по курсу', false, 'learning-plan-search');
+  box.append(LearningSearchPanel(content));
+  return box;
+}
+
 function overview(content) {
-  const box = card('learning-plan-overview');
+  const box = disclosurePanel('Обзор плана', false, 'learning-plan-overview');
   box.append(
-    text('h2', 'learning-card__title', content.plan.title),
+    text('h3', 'learning-card__title', content.plan.title),
     text('p', 'learning-muted', content.plan.subtitle),
   );
   const stats = document.createElement('div');
@@ -63,80 +69,241 @@ function overview(content) {
 
 function monthsRoadmap(content, examsByMonth) {
   const wrap = document.createElement('div');
-  wrap.className = 'learning-months';
-  const selectedMonth = Number(readQueryParam('month'));
-
-  for (const month of content.plan.months || []) {
-    const box = card('learning-month');
-    box.id = `month-${month.month}`;
-    if (selectedMonth === month.month) box.classList.add('is-highlighted');
-
-    const head = document.createElement('header');
-    head.className = 'learning-month__head';
-    head.append(
-      text('span', 'learning-month__badge', `Месяц ${month.month}`),
-      text('h2', 'learning-card__title', month.title),
-      text('p', 'learning-muted', month.focus),
-    );
-    box.append(head);
-
-    const meta = document.createElement('div');
-    meta.className = 'learning-month__meta';
-    meta.append(
-      smallStat('Артефакт', month.artifact || 'Портфолио-результат'),
-      smallStat('Навыки', (month.skills || []).join(', ')),
-    );
-    box.append(meta);
-
-    box.append(text('h3', 'learning-subtitle', 'Спринты'));
-    const sprints = document.createElement('div');
-    sprints.className = 'learning-sprints';
-    for (const sprint of month.sprints || []) sprints.append(sprintCard(sprint));
-    box.append(sprints);
-
-    box.append(text('h3', 'learning-subtitle', 'Недели и темы'));
-    const weeks = document.createElement('div');
-    weeks.className = 'learning-weeks';
-    for (const week of month.weeks || []) weeks.append(weekCard(week, month));
-    box.append(weeks);
-
-    if (month.projects?.length) {
-      box.append(text('h3', 'learning-subtitle', 'Проекты месяца'));
-      const projects = document.createElement('div');
-      projects.className = 'learning-mini-grid';
-      for (const project of month.projects) {
-        const projectCard = card('learning-mini-card');
-        projectCard.append(
-          text('strong', '', project.title),
-          text('p', 'learning-muted', project.businessQuestion),
-        );
-        projects.append(projectCard);
-      }
-      box.append(projects);
-    }
-
-    if (month.careerActions?.length) {
-      box.append(text('h3', 'learning-subtitle', 'Карьерные действия'));
-      const list = document.createElement('ul');
-      list.className = 'learning-list';
-      for (const action of month.careerActions) {
-        const li = document.createElement('li');
-        li.textContent = action;
-        list.append(li);
-      }
-      box.append(list);
-    }
-
-    const moduleIds = month.trainerLinks?.map((link) => link.module) || [];
-    box.append(text('h3', 'learning-subtitle', 'Подходящие модули тренажера'), moduleLinks(moduleIds));
-    box.append(monthlyExamPanel(month, examsByMonth.get(month.month)));
-    wrap.append(box);
+  wrap.className = 'learning-plan-browser';
+  const months = content.plan.months || [];
+  if (months.length === 0) {
+    wrap.append(card('learning-month'));
+    wrap.firstElementChild.append(text('p', 'learning-empty', 'В плане пока нет месяцев.'));
+    return wrap;
   }
+
+  const monthParam = readQueryParam('month');
+  if (!monthParam) {
+    wrap.append(stepNavigator(months));
+    return wrap;
+  }
+
+  const selectedMonth = readBoundedNumber(monthParam, 1, months.length, 1);
+  const month = months.find((item) => item.month === selectedMonth) || months[0];
+
+  const weekParam = readQueryParam('week');
+  if (!weekParam) {
+    wrap.append(stepNavigator(months, month));
+    return wrap;
+  }
+
+  const selectedWeek = readBoundedNumber(weekParam, 1, month.weeks?.length || 1, 1);
+  const week = month.weeks?.find((item) => item.week === selectedWeek) || month.weeks?.[selectedWeek - 1] || month.weeks?.[0] || null;
+  const days = buildWeekDays(week, month);
+
+  const dayParam = readQueryParam('day');
+  if (!dayParam) {
+    wrap.append(stepNavigator(months, month, week));
+    return wrap;
+  }
+
+  const selectedDay = readBoundedNumber(dayParam, 1, days.length || 6, 1);
+  const day = days.find((item) => item.day === selectedDay) || days[0];
+
+  wrap.append(
+    monthPanel(months, month, week, day, days, examsByMonth.get(month.month)),
+    planNavigator(months, month, week, day),
+  );
   return wrap;
 }
 
-function sprintCard(sprint) {
+function stepNavigator(months, selectedMonth = null, selectedWeek = null) {
+  const box = card('learning-plan-step');
+  box.append(text('h2', 'learning-card__title', stepTitle(selectedMonth, selectedWeek)));
+
+  const monthGroup = segmentedGroup('Месяцы');
+  const monthLinks = monthGroup.querySelector('.learning-segmented');
+  for (const month of months) {
+    monthLinks.append(segmentLink(
+      `Месяц ${month.month}`,
+      planHref(month.month),
+      month.month === selectedMonth?.month,
+    ));
+  }
+  box.append(monthGroup);
+
+  if (selectedMonth) {
+    const weekGroup = segmentedGroup('Недели');
+    const weekLinks = weekGroup.querySelector('.learning-segmented');
+    for (const week of selectedMonth.weeks || []) {
+      weekLinks.append(segmentLink(
+        `Неделя ${week.week}`,
+        planHref(selectedMonth.month, week.week),
+        week.week === selectedWeek?.week,
+      ));
+    }
+    box.append(weekGroup);
+  }
+
+  if (selectedMonth && selectedWeek) {
+    const dayGroup = segmentedGroup('Дни');
+    const dayLinks = dayGroup.querySelector('.learning-segmented');
+    for (const day of buildWeekDays(selectedWeek, selectedMonth)) {
+      dayLinks.append(segmentLink(
+        dayLabel(day),
+        planHref(selectedMonth.month, selectedWeek.week, day.day),
+        false,
+      ));
+    }
+    box.append(dayGroup);
+  }
+
+  return box;
+}
+
+function stepTitle(selectedMonth, selectedWeek) {
+  if (selectedMonth && selectedWeek) return `Месяц ${selectedMonth.month} · Неделя ${selectedWeek.week}`;
+  if (selectedMonth) return `Месяц ${selectedMonth.month}`;
+  return 'Выберите месяц';
+}
+
+function planNavigator(months, selectedMonth, selectedWeek, selectedDay) {
+  const box = disclosurePanel('Переход к другому дню', false, 'learning-plan-nav');
+
+  const monthGroup = segmentedGroup('Месяцы');
+  const monthLinks = monthGroup.querySelector('.learning-segmented');
+  for (const month of months) {
+    monthLinks.append(segmentLink(
+      `Месяц ${month.month}`,
+      planHref(month.month),
+      month.month === selectedMonth.month,
+    ));
+  }
+  box.append(monthGroup);
+
+  const weekGroup = segmentedGroup('Недели');
+  const weekLinks = weekGroup.querySelector('.learning-segmented');
+  for (const week of selectedMonth.weeks || []) {
+    weekLinks.append(segmentLink(
+      `Неделя ${week.week}`,
+      planHref(selectedMonth.month, week.week),
+      selectedWeek?.week === week.week,
+    ));
+  }
+  box.append(weekGroup);
+
+  const dayGroup = segmentedGroup('Дни');
+  const dayLinks = dayGroup.querySelector('.learning-segmented');
+  for (const day of buildWeekDays(selectedWeek, selectedMonth)) {
+    dayLinks.append(segmentLink(
+      dayLabel(day),
+      planHref(selectedMonth.month, selectedWeek?.week || 1, day.day),
+      selectedDay?.day === day.day,
+    ));
+  }
+  box.append(dayGroup);
+  return box;
+}
+
+function monthPanel(months, month, selectedWeek, selectedDay, days, savedExam) {
+  const box = card('learning-month');
+  box.id = `month-${month.month}`;
+  box.classList.add('is-highlighted');
+  box.append(
+    focusHeader(months, month, selectedWeek, selectedDay),
+    DayDetail(selectedDay, month, selectedWeek),
+  );
+
+  const monthInfo = disclosurePanel('Информация о месяце', false);
+  monthInfo.append(monthSummary(month));
+  box.append(monthInfo);
+
+  const weekInfo = disclosurePanel('Неделя и дни', false);
+  weekInfo.append(weekCard(selectedWeek, month, selectedDay, days));
+  box.append(weekInfo);
+
+  const sprintInfo = disclosurePanel('Спринты', false);
+  const sprints = document.createElement('div');
+  sprints.className = 'learning-sprints';
+  for (const sprint of month.sprints || []) sprints.append(sprintCard(sprint, selectedWeek));
+  sprintInfo.append(sprints);
+  box.append(sprintInfo);
+
+  if (month.projects?.length) {
+    const projectInfo = disclosurePanel('Проекты месяца', false);
+    const projects = document.createElement('div');
+    projects.className = 'learning-mini-grid';
+    for (const project of month.projects) {
+      const projectCard = document.createElement('section');
+      projectCard.className = 'learning-mini-card';
+      projectCard.append(
+        text('strong', '', project.title),
+        text('p', 'learning-muted', project.businessQuestion),
+      );
+      projects.append(projectCard);
+    }
+    projectInfo.append(projects);
+    box.append(projectInfo);
+  }
+
+  if (month.careerActions?.length) {
+    const careerInfo = disclosurePanel('Карьерные действия', false);
+    const list = document.createElement('ul');
+    list.className = 'learning-list';
+    for (const action of month.careerActions) {
+      const li = document.createElement('li');
+      li.textContent = action;
+      list.append(li);
+    }
+    careerInfo.append(list);
+    box.append(careerInfo);
+  }
+
+  const moduleIds = month.trainerLinks?.map((link) => link.module) || [];
+  const moduleInfo = disclosurePanel('Подходящие модули тренажера', false);
+  moduleInfo.append(moduleLinks(moduleIds));
+  box.append(moduleInfo);
+
+  const examInfo = disclosurePanel('Экзамен месяца', false);
+  examInfo.append(monthlyExamPanel(month, savedExam));
+  box.append(examInfo);
+  return box;
+}
+
+function focusHeader(months, month, week, day) {
+  const head = document.createElement('header');
+  head.className = 'learning-focus-head';
+  const prevHref = adjacentDayHref(months, month, week, day, -1);
+  const nextHref = adjacentDayHref(months, month, week, day, 1);
+
+  const copy = document.createElement('div');
+  copy.className = 'learning-focus-head__copy';
+  copy.append(
+    text('span', 'learning-month__badge', `Месяц ${month.month} · Неделя ${week?.week || 1} · ${dayLabel(day)}`),
+    text('h2', 'learning-focus-head__title', day?.title || month.title),
+    text('p', 'learning-muted', `${month.title} · ${week?.title || month.focus}`),
+  );
+
+  const actions = document.createElement('div');
+  actions.className = 'learning-focus-head__actions';
+  actions.append(
+    routeButton('Предыдущий день', prevHref, !prevHref),
+    routeButton('Следующий день', nextHref, !nextHref, true),
+  );
+  head.append(copy, actions);
+  return head;
+}
+
+function monthSummary(month) {
+  const wrap = document.createElement('div');
+  const meta = document.createElement('div');
+  meta.className = 'learning-month__meta';
+  meta.append(
+    smallStat('Артефакт', month.artifact || 'Портфолио-результат'),
+    smallStat('Навыки', (month.skills || []).join(', ')),
+  );
+  wrap.append(text('p', 'learning-muted', month.focus), meta);
+  return wrap;
+}
+
+function sprintCard(sprint, selectedWeek) {
   const box = card('learning-sprint');
+  if ((sprint.weeks || []).includes(selectedWeek?.week)) box.classList.add('is-current');
   box.append(
     text('span', 'learning-month__badge', `Спринт ${sprint.sprint}`),
     text('strong', '', sprint.title),
@@ -146,20 +313,114 @@ function sprintCard(sprint) {
   return box;
 }
 
-function weekCard(week, month) {
+function weekCard(week, month, selectedDay, days) {
   const box = card('learning-week');
-  box.append(text('strong', '', `Неделя ${week.week}: ${week.title}`));
-  const list = document.createElement('ul');
-  list.className = 'learning-list';
-  for (const topic of week.topics || []) {
-    const li = document.createElement('li');
-    li.append(document.createTextNode(topic));
-    const firstModule = month.trainerLinks?.[0]?.module;
-    if (firstModule) li.append(moduleButton(firstModule, 'Практика'));
-    list.append(li);
+  if (!week) {
+    box.append(text('p', 'learning-empty', 'Неделя не найдена.'));
+    return box;
   }
-  box.append(list);
+  box.append(
+    text('strong', '', `Неделя ${week.week}: ${week.title}`),
+    text('p', 'learning-muted', selectedDay ? `${dayLabel(selectedDay)} · ${selectedDay.title}` : week.title),
+  );
+
+  const dayGrid = document.createElement('div');
+  dayGrid.className = 'learning-day-grid';
+  for (const day of days) {
+    const dayLink = document.createElement('a');
+    dayLink.href = planHref(month.month, week.week, day.day);
+    dayLink.className = 'learning-day-pill';
+    if (day.day === selectedDay?.day) {
+      dayLink.classList.add('is-current');
+      dayLink.setAttribute('aria-current', 'true');
+    }
+    dayLink.append(
+      text('span', '', dayLabel(day)),
+      text('strong', '', day.title),
+    );
+    dayGrid.append(dayLink);
+  }
+  box.append(dayGrid);
   return box;
+}
+
+function segmentedGroup(label) {
+  const group = document.createElement('section');
+  group.className = 'learning-plan-picker';
+  group.append(text('h3', 'learning-subtitle', label));
+  const links = document.createElement('div');
+  links.className = 'learning-segmented';
+  group.append(links);
+  return group;
+}
+
+function segmentLink(label, href, active) {
+  const link = document.createElement('a');
+  link.href = href;
+  link.textContent = label;
+  if (active) {
+    link.className = 'is-current';
+    link.setAttribute('aria-current', 'true');
+  }
+  return link;
+}
+
+function planHref(month, week, day) {
+  const params = new URLSearchParams();
+  if (Number.isInteger(Number(month))) params.set('month', String(month));
+  if (Number.isInteger(Number(week))) params.set('week', String(week));
+  if (Number.isInteger(Number(day))) params.set('day', String(day));
+  const query = params.toString();
+  return `#/learning/plan${query ? `?${query}` : ''}`;
+}
+
+function adjacentDayHref(months, month, week, day, direction) {
+  const route = [];
+  for (const planMonth of months || []) {
+    for (const planWeek of planMonth.weeks || []) {
+      for (const planDay of buildWeekDays(planWeek, planMonth)) {
+        route.push({ month: planMonth.month, week: planWeek.week, day: planDay.day });
+      }
+    }
+  }
+  const index = route.findIndex((item) => (
+    item.month === month?.month
+    && item.week === week?.week
+    && item.day === day?.day
+  ));
+  const next = route[index + direction];
+  return next ? planHref(next.month, next.week, next.day) : '';
+}
+
+function routeButton(label, href, disabled, primary = false) {
+  const link = document.createElement('a');
+  link.className = `learning-button${primary ? ' learning-button--primary' : ''}`;
+  link.textContent = label;
+  if (disabled) {
+    link.classList.add('is-disabled');
+    link.setAttribute('aria-disabled', 'true');
+    link.tabIndex = -1;
+    link.href = '#/learning/plan';
+  } else {
+    link.href = href;
+  }
+  return link;
+}
+
+function disclosurePanel(title, open = false, className = '') {
+  const details = document.createElement('details');
+  details.className = `learning-disclosure${className ? ` ${className}` : ''}`;
+  details.open = Boolean(open);
+  const summary = document.createElement('summary');
+  summary.append(text('span', '', title));
+  details.append(summary);
+  return details;
+}
+
+function readBoundedNumber(value, min, max, fallback) {
+  const number = Number(value);
+  if (!Number.isInteger(number)) return fallback;
+  return Math.min(Math.max(number, min), max);
 }
 
 function monthlyExamPanel(month, saved) {

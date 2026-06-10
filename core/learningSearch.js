@@ -42,9 +42,25 @@ function indexPlan(content) {
         label: `Месяц ${month.month}, неделя ${week.week}`,
         title: week.title,
         description: (week.topics || []).join(' '),
-        href: `#/learning/plan?month=${month.month}`,
+        href: `#/learning/plan?month=${month.month}&week=${week.week}`,
         text: [month.title, ...(month.skills || []), ...moduleTexts(month.trainerLinks?.map((link) => link.module))],
       }));
+      for (const day of week.days || []) {
+        rows.push(makeItem({
+          type: 'day',
+          label: `Месяц ${month.month}, неделя ${week.week}`,
+          title: day.title,
+          description: day.summary,
+          href: `#/learning/plan?month=${month.month}&week=${week.week}&day=${day.day}`,
+          text: [
+            day.id,
+            ...(day.topics || []),
+            ...(day.taskIds || []),
+            ...(day.practiceIds || []),
+            ...(day.caseIds || []),
+          ],
+        }));
+      }
     }
   }
   return rows;
