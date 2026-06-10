@@ -7,6 +7,17 @@
 // этапы TASKS.md (0–10) и функционально полон — отсюда 1.0.
 export const APP_VERSION = '1.0.0';
 
+// --- Версия кэша ассетов ---
+// ЕДИНСТВЕННАЯ точка смены cache-bust суффикса ?v=… для всех ассетов:
+//   index.html  <link href="styles.css?v=…">  и  <script src="main.js?v=…">
+//   main.js     import '…/appRoutes.js?v=…'
+//   core/appRoutes.js  import '…/TasksView.js?v=…'
+//
+// Когда нужно сбросить кэш браузера — измени значение здесь, затем запусти:
+//   bash scripts/bump-cache-version.sh
+// Скрипт подставит новое значение во все четыре места.
+export const APP_CACHE_VERSION = 'v1.0';
+
 // --- Лимиты контента ---
 // Максимальный размер исходного датасета одного кейса (PRD §3: 5 MB).
 export const MAX_DATASET_BYTES = 5 * 1024 * 1024; // 5 242 880

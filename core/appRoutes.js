@@ -16,7 +16,8 @@ import { SettingsView } from '../modules/settings/SettingsView.js';
 import { AboutView } from '../modules/about/AboutView.js';
 import { LearningTodayView } from '../modules/learning/TodayView.js';
 import { LearningPlanView } from '../modules/learning/PlanView.js';
-import { LearningTasksView } from '../modules/learning/TasksView.js?v=topic-tasks-1';
+// Cache-bust version — менять через scripts/bump-cache-version.sh (источник: config.js APP_CACHE_VERSION)
+import { LearningTasksView } from '../modules/learning/TasksView.js?v=v1.0';
 import { LearningProjectsView } from '../modules/learning/ProjectsView.js';
 import { LearningCareerView } from '../modules/learning/CareerView.js';
 import { LearningMockInterviewView } from '../modules/learning/MockInterviewView.js';

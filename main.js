@@ -10,7 +10,8 @@ import { smokeTest as smokeSim } from './core/simulationEngine.js';
 import { smokeTest as smokeAutomation } from './core/automationArtifacts.js';
 import { smokeTest as smokeAnalytics } from './core/analytics.js';
 import { smokeTest as smokeLearningProgress } from './core/learningProgress.js';
-import { APP_ROUTES } from './core/appRoutes.js?v=topic-tasks-1';
+// Cache-bust version — менять через scripts/bump-cache-version.sh (источник: config.js APP_CACHE_VERSION)
+import { APP_ROUTES } from './core/appRoutes.js?v=v1.0';
 import { defineRoutes, startRouter } from './core/router.js';
 import { applyStoredTheme } from './core/theme.js';
 import { installNavigation } from './core/components/Sidebar.js';
