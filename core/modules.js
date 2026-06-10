@@ -77,9 +77,11 @@ export const MODULES = [
 // Только модули с кейсами (5.1–5.7) — для каталога и фильтров статистики.
 export const CASE_MODULES = MODULES.filter((m) => m.hasCases);
 
-// Полный реестр типов: { id, title, description, skillGroup, hasCases, view, validator }.
-// view и validator — null до явной регистрации; заполняются из modules/caseHost.js.
-const _registry = new Map(MODULES.map((m) => [m.id, { ...m, view: null, validator: null }]));
+// Полный реестр типов: { id, title, description, skillGroup, hasCases, view, validator, grader }.
+// view, validator, grader — null до явной регистрации.
+// view заполняется из modules/caseHost.js; grader — из того же файла или отдельного плагина.
+// Контракт нового типа контента — см. docs/extension-guide.md.
+const _registry = new Map(MODULES.map((m) => [m.id, { ...m, view: null, validator: null, grader: null }]));
 
 // Метаданные модуля по id ('5.1') или undefined, если id неизвестен.
 export function getModule(id) {
@@ -100,4 +102,20 @@ export function registerModuleView(id, viewFn) {
 // Получить зарегистрированный CaseView для модуля, или null если не зарегистрирован.
 export function getModuleView(id) {
   return _registry.get(id)?.view ?? null;
+}
+
+// Зарегистрировать Grader для модуля. Grader — объект { grade(answer, ref, opts?) → GradeResult }.
+// Реализации — SqlGrader, SelfGrader, ScoreGrader из core/grader.js.
+export function registerModuleGrader(id, grader) {
+  const entry = _registry.get(id);
+  if (!entry) {
+    console.warn(`[modules] registerModuleGrader: неизвестный id "${id}"`);
+    return;
+  }
+  entry.grader = grader;
+}
+
+// Получить зарегистрированный Grader для модуля, или null если не зарегистрирован.
+export function getModuleGrader(id) {
+  return _registry.get(id)?.grader ?? null;
 }

@@ -21,6 +21,7 @@
 // ES-модуль: `import { SelfAssessment } from './core/components/SelfAssessment.js'`.
 
 import { normalizeScore, clampScore, saveAndFinalize } from '../event.js';
+import { t } from '../i18n.js';
 
 // --- Чистый расчёт доли самооочки (T1.4.2) -----------------------------------
 // criteria: [{ id, label, weight?, type?: 'score'|'checkbox' }]
@@ -58,14 +59,14 @@ export function SelfAssessment({
   legendWrap.className = 'self-assessment__head';
   const title = document.createElement('h2');
   title.className = 'self-assessment__title';
-  title.textContent = 'Самооценка';
+  title.textContent = t('sa.title');
   legendWrap.append(title);
 
   // Контекст подсказок (PRD §4: показываем как информацию, на балл не влияет).
   if (hintsTotal > 0) {
     const hints = document.createElement('p');
     hints.className = 'self-assessment__hints';
-    hints.textContent = `Вы открыли ${hintsUsed} из ${hintsTotal} подсказок — учтите это при оценке.`;
+    hints.textContent = t('sa.hintsCtx', { used: hintsUsed, total: hintsTotal });
     legendWrap.append(hints);
   }
   form.append(legendWrap);
@@ -98,7 +99,7 @@ export function SelfAssessment({
   }
 
   function refreshTotal() {
-    totalLine.textContent = `Итоговый балл: ${currentScore()} / 100`;
+    totalLine.textContent = t('sa.total', { score: currentScore() });
   }
   refreshTotal();
 
@@ -109,7 +110,7 @@ export function SelfAssessment({
   const submit = document.createElement('button');
   submit.type = 'submit';
   submit.className = 'self-assessment__submit';
-  submit.textContent = 'Завершить попытку';
+  submit.textContent = t('sa.submit');
   actions.append(submit);
 
   const status = document.createElement('p');
@@ -127,7 +128,7 @@ export function SelfAssessment({
     if (finalized || submitting) return; // повторная отправка заблокирована
     submitting = true;
     submit.disabled = true;
-    status.textContent = 'Записываем результат…';
+    status.textContent = t('sa.saving');
 
     try {
       const selfFraction = computeSelfFraction(criteria, values);
@@ -147,13 +148,13 @@ export function SelfAssessment({
       lockInputs(list);
       submit.hidden = true;
       status.classList.add('self-assessment__status--done');
-      status.textContent = `Попытка записана. Итоговый балл: ${score} / 100.`;
+      status.textContent = t('sa.saved', { score });
 
       if (onFinalized) await onFinalized(event);
     } catch (err) {
       console.error('[self-assessment] не удалось записать попытку', err);
       status.classList.add('self-assessment__status--error');
-      status.textContent = 'Не удалось сохранить результат. Проверьте хранилище и попробуйте ещё раз.';
+      status.textContent = t('sa.error');
       submit.disabled = false; // дать повторить попытку записи (не новую попытку)
       submitting = false;
     }

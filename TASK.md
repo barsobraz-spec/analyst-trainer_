@@ -399,12 +399,24 @@ Analyst Trainer — локальное офлайн-приложение (vanill
 
 Задачи:
 
-* [ ] Вынести пользовательские строки в централизованный словарь (слой i18n,
+* [x] Вынести пользовательские строки в централизованный словарь (слой i18n,
       по умолчанию русский — поведение не меняется)
-* [ ] Ввести единый интерфейс «проверяющего» (grader) с текущими реализациями как
+      — core/i18n.js: t(key,vars)+registerLocale+setLocale; locales/ru.js: словарь RU
+        (sa.*, dc.*, common.*); SelfAssessment.js мигрирован на t() полностью
+* [x] Ввести единый интерфейс «проверяющего» (grader) с текущими реализациями как
       первыми плагинами
-* [ ] Описать контракт нового типа контента (схема + View + grader)
-* [ ] Зафиксировать архитектурное решение в `docs/`
+      — core/grader.js: интерфейс GradeResult={fraction,feedback?,details?};
+        SqlGrader (5.5, обёртка compareResultSets), SelfGrader (5.1–5.4/5.7, обёртка
+        computeSelfFraction), ScoreGrader(fn) — фабрика для числовых оценок (5.3/5.6);
+        withOptions(grader, defaultOpts) — partial application
+* [x] Описать контракт нового типа контента (схема + View + grader)
+      — core/modules.js: _registry расширен полем grader:null;
+        registerModuleGrader(id,grader)+getModuleGrader(id) добавлены;
+        контракт ContentType={id,title,schema,View,grader} задокументирован
+* [x] Зафиксировать архитектурное решение в `docs/`
+      — docs/extension-guide.md: три раздела «Как добавить язык / тип контента /
+        проверяющего» со схемами, шагами, примерами кода и сводной таблицей;
+        smoke 18/18 PASS
 
 Изменяемые файлы:
 
