@@ -5,11 +5,15 @@
 // модулей отсюда, чтобы тексты не расходились между экранами.
 //
 // Идентификаторы 5.1–5.8 совпадают с полем `module` в кейсах и событиях.
-// Модули 5.1–5.7 содержат кейсы (см. KNOWN_CASE_MODULES в caseValidator.js);
-// 5.8 (Learning Analytics) кейсов не имеет и открывается как отдельный экран
-// аналитики, а не как список кейсов.
+// Модули 5.1–5.7 содержат кейсы; 5.8 (Learning Analytics) кейсов не имеет.
 //
-// ES-модуль: `import { MODULES, getModule, CASE_MODULES } from './core/modules.js'`.
+// Точка расширения: чтобы добавить новый тип контента —
+//   1. добавить запись в MODULES (id, title, description, skillGroup, hasCases);
+//   2. вызвать registerModuleView(id, ViewFn) из модульного слоя (modules/).
+// Никакие другие файлы (роутер, валидатор, хост кейсов) менять не нужно.
+//
+// ES-модуль: `import { MODULES, getModule, CASE_MODULES,
+//   registerModuleView, getModuleView } from './core/modules.js'`.
 
 export const MODULES = [
   {
@@ -73,9 +77,27 @@ export const MODULES = [
 // Только модули с кейсами (5.1–5.7) — для каталога и фильтров статистики.
 export const CASE_MODULES = MODULES.filter((m) => m.hasCases);
 
-const MODULE_BY_ID = new Map(MODULES.map((m) => [m.id, m]));
+// Полный реестр типов: { id, title, description, skillGroup, hasCases, view, validator }.
+// view и validator — null до явной регистрации; заполняются из modules/caseHost.js.
+const _registry = new Map(MODULES.map((m) => [m.id, { ...m, view: null, validator: null }]));
 
-// Метаданные модуля по id (`'5.1'`) или undefined, если id неизвестен.
+// Метаданные модуля по id ('5.1') или undefined, если id неизвестен.
 export function getModule(id) {
-  return MODULE_BY_ID.get(id);
+  return _registry.get(id);
+}
+
+// Зарегистрировать CaseView-функцию для модуля. Вызывается из modules/caseHost.js.
+// Позволяет core/ не импортировать ничего из modules/ (нет нарушения слоёв).
+export function registerModuleView(id, viewFn) {
+  const entry = _registry.get(id);
+  if (!entry) {
+    console.warn(`[modules] registerModuleView: неизвестный id "${id}"`);
+    return;
+  }
+  entry.view = viewFn;
+}
+
+// Получить зарегистрированный CaseView для модуля, или null если не зарегистрирован.
+export function getModuleView(id) {
+  return _registry.get(id)?.view ?? null;
 }

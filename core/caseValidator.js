@@ -9,6 +9,7 @@
 // ES-модуль: `import { validateCase, markCaseError, ERROR_CODES } from './core/caseValidator.js'`.
 
 import { isKnownTag } from './skillTags.js';
+import { CASE_MODULES } from './modules.js';
 
 // --- Машинно-читаемые коды ошибок контента (PRD §6 Ф7, T0.3) -----------------
 export const ERROR_CODES = Object.freeze({
@@ -19,9 +20,9 @@ export const ERROR_CODES = Object.freeze({
   LOAD_FAILED: 'load_failed',            // не удалось получить файл (404/сеть/битый JSON)
 });
 
-// Модули, у которых есть кейсы (PRD §5: 5.1–5.7). 5.8 (Learning Analytics) кейсов
-// не содержит, поэтому module='5.8' для кейса считается неизвестным.
-const KNOWN_CASE_MODULES = new Set(['5.1', '5.2', '5.3', '5.4', '5.5', '5.6', '5.7']);
+// Производится из реестра modules.js: hasCases:true → допустимый module в кейсе.
+// Добавление нового модуля в MODULES автоматически расширяет этот набор.
+const KNOWN_CASE_MODULES = new Set(CASE_MODULES.map((m) => m.id));
 
 const DIFFICULTIES = new Set(['basic', 'intermediate', 'advanced']);
 

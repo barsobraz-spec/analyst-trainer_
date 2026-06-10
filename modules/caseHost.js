@@ -13,6 +13,7 @@
 import { loadIndex, loadCase } from '../core/caseLoader.js';
 import { getAttemptNo } from '../core/event.js';
 import { caseNavFooter, installSwipeNav } from '../core/components/caseNav.js';
+import { registerModuleView, getModuleView } from '../core/modules.js';
 import { DetectiveCaseView } from './detective/CaseView.js';
 import { HypothesisCaseView } from './hypothesis/CaseView.js';
 import { RcaCaseView } from './rca/CaseView.js';
@@ -22,16 +23,15 @@ import { SimulatorCaseView } from './simulator/CaseView.js';
 import { AutomationCaseView } from './automation/CaseView.js';
 import { findUserCase } from './automation/userCases.js';
 
-// Реестр модульных представлений. Ключ — id модуля (PRD §5).
-const MODULE_VIEWS = {
-  '5.1': DetectiveCaseView,
-  '5.2': HypothesisCaseView,
-  '5.3': DashboardCaseView,
-  '5.4': RcaCaseView,
-  '5.5': SqlCaseView,
-  '5.6': SimulatorCaseView,
-  '5.7': AutomationCaseView,
-};
+// Регистрируем CaseView в общем реестре модулей (core/modules.js).
+// Чтобы добавить новый модуль: 1) добавить запись в MODULES, 2) добавить строку ниже.
+registerModuleView('5.1', DetectiveCaseView);
+registerModuleView('5.2', HypothesisCaseView);
+registerModuleView('5.3', DashboardCaseView);
+registerModuleView('5.4', RcaCaseView);
+registerModuleView('5.5', SqlCaseView);
+registerModuleView('5.6', SimulatorCaseView);
+registerModuleView('5.7', AutomationCaseView);
 
 // Модуль с пользовательскими кейсами (Automation Designer, PRD §5.7 Ф5).
 const USER_CASE_MODULE = '5.7';
@@ -77,7 +77,7 @@ export async function CaseHost({ id, caseId }) {
     caseData = result.case;
   }
 
-  const View = MODULE_VIEWS[id];
+  const View = getModuleView(id);
   if (!View) {
     return errorScreen(
       'Модуль в разработке',
