@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "totalItems": 132,
+  "chunks": [
+    {
+      "skill": "excel",
+      "section": "Месяц 1: Excel и основы работы с данными",
+      "count": 35,
+      "path": "learning-plan/data/chunks/practice-excel.json"
+    },
+    {
+      "skill": "sql",
+      "section": "Месяц 2: SQL и теория баз данных",
+      "count": 35,
+      "path": "learning-plan/data/chunks/practice-sql.json"
+    },
+    {
+      "skill": "power-bi",
+      "section": "Месяц 3: Power BI: визуализация и дашборды",
+      "count": 15,
+      "path": "learning-plan/data/chunks/practice-power-bi.json"
+    },
+    {
+      "skill": "statistics",
+      "section": "Месяц 4: Статистика для аналитика",
+      "count": 13,
+      "path": "learning-plan/data/chunks/practice-statistics.json"
+    },
+    {
+      "skill": "python-pandas",
+      "section": "Месяц 5: Python для аналитики",
+      "count": 14,
+      "path": "learning-plan/data/chunks/practice-python-pandas.json"
+    },
+    {
+      "skill": "product-banking",
+      "section": "Месяц 6: Продуктовая и банковская аналитика",
+      "count": 4,
+      "path": "learning-plan/data/chunks/practice-product-banking.json"
+    },
+    {
+      "skill": "github-communication",
+      "section": "Месяц 7: Капстоун и финальное ускорение поиска",
+      "count": 4,
+      "path": "learning-plan/data/chunks/practice-github-communication.json"
+    },
+    {
+      "skill": "product-analytics",
+      "section": "Месяц 6: Продуктовая и банковская аналитика",
+      "count": 9,
+      "path": "learning-plan/data/chunks/practice-product-analytics.json"
+    },
+    {
+      "skill": "retention",
+      "section": "Месяц 6: Продуктовая и банковская аналитика",
+      "count": 1,
+      "path": "learning-plan/data/chunks/practice-retention.json"
+    },
+    {
+      "skill": "funnel-analysis",
+      "section": "Месяц 6: Продуктовая и банковская аналитика",
+      "count": 1,
+      "path": "learning-plan/data/chunks/practice-funnel-analysis.json"
+    },
+    {
+      "skill": "unit-economics",
+      "section": "Месяц 6: Продуктовая и банковская аналитика",
+      "count": 1,
+      "path": "learning-plan/data/chunks/practice-unit-economics.json"
+    }
+  ]
+}

@@ -119,6 +119,18 @@ export async function loadDataset(path) {
   }
 }
 
+// --- Метаданные каталога без загрузки файлов кейсов (Этап 6) -----------------
+// Возвращает записи индекса (caseId/module/path/title/difficulty) без обращения к
+// файлам кейсов. Битые записи манифеста (неполные метаданные) помечаются ошибкой.
+// Используется там, где не нужен payload кейса (будущий быстрый каталог).
+export async function loadCasesMeta({ module } = {}) {
+  const { entries: allEntries, error: indexError } = await loadIndex();
+  const entries = module === undefined
+    ? allEntries
+    : allEntries.filter((entry) => entry.module === module);
+  return { cases: entries, indexError };
+}
+
 // --- Загрузка всего каталога (PRD §6 Ф6/Ф7) ----------------------------------
 // Читает манифест и загружает каждый кейс параллельно. Возвращает массив записей
 // для каталога, где каждый элемент — либо успешно провалидированный кейс со

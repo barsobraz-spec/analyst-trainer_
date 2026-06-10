@@ -2,16 +2,26 @@
 //
 // Единственная точка чтения learning-plan/data для UI. Word-источники остаются
 // первоисточником в репозитории, но браузер во время работы читает только JSON.
+//
+// Загрузка разбита на два уровня (Этап 6):
+//   • Базовый (быстрый): plan + tasks + projects + career (~300 КБ)
+//   • Ленивый: practiceContent грузится по навыку через loadPracticeSlice(skillId)
+//     или весь сразу через loadAllPracticeContent() — только когда экран это требует.
 
 const CONTENT_PATHS = Object.freeze({
   plan: './learning-plan/data/plan.json',
   tasks: './learning-plan/data/tasks.json',
-  practiceContent: './learning-plan/data/practiceContent.json',
+  // practiceContent (~1 МБ) убрана из базовой загрузки — используй loadPracticeSlice()
   projects: './learning-plan/data/projects.json',
   career: './learning-plan/data/career.json',
 });
 
+const PRACTICE_INDEX_PATH = './learning-plan/data/practice-index.json';
+const PRACTICE_CHUNK_BASE = './learning-plan/data/chunks/';
+
 let contentPromise = null;
+let practiceIndexPromise = null;
+const practiceSlicePromises = new Map();
 
 export class LearningContentError extends Error {
   constructor(message, { cause } = {}) {
@@ -47,7 +57,6 @@ export function loadLearningContent() {
 function normalizeContent(raw) {
   const plan = raw.plan || {};
   const tasks = raw.tasks || {};
-  const practiceContent = raw.practiceContent || {};
   const projects = raw.projects || {};
   const career = raw.career || {};
 
@@ -61,20 +70,6 @@ function normalizeContent(raw) {
   }));
 
   const skillsById = new Map((tasks.skills || []).map((skill) => [skill.id, skill]));
-  const practiceItems = (practiceContent.items || []).map((item, index) => ({
-    ...item,
-    id: item.id || `practice-${item.taskId || index + 1}`,
-    taskIds: normalizeStringList(item.taskIds || [item.taskId]),
-    moduleIds: normalizeStringList(item.moduleIds || item.trainerModules || item.modules?.map((module) => module.id)),
-  }));
-  const practicesByTaskId = new Map();
-  const practicesById = new Map();
-  for (const item of practiceItems) {
-    practicesById.set(item.id, item);
-    for (const taskId of item.taskIds) {
-      if (taskId && !practicesByTaskId.has(taskId)) practicesByTaskId.set(taskId, item);
-    }
-  }
   const monthsByNumber = new Map((plan.months || []).map((month) => [month.month, month]));
   const careerActionsByMonth = new Map((career.monthlyActions || []).map((item) => [item.month, item]));
   const projectsById = new Map((projects.projects || []).map((project) => [project.id, project]));
@@ -87,17 +82,19 @@ function normalizeContent(raw) {
     }
   }
 
+  // practiceContent не грузится в базовой загрузке — пустые структуры до явного
+  // вызова enrichContentWithPractice() или loadAllPracticeContent().
   return {
     plan,
     tasks,
-    practiceContent: { ...practiceContent, items: practiceItems },
+    practiceContent: { items: [] },
     projects,
     career,
     allTasks,
-    practiceItems,
+    practiceItems: [],
     skillsById,
-    practicesByTaskId,
-    practicesById,
+    practicesByTaskId: new Map(),
+    practicesById: new Map(),
     daysById,
     monthsByNumber,
     careerActionsByMonth,
@@ -141,4 +138,77 @@ export function safeContentFallback(error) {
     title: 'Учебный контент недоступен',
     message: error?.message || 'Проверьте локальный HTTP-сервер и файлы learning-plan/data.',
   };
+}
+
+// --- Ленивая загрузка практики (Этап 6) --------------------------------------
+
+// Загрузить индекс чанков практики (2.5 КБ). Кешируется на весь сеанс.
+export function loadPracticeIndex() {
+  if (!practiceIndexPromise) {
+    practiceIndexPromise = fetch(PRACTICE_INDEX_PATH)
+      .then((r) => {
+        if (!r.ok) throw new LearningContentError(`Индекс практики недоступен (HTTP ${r.status})`);
+        return r.json();
+      })
+      .catch((err) => {
+        practiceIndexPromise = null;
+        return { chunks: [] };
+      });
+  }
+  return practiceIndexPromise;
+}
+
+// Загрузить практику для одного навыка по его id (например 'excel').
+// Результат кешируется на весь сеанс — повторные вызовы возвращают тот же промис.
+export function loadPracticeSlice(skillId) {
+  if (!practiceSlicePromises.has(skillId)) {
+    const path = `${PRACTICE_CHUNK_BASE}practice-${skillId}.json`;
+    const promise = fetch(path)
+      .then((r) => {
+        if (!r.ok) throw new LearningContentError(`Чанк практики '${skillId}' недоступен (HTTP ${r.status})`);
+        return r.json();
+      })
+      .then((data) => (Array.isArray(data.items) ? data.items : []))
+      .catch((err) => {
+        practiceSlicePromises.delete(skillId);
+        throw err instanceof LearningContentError ? err
+          : new LearningContentError(`Не удалось загрузить практику для '${skillId}'.`, { cause: err });
+      });
+    practiceSlicePromises.set(skillId, promise);
+  }
+  return practiceSlicePromises.get(skillId);
+}
+
+// Загрузить всю практику (все навыки) параллельно.
+// Используется PracticeView — грузится только при открытии этого экрана.
+export async function loadAllPracticeContent() {
+  const index = await loadPracticeIndex();
+  const skillIds = (index.chunks || []).map((c) => c.skill).filter(Boolean);
+  if (skillIds.length === 0) return [];
+  const slices = await Promise.all(skillIds.map((id) => loadPracticeSlice(id).catch(() => [])));
+  return slices.flat();
+}
+
+// Добавить загруженные items практики к уже нормализованному объекту контента.
+// Не мутирует исходный объект — возвращает новый.
+export function enrichContentWithPractice(content, rawItems = []) {
+  const practiceItems = normalizePracticeItems(rawItems);
+  const practicesByTaskId = new Map();
+  const practicesById = new Map();
+  for (const item of practiceItems) {
+    practicesById.set(item.id, item);
+    for (const taskId of item.taskIds) {
+      if (taskId && !practicesByTaskId.has(taskId)) practicesByTaskId.set(taskId, item);
+    }
+  }
+  return { ...content, practiceItems, practicesById, practicesByTaskId };
+}
+
+function normalizePracticeItems(rawItems = []) {
+  return rawItems.map((item, index) => ({
+    ...item,
+    id: item.id || `practice-${item.taskId || index + 1}`,
+    taskIds: normalizeStringList(item.taskIds || [item.taskId]),
+    moduleIds: normalizeStringList(item.moduleIds || item.trainerModules || item.modules?.map((m) => m.id)),
+  }));
 }

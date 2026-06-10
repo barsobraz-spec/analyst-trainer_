@@ -11,7 +11,7 @@ import { getModule } from '../../core/modules.js';
 import { getOutline, caseHash } from '../../core/courseNav.js';
 import { loadProgressMap, statusOf } from '../../core/progress.js';
 import { getAllTaskProgress } from '../../core/db.js';
-import { loadLearningContent } from '../../core/learningContent.js';
+import { loadLearningContent, loadAllPracticeContent, enrichContentWithPractice } from '../../core/learningContent.js?v=v1.0';
 import { TASK_STATUS } from '../../core/learningProgress.js';
 import { StatusBadge, DifficultyBadge } from '../../core/components/StatusBadge.js';
 import { FavoriteButton } from '../../core/components/FavoriteButton.js';
@@ -28,12 +28,15 @@ export async function PracticeView() {
   root.className = 'practice screen';
   root.append(pageHeader('Практика', 'Кейсы тренажера, связанные задачи учебного плана и быстрый случайный старт.'));
 
-  const [outline, progress, content, taskProgress] = await Promise.all([
+  const [outline, progress, baseContent, taskProgress, practiceItems] = await Promise.all([
     getOutline(),
     loadProgressMap(),
     loadLearningContent().catch(() => null),
     getAllTaskProgress().catch(() => []),
+    loadAllPracticeContent().catch(() => []),
   ]);
+  // Обогащаем базовый контент всей практикой — нужна для фильтрации и отображения.
+  const content = baseContent ? enrichContentWithPractice(baseContent, practiceItems) : null;
   const filters = currentFilters();
   const pool = filterCases(outline.flat, progress, filters, content, taskProgress);
 
@@ -41,7 +44,7 @@ export async function PracticeView() {
 
   if (outline.flat.length === 0) {
     root.append(emptyState({
-      icon: '🎲',
+      icon: 'dice',
       title: 'Пока нет кейсов для практики',
       text: 'Когда появятся кейсы, здесь можно будет тренироваться на случайных задачах.',
       ctaHref: '#/modules',

@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "skill": "unit-economics",
+  "items": [
+    {
+      "taskId": "task-112",
+      "taskTitle": "Посчитать CAC, LTV, payback period и маржу; определить, когда юнит-экономика сходится",
+      "sourceType": "main",
+      "section": "Месяц 6: Продуктовая и банковская аналитика",
+      "skill": {
+        "id": "unit-economics",
+        "title": "Unit-economics"
+      },
+      "modules": [
+        {
+          "id": "5.5",
+          "title": "SQL Investigation"
+        },
+        {
+          "id": "5.6",
+          "title": "Business Simulator"
+        }
+      ],
+      "practiceContent": {
+        "businessContext": "Мобильный финтех-сервис Finova работает на рынках Казахстана и Кыргызстана: p2p-переводы, кошелёк, кредитная линия. Команда аналитики видит рост регистраций, но нет ясности, что именно двигает бизнес вперёд. CFO просит: 'Покажи, зарабатываем ли мы на каждом клиенте, которого привлекаем'. Аналитик должен посчитать юнит-экономику.",
+        "managerRequest": "Посчитай CAC по каналам, LTV за 12 месяцев, payback period и маржу на одного пользователя. Определи: при каких параметрах бизнес масштабируется, а при каких — нет.",
+        "businessGoal": "Понять, можно ли удвоить рекламный бюджет — или это только увеличит убытки.",
+        "inputData": {
+          "description": "Выгрузки из продуктовой аналитики, CRM и BI-витрин.",
+          "tables": [
+            {
+              "name": "marketing_costs",
+              "fields": [
+                "month",
+                "channel",
+                "spend"
+              ],
+              "source": "маркетинговый отчёт"
+            },
+            {
+              "name": "users",
+              "fields": [
+                "user_id",
+                "signup_date",
+                "channel",
+                "plan"
+              ],
+              "source": "CRM"
+            },
+            {
+              "name": "purchases",
+              "fields": [
+                "user_id",
+                "purchase_date",
+                "amount"
+              ],
+              "source": "платёжная витрина"
+            }
+          ],
+          "sources": [
+            "маркетинговый отчёт",
+            "CRM",
+            "платёжная витрина"
+          ]
+        },
+        "analystTask": [
+          "Посчитать CAC по каналу: spend / new_users за период.",
+          "Посчитать среднюю выручку на пользователя за 1, 3, 6, 12 месяцев (LTV кривую).",
+          "Посчитать payback period: через сколько месяцев LTV превышает CAC.",
+          "Посчитать маржу: (LTV - CAC) / CAC × 100%. При каком значении LTV/CAC ≥ 3 — правило масштабирования."
+        ],
+        "expectedResult": "Таблица по каналам (CAC / LTV_12m / payback_months / margin%) и вывод: какой канал масштабировать, какой отключить.",
+        "businessConclusion": "CFO получает ответ: organic даёт LTV/CAC=4.2 (масштабировать), paid social — LTV/CAC=1.3 (убыточен при текущем масштабе).",
+        "validationCriteria": [
+          "CAC считается правильно (spend/acquired, а не spend/всех пользователей).",
+          "LTV считается по реальным транзакциям, не по ARPU×12.",
+          "Payback period указан в конкретных месяцах."
+        ],
+        "commonMistakes": [
+          "Считать LTV как ARPU×срок без скидки на churn.",
+          "Забыть про маркетинговые расходы при расчёте CAC."
+        ],
+        "skills": [
+          "unit-economics",
+          "CAC",
+          "LTV",
+          "payback period",
+          "маржа",
+          "SQL"
+        ],
+        "difficulty": "hard",
+        "estimatedTime": 130,
+        "hiringSignal": "Работодатель проверяет: умеет ли кандидат считать юнит-экономику по реальным данным — это один из ключевых вопросов на финансово-продуктовых ролях.",
+        "portfolioValue": {
+          "canUse": true,
+          "note": "Да, если оформить как мини-кейс с бизнес-вопросом, данными и выводом."
+        },
+        "interviewQuestions": [
+          "Чем LTV отличается от ARPU?",
+          "Почему LTV/CAC ≥ 3 — это правило?",
+          "Как учесть churn при расчёте LTV?"
+        ]
+      }
+    }
+  ]
+}

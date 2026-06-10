@@ -4,6 +4,7 @@ import { getAllTaskProgress, saveTaskProgress } from '../../core/db.js';
 import { calculateChecklistProgress, groupWeakSpots, TASK_STATUS } from '../../core/learningProgress.js';
 import { moduleButton } from '../../core/learningLinks.js';
 import { navigate } from '../../core/router.js';
+import { loadPracticeSlice, enrichContentWithPractice } from '../../core/learningContent.js?v=v1.0';
 import { LearningRemindersPanel, REMINDER_SUGGESTIONS } from './LearningReminders.js';
 import {
   TASK_STATUS_LABELS,
@@ -20,11 +21,14 @@ import {
   withLearningContent,
 } from './learningUi.js?v=practice-content-2';
 
+// Максимум задач в первом рендере списка. Кнопка «Показать ещё» грузит остаток.
+const TASK_PAGE_SIZE = 50;
+
 export function LearningTasksView() {
   return withLearningContent(renderTasks);
 }
 
-async function renderTasks(content) {
+async function renderTasks(baseContent) {
   const section = screen('learning learning-tasks');
   section.append(
     learningHeader('Задачи', 'Выберите тему, затем работайте только с ее задачами. Статусы хранятся только в IndexedDB.'),
@@ -33,11 +37,18 @@ async function renderTasks(content) {
   const progressRows = await getAllTaskProgress().catch(() => []);
   const progress = toProgressMap(progressRows);
   const params = currentFilters();
-  const selectedSkill = params.skill || skillByTaskId(content, params.task);
+  const selectedSkill = params.skill || skillByTaskId(baseContent, params.task);
 
   if (!selectedSkill) {
-    section.append(topicPicker(content, progressRows));
+    section.append(topicPicker(baseContent, progressRows));
     return section;
+  }
+
+  // Ленивая загрузка практики только для выбранного навыка (~30–290 КБ вместо 1 МБ).
+  let content = baseContent;
+  const practiceSlice = await loadPracticeSlice(selectedSkill).catch(() => []);
+  if (practiceSlice.length > 0) {
+    content = enrichContentWithPractice(baseContent, practiceSlice);
   }
 
   section.append(topicHeader(content, progressRows, selectedSkill));
@@ -173,6 +184,43 @@ function filterTasks(content, progress, selectedSkill = '') {
   });
 }
 
+function buildTaskRow(task, content, progress, selectedTask) {
+  const row = document.createElement('article');
+  row.className = 'learning-task-row';
+  row.id = task.id;
+  if (selectedTask === task.id) row.classList.add('is-highlighted');
+  const body = document.createElement('div');
+  body.className = 'learning-task-row__body';
+  body.append(
+    text('span', 'learning-task-row__num', task.number ? `#${task.number}` : task.source || 'extra'),
+    text('strong', 'learning-task-row__title', task.title),
+  );
+  const links = document.createElement('div');
+  links.className = 'learning-task-row__links';
+  for (const moduleId of task.trainerModules || []) links.append(moduleButton(moduleId, 'Практика'));
+  body.append(links);
+
+  const controls = document.createElement('div');
+  controls.className = 'learning-task-row__controls';
+  const current = progress.get(task.id);
+  const select = statusSelect(Object.keys(TASK_STATUS_LABELS), TASK_STATUS_LABELS, current?.status || TASK_STATUS.notStarted);
+  select.addEventListener('change', async () => {
+    await saveTaskProgress({
+      taskId: task.id,
+      status: select.value,
+      month: task.month,
+      skill: task.skill,
+      notes: current?.notes || '',
+    });
+    navigate(location.hash.replace(/^#/, '') || '/learning/tasks');
+  });
+  controls.append(select);
+  row.append(body, controls);
+  const practice = content.practicesByTaskId?.get(task.id);
+  if (practice) row.append(practiceDetails(practice, selectedTask === task.id));
+  return row;
+}
+
 function taskList(content, tasks, progress, selectedSkill = '') {
   const wrap = card('learning-task-list');
   const skill = content.skillsById.get(selectedSkill);
@@ -185,51 +233,44 @@ function taskList(content, tasks, progress, selectedSkill = '') {
 
   const selectedTask = readQueryParam('task');
   const groups = groupBy(tasks, (task) => `${task.month}:${task.skill}`);
+
+  // Для масштабирования до 10 000+ задач: рендерим первые TASK_PAGE_SIZE строк,
+  // остальные добавляются кнопкой «Показать ещё».
+  let renderedCount = 0;
+  const deferred = []; // { groupEl, task } — задачи за пределами первой страницы
+
   for (const group of groups.values()) {
     const first = group[0];
-    const skill = content.skillsById.get(first.skill)?.title || first.skill;
+    const skillTitle = content.skillsById.get(first.skill)?.title || first.skill;
     const groupEl = document.createElement('section');
     groupEl.className = 'learning-task-group';
-    groupEl.append(text('h3', 'learning-subtitle', `Месяц ${first.month} · ${skill}`));
+    groupEl.append(text('h3', 'learning-subtitle', `Месяц ${first.month} · ${skillTitle}`));
 
     for (const task of group) {
-      const row = document.createElement('article');
-      row.className = 'learning-task-row';
-      row.id = task.id;
-      if (selectedTask === task.id) row.classList.add('is-highlighted');
-      const body = document.createElement('div');
-      body.className = 'learning-task-row__body';
-      body.append(
-        text('span', 'learning-task-row__num', task.number ? `#${task.number}` : task.source || 'extra'),
-        text('strong', 'learning-task-row__title', task.title),
-      );
-      const links = document.createElement('div');
-      links.className = 'learning-task-row__links';
-      for (const moduleId of task.trainerModules || []) links.append(moduleButton(moduleId, 'Практика'));
-      body.append(links);
-
-      const controls = document.createElement('div');
-      controls.className = 'learning-task-row__controls';
-      const current = progress.get(task.id);
-      const select = statusSelect(Object.keys(TASK_STATUS_LABELS), TASK_STATUS_LABELS, current?.status || TASK_STATUS.notStarted);
-      select.addEventListener('change', async () => {
-        await saveTaskProgress({
-          taskId: task.id,
-          status: select.value,
-          month: task.month,
-          skill: task.skill,
-          notes: current?.notes || '',
-        });
-        navigate(location.hash.replace(/^#/, '') || '/learning/tasks');
-      });
-      controls.append(select);
-      row.append(body, controls);
-      const practice = content.practicesByTaskId?.get(task.id);
-      if (practice) row.append(practiceDetails(practice, selectedTask === task.id));
-      groupEl.append(row);
+      if (renderedCount < TASK_PAGE_SIZE) {
+        groupEl.append(buildTaskRow(task, content, progress, selectedTask));
+        renderedCount++;
+      } else {
+        deferred.push({ groupEl, task });
+      }
     }
     wrap.append(groupEl);
   }
+
+  if (deferred.length > 0) {
+    const showMore = document.createElement('button');
+    showMore.type = 'button';
+    showMore.className = 'learning-button learning-show-more';
+    showMore.textContent = `Показать ещё ${deferred.length} задач`;
+    showMore.addEventListener('click', () => {
+      for (const { groupEl, task } of deferred) {
+        groupEl.append(buildTaskRow(task, content, progress, selectedTask));
+      }
+      showMore.remove();
+    });
+    wrap.append(showMore);
+  }
+
   return wrap;
 }
 
