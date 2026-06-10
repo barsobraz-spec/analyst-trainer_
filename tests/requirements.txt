@@ -1,0 +1,3 @@
+# Dev-зависимости для smoke-тестов.
+# Установка: pip3 install -r tests/requirements.txt && python3 -m playwright install chromium
+playwright>=1.40
