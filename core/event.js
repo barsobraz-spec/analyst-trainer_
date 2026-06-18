@@ -18,6 +18,13 @@
 import { DURATION_CAP_SEC, W_AUTO, W_SELF } from '../config.js';
 import { getEvents, saveEvent, deleteDraftState, openDB, StorageError } from './db.js';
 
+// --- Именованные константы DOM-событий --------------------------------------
+// Использовать только эти константы — не строковые литералы — во всех местах
+// dispatchEvent / addEventListener, чтобы опечатка в имени не прошла молча.
+// at:favorites-changed живёт в core/favorites.js (издатель и слушатель в одном
+// модуле), здесь дублировать не нужно.
+export const PROGRESS_EVENT = 'at:progress-changed';
+
 // --- Номер попытки (T1.3.2) --------------------------------------------------
 // Политика повторного прохождения (PRD §4): каждая попытка — отдельное событие;
 // attemptNo нумеруется по этому кейсу с 1. Считаем по уже записанным событиям.
@@ -144,7 +151,7 @@ export async function saveAndFinalize(params = {}) {
   // обновляют отметки и прогресс-бары без перезагрузки. Доставка не критична.
   try {
     if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
-      window.dispatchEvent(new CustomEvent('at:progress-changed', {
+      window.dispatchEvent(new CustomEvent(PROGRESS_EVENT, {
         detail: { caseId: event.caseId, module: event.module },
       }));
     }

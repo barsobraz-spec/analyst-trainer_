@@ -16,6 +16,7 @@ export const SKILL_TAGS = [
   'sql',
   'business-thinking',
   'automation-design',
+  'ai-tools',
 ];
 
 // Быстрый lookup при валидации.
@@ -26,7 +27,7 @@ const SKILL_TAG_SET = new Set(SKILL_TAGS);
 // в SKILL_GROUP_LABELS (их показывает UI прогресса по навыкам).
 export const SKILL_GROUPS = {
   analytical: ['analytical-thinking', 'hypotheses', 'root-cause'],
-  practical: ['sql', 'data-viz'],
+  practical: ['sql', 'data-viz', 'ai-tools'],
   business: ['business-thinking', 'automation-design'],
 };
 

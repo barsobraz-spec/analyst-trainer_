@@ -21,14 +21,14 @@ export function getStoredTheme() {
     stored = localStorage.getItem(THEME_KEY);
   } catch { /* localStorage недоступен — игнорируем */ }
   if (THEMES.includes(stored)) return stored;
-  return 'light';
+  return 'dark';
 }
 
 // Применить тему к документу. Атрибут data-theme ставится ЯВНО ('light' | 'dark'):
 // тёмная палитра живёт в :root, светлая — в [data-theme="light"], поэтому достаточно
 // корректного значения атрибута (см. styles.css).
 export function applyTheme(theme) {
-  const value = THEMES.includes(theme) ? theme : 'light';
+  const value = THEMES.includes(theme) ? theme : 'dark';
   document.documentElement.setAttribute('data-theme', value);
   return value;
 }

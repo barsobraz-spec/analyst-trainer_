@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "totalItems": 132,
+  "totalItems": 140,
   "chunks": [
     {
       "skill": "excel",
@@ -67,6 +67,18 @@
       "section": "Месяц 6: Продуктовая и банковская аналитика",
       "count": 1,
       "path": "learning-plan/data/chunks/practice-unit-economics.json"
+    },
+    {
+      "skill": "communications",
+      "section": "Месяцы 3–6: Коммуникации и презентации для стейкхолдеров",
+      "count": 4,
+      "path": "learning-plan/data/chunks/practice-communications.json"
+    },
+    {
+      "skill": "ai-tools",
+      "section": "Месяцы 5–7: AI-инструменты для аналитика",
+      "count": 4,
+      "path": "learning-plan/data/chunks/practice-ai-tools.json"
     }
   ]
 }

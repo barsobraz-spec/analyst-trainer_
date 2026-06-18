@@ -1,0 +1,51 @@
+{
+  "caseId": "sql-m2w1d3-where",
+  "module": "5.5",
+  "schemaVersion": 1,
+  "title": "День 3 · Фильтрация: WHERE, BETWEEN, IN, AND/OR",
+  "difficulty": "basic",
+  "skillTags": ["sql"],
+  "payload": {
+    "scenario": "Продолжаем работу с базой Olist. Бизнес начал задавать конкретные вопросы — «покажи заказы, которые…». Сегодня учимся доставать только те строки, что нужны под вопрос.\n\nИспользуем WHERE, операторы сравнения, BETWEEN, IN, AND/OR со скобками. Никаких агрегатов и JOIN — это позже.",
+    "question": "Решите подзадачи через WHERE/BETWEEN/IN. Перед каждым запросом проговорите вслух, сколько примерно строк ждёте.",
+    "datasetPath": "cases/datasets/sql-m2-olist.json",
+    "starterSql": "SELECT order_id, order_status, order_purchase_timestamp FROM orders LIMIT 20;",
+    "subtasks": [
+      {
+        "id": "s1",
+        "prompt": "Выведите order_id и order_status всех доставленных заказов (status = 'delivered').",
+        "orderSensitive": false,
+        "referenceSql": "SELECT order_id, order_status FROM orders WHERE order_status = 'delivered';",
+        "explanation": "WHERE с равенством по тексту: значение в одинарных кавычках. В Olist это самый большой статус — ~237 заказов из 261."
+      },
+      {
+        "id": "s2",
+        "prompt": "Выведите order_id и order_purchase_timestamp заказов, купленных в 2018 году (BETWEEN по дате).",
+        "orderSensitive": false,
+        "referenceSql": "SELECT order_id, order_purchase_timestamp FROM orders WHERE order_purchase_timestamp BETWEEN '2018-01-01' AND '2018-12-31 23:59:59';",
+        "explanation": "BETWEEN включителен с обеих сторон. Текстовые даты в ISO-формате 'YYYY-MM-DD HH:MM:SS' сравниваются лексикографически — это работает корректно благодаря порядку компонент."
+      },
+      {
+        "id": "s3",
+        "prompt": "Все заказы в статусах 'delivered' или 'shipped' — через IN. Выведите order_id и order_status.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT order_id, order_status FROM orders WHERE order_status IN ('delivered','shipped');",
+        "explanation": "IN — короче цепочки OR. Удобнее читать и поддерживать: добавить статус — добавить элемент списка, а не лепить ещё одну OR-ветку."
+      },
+      {
+        "id": "s4",
+        "prompt": "Доставленные заказы, купленные в июле 2018: order_id и timestamp. Комбинация WHERE + AND + BETWEEN.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT order_id, order_purchase_timestamp FROM orders WHERE order_status = 'delivered' AND order_purchase_timestamp BETWEEN '2018-07-01' AND '2018-07-31 23:59:59';",
+        "explanation": "Два условия через AND. Оба должны быть истинны. Скобки тут не обязательны — AND имеет приоритет — но привычку их ставить лучше выработать сразу."
+      },
+      {
+        "id": "s5",
+        "prompt": "Заказы НЕ в статусах 'canceled' и 'unavailable' (через NOT IN). Выведите order_id, order_status.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT order_id, order_status FROM orders WHERE order_status NOT IN ('canceled','unavailable');",
+        "explanation": "NOT IN — отрицание списка. Внимание: в реальных данных бывают NULL в статусе — NOT IN их потеряет (NULL не равен ничему, в т.ч. отрицанию). Здесь статусов NULL нет, ловушку разберём в дне 4."
+      }
+    ]
+  }
+}

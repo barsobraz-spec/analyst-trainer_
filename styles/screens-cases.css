@@ -1,0 +1,547 @@
+/* --- Экран кейса Data Detective (T1.6) --- */
+.case-view__scenario p { line-height: 1.6; }
+
+.case-view__question {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  background: var(--accent-tint);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+/* Таблица данных с сортировкой (Ф1) */
+.case-view__table-wrap { overflow-x: auto; margin: 1rem 0; }
+.case-view__table {
+  border-collapse: collapse;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.case-view__table th,
+.case-view__table td {
+  padding: 0.5rem 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.case-view__table th { background: var(--surface-2); }
+.case-view__table tbody tr:last-child td { border-bottom: none; }
+.case-view__cell--num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.case-view__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.case-view__sort:hover { color: var(--accent); }
+.case-view__sort-arrow { color: var(--accent); font-size: 0.75rem; }
+
+/* Метрики (Ф1) — аккуратные «стат-плитки»: подпись над крупным числом,
+   тонкая граница 1px, стеклянный блик сверху. */
+.case-view__metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 0.7rem;
+  margin: 1.15rem 0;
+}
+.case-view__metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--glass-highlight);
+}
+.case-view__metrics dt {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+.case-view__metrics dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Цепочка рассуждений (Ф2) */
+.reasoning-chain { margin-top: 1.5rem; }
+.reasoning-chain__title { margin: 0 0 0.3rem; }
+.reasoning-chain__hint { margin: 0 0 0.8rem; color: var(--text-muted); font-size: 0.9rem; }
+.reasoning-chain__list {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin: 0 0 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.reasoning-chain__step { display: flex; gap: 0.6rem; align-items: flex-start; }
+.reasoning-chain__input {
+  flex: 1;
+  font: inherit;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  resize: vertical;
+}
+.reasoning-chain__input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.reasoning-chain__remove {
+  flex: none;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+}
+.reasoning-chain__remove:hover:not(:disabled) { color: var(--danger); border-color: var(--danger-border); }
+.reasoning-chain__add {
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: 1px dashed var(--accent);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+}
+.reasoning-chain__add:disabled { color: var(--text-muted); border-color: var(--border); cursor: default; }
+
+/* --- Метод «5 Whys» модуля 5.4 (T4.1) — линейная цепочка «Почему?» --------- */
+.five-whys { margin-top: 1.5rem; }
+.five-whys__title { margin: 0 0 0.3rem; }
+.five-whys__hint { margin: 0 0 0.8rem; color: var(--text-muted); font-size: 0.9rem; }
+.five-whys__problem {
+  margin: 0 0 0.9rem;
+  padding: 0.6rem 0.8rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-weight: 600;
+}
+.five-whys__list {
+  list-style: none;
+  /* Лесенка-цепочка: каждый следующий уровень отступает глубже предыдущего. */
+  counter-reset: why;
+  padding: 0;
+  margin: 0 0 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.five-whys__level {
+  counter-increment: why;
+  border-left: 3px solid var(--accent);
+  padding: 0.1rem 0 0.1rem 0.8rem;
+}
+.five-whys__level:nth-child(n + 2) { margin-left: 1.1rem; }
+.five-whys__context {
+  margin: 0 0 0.3rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.five-whys__context::before {
+  content: counter(why) ". ";
+  color: var(--accent);
+}
+.five-whys__input {
+  width: 100%;
+  font: inherit;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  resize: vertical;
+}
+.five-whys__input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.five-whys__controls { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.five-whys__add {
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: 1px dashed var(--accent);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+}
+.five-whys__add:disabled { color: var(--text-muted); border-color: var(--border); cursor: default; }
+.five-whys__remove {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+}
+.five-whys__remove:hover:not(:disabled) { color: var(--danger); border-color: var(--danger-border); }
+.five-whys__remove:disabled { color: var(--text-muted); border-color: var(--border); cursor: default; opacity: 0.6; }
+.five-whys__status { margin: 0.5rem 0 0; color: var(--text-muted); font-size: 0.85rem; min-height: 1.2em; }
+
+/* --- Выбор метода RCA (5.4, T4.2): 5 Whys / Fishbone ----------------------- */
+.cause-analysis { margin-top: 1.5rem; }
+.method-picker {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem 1rem;
+  margin: 0 0 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.method-picker__legend { font-weight: 600; padding: 0 0.3rem; }
+.method-picker__option {
+  flex: 1 1 220px;
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.method-picker__option:has(input:checked) { border-color: var(--accent); background: var(--bg); }
+.method-picker__option:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 1px; }
+.method-picker__text { display: flex; flex-direction: column; gap: 0.15rem; }
+.method-picker__name { font-weight: 600; }
+.method-picker__hint { color: var(--text-muted); font-size: 0.85rem; }
+
+/* --- Интерактивное дерево причин (5.4 Ф3/Ф4) ------------------------------- */
+.fishbone { margin-top: 0.5rem; }
+.fishbone__title { margin: 0 0 0.3rem; }
+.fishbone__intro { margin: 0 0 0.9rem; color: var(--text-muted); font-size: 0.9rem; }
+.cause-tree__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+/* Вложенные уровни отступают и тянут ветку-направляющую слева. */
+.cause-tree__node > .cause-tree__list {
+  margin-top: 0.4rem;
+  margin-left: 0.9rem;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--border);
+}
+.cause-tree__row { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+.cause-tree__toggle {
+  flex: none;
+  width: 1.6rem;
+  font: inherit;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.2rem 0;
+  cursor: pointer;
+}
+.cause-tree__toggle--leaf { border-color: transparent; background: none; cursor: default; }
+.cause-tree__label {
+  font-weight: 600;
+  padding: 0.3rem 0.2rem;
+}
+.cause-tree__label--fixed { color: var(--text); }
+.cause-tree__label-input {
+  flex: 1 1 12rem;
+  font: inherit;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.cause-tree__label-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.cause-tree__root,
+.cause-tree__add,
+.cause-tree__delete {
+  flex: none;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+}
+.cause-tree__add { font-weight: 700; min-width: 2rem; }
+.cause-tree__root.is-on { color: var(--warning-fg); border-color: var(--warning-border); background: var(--warning-bg); }
+.cause-tree__delete:hover:not(:disabled) { color: var(--danger); border-color: var(--danger-border); }
+/* Подсветка узла, помеченного корневой причиной. */
+.cause-tree__node--root > .cause-tree__row {
+  background: var(--warning-bg);
+  border-radius: var(--radius);
+  padding: 0.15rem 0.3rem;
+}
+
+/* Эталонное дерево (5.4 Ф5) — только для чтения, в той же визуализации. */
+.cause-tree--readonly .cause-tree__row { padding: 0.2rem 0.3rem; }
+.cause-tree--readonly .cause-tree__label { padding: 0; }
+.cause-tree__root-badge {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--warning-fg);
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius);
+  padding: 0.05rem 0.45rem;
+}
+.rca-solution__root-cause {
+  margin: 0.9rem 0 0;
+  padding: 0.6rem 0.8rem;
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius);
+}
+
+/* Финальный ответ (Ф3) */
+.case-view__answer { margin-top: 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.case-view__answer-label { font-weight: 600; }
+.case-view__answer-input {
+  font: inherit;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  resize: vertical;
+}
+.case-view__answer-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Кнопка сверки с эталоном */
+.case-view__submit-bar { margin-top: 1.25rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.case-view__submit {
+  padding: 0.55rem 1.3rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.case-view__submit:hover:not(:disabled) { filter: brightness(1.05); }
+.case-view__submit:disabled { opacity: 0.6; cursor: not-allowed; }
+.case-view__submit-hint { font-size: 0.88rem; color: var(--text-muted); }
+
+.case-view__done { margin-top: 1rem; font-weight: 600; color: var(--success); }
+.case-view__done a { margin-left: 0.25rem; }
+
+.case-host-error a { display: inline-block; margin-top: 0.5rem; }
+
+/* --- Конструктор гипотез 5.2 (T3.1, PRD §5.2 Ф1–Ф3) --- */
+.hypothesis-form { margin-top: 1.5rem; }
+.hypothesis-form__title { margin: 0 0 0.3rem; }
+.hypothesis-form__intro { margin: 0 0 1rem; color: var(--text-muted); font-size: 0.92rem; }
+
+.hypothesis-form__list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hypothesis-form__card {
+  padding: 1.1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.hypothesis-form__card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.85rem;
+}
+.hypothesis-form__card-title { margin: 0; font-size: 1.05rem; }
+.hypothesis-form__card-actions { margin-left: auto; display: flex; gap: 0.5rem; }
+
+.hypothesis-form__insert {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: 1px dashed var(--accent);
+  border-radius: var(--radius);
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+}
+.hypothesis-form__insert:hover:not(:disabled) { background: var(--accent-tint); }
+
+.hypothesis-form__remove {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+}
+.hypothesis-form__remove:hover:not(:disabled) { color: var(--danger); border-color: var(--danger-border); }
+
+.hypothesis-form__fields { display: grid; gap: 0.7rem; }
+.hypothesis-form__field { display: flex; flex-direction: column; gap: 0.25rem; }
+.hypothesis-form__field-label { font-weight: 600; font-size: 0.9rem; }
+.hypothesis-form__field-input {
+  font: inherit;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  resize: vertical;
+}
+.hypothesis-form__field-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.hypothesis-form__add {
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: 1px dashed var(--accent);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+}
+.hypothesis-form__add:disabled { color: var(--text-muted); border-color: var(--border); cursor: default; }
+
+/* Чек-лист качества гипотезы (Ф3) */
+.quality-checklist {
+  margin: 0.9rem 0 0;
+  padding: 0.7rem 1rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  min-inline-size: 0;
+}
+.quality-checklist__legend { font-weight: 600; font-size: 0.9rem; padding: 0 0.4rem; }
+.quality-checklist__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+.quality-checklist__row { display: flex; align-items: flex-start; gap: 0.5rem; }
+.quality-checklist__checkbox { width: 1.05rem; height: 1.05rem; margin-top: 0.2rem; flex: none; }
+.quality-checklist__text { display: flex; flex-direction: column; }
+.quality-checklist__label { font-weight: 500; }
+.quality-checklist__hint { font-size: 0.82rem; color: var(--text-muted); }
+.quality-checklist__score {
+  margin: 0.7rem 0 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* --- Проблемная ситуация кейса 5.2: факты/данные --- */
+.case-view__facts { margin: 1.1rem 0; }
+.case-view__facts-title { margin: 0 0 0.5rem; font-size: 1.05rem; }
+.case-view__facts-list {
+  margin: 0;
+  padding-left: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.case-view__facts-list li { line-height: 1.5; }
+
+/* --- Матрица приоритизации 5.2 (T3.2, PRD §5.2 Ф4) --- */
+.prioritization { margin-top: 1.5rem; }
+.prioritization__title { margin: 0 0 0.3rem; }
+.prioritization__hint { margin: 0 0 0.9rem; color: var(--text-muted); font-size: 0.9rem; }
+
+.prioritization__grid {
+  display: grid;
+  grid-template-columns: max-content 1fr 1fr;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+.prioritization__corner { background: transparent; }
+.prioritization__col-header,
+.prioritization__row-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+.prioritization__row-header { padding-right: 0.4rem; }
+
+.prioritization__cell {
+  min-height: 90px;
+  padding: 0.5rem 0.6rem 0.6rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.prioritization__cell-tag {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.prioritization__slots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.prioritization__tray { margin-top: 0.9rem; }
+.prioritization__tray-title { margin: 0 0 0.4rem; font-size: 0.95rem; }
+.prioritization__empty { margin: 0; color: var(--text-muted); font-size: 0.88rem; }
+
+.prioritization__chip {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  padding: 0.35rem 0.5rem;
+  background: var(--accent-tint);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.prioritization__chip-name { font-weight: 600; font-size: 0.85rem; }
+.prioritization__move {
+  font: inherit;
+  font-size: 0.82rem;
+  margin-left: auto;
+  padding: 0.15rem 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  max-width: 100%;
+}
+.prioritization__move:disabled { opacity: 0.6; cursor: default; }
+
+@media (max-width: 560px) {
+  /* На узком экране подписи усилий прячем, ячейки — в один столбец, чтобы
+     селекты и фишки не сжимались до нечитаемого вида. */
+  .prioritization__grid { grid-template-columns: 1fr; }
+  .prioritization__corner,
+  .prioritization__col-header { display: none; }
+  .prioritization__row-header { justify-content: flex-start; padding: 0.3rem 0 0; }
+}
+

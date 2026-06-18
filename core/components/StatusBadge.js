@@ -11,6 +11,8 @@
 //
 // ES-модуль: `import { StatusBadge, DifficultyBadge } from './core/components/StatusBadge.js'`.
 
+import { h } from '../dom.js';
+
 // Человекочитаемые подписи закрытых перечней (PRD §4).
 export const STATUS_LABEL = {
   not_started: 'Не начат',
@@ -28,26 +30,19 @@ export const DIFFICULTY_LABEL = {
 // null/undefined → «Статус недоступен» (например, сбой чтения хранилища — PRD §3),
 // неизвестное значение показываем как есть, не роняя экран.
 export function StatusBadge(status) {
-  const span = document.createElement('span');
-  span.className = 'badge badge--status';
-
   if (status == null) {
-    span.classList.add('badge--status-unknown');
-    span.textContent = 'Статус недоступен';
-    return span;
+    return h('span', { className: 'badge badge--status badge--status-unknown' }, 'Статус недоступен');
   }
-
-  span.classList.add(`badge--status-${String(status).replace('_', '-')}`);
-  span.textContent = STATUS_LABEL[status] ?? String(status);
-  return span;
+  return h('span', {
+    className: `badge badge--status badge--status-${String(status).replace('_', '-')}`,
+  }, STATUS_LABEL[status] ?? String(status));
 }
 
 // Бейдж сложности. level: 'basic' | 'intermediate' | 'advanced'.
 // Неизвестный/пустой уровень → нейтральный бейдж, без падения.
 export function DifficultyBadge(level) {
-  const span = document.createElement('span');
   const known = Object.prototype.hasOwnProperty.call(DIFFICULTY_LABEL, level);
-  span.className = `badge badge--difficulty badge--${known ? level : 'unknown'}`;
-  span.textContent = known ? DIFFICULTY_LABEL[level] : (level || 'без уровня');
-  return span;
+  return h('span', {
+    className: `badge badge--difficulty badge--${known ? level : 'unknown'}`,
+  }, known ? DIFFICULTY_LABEL[level] : (level || 'без уровня'));
 }

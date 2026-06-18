@@ -497,6 +497,139 @@
       "path": "cases/automation-010.json",
       "title": "Автоматизировать апсейл при достижении лимита тарифа",
       "difficulty": "advanced"
+    },
+    {
+      "caseId": "detective-011",
+      "module": "5.1",
+      "path": "cases/detective-011.json",
+      "title": "Revenue растёт, а Weekly Active Users падают",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "detective-012",
+      "module": "5.1",
+      "path": "cases/detective-012.json",
+      "title": "AI нашёл причину падения выручки — проверь его вывод",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "hypothesis-011",
+      "module": "5.2",
+      "path": "cases/hypothesis-011.json",
+      "title": "Activation в SaaS: ICE-приоритизация гипотез",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "simulator-011",
+      "module": "5.6",
+      "path": "cases/simulator-011.json",
+      "title": "Unit-economics: масштабирование убивает маржу",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "sql-011",
+      "module": "5.5",
+      "path": "cases/sql-011.json",
+      "title": "Retention и LTV по каналам привлечения",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "dashboard-m1w4d1-chartchoice",
+      "module": "5.3",
+      "path": "cases/dashboard-m1w4d1-chartchoice.json",
+      "title": "Какой график для какой задачи",
+      "difficulty": "basic"
+    },
+    {
+      "caseId": "detective-m1w1d2-formulas",
+      "module": "5.1",
+      "path": "cases/detective-m1w1d2-formulas.json",
+      "title": "BizhuMart: первые цифры по январским заказам",
+      "difficulty": "basic"
+    },
+    {
+      "caseId": "detective-m1w1d3-logic",
+      "module": "5.1",
+      "path": "cases/detective-m1w1d3-logic.json",
+      "title": "Классификация заказов для программы лояльности",
+      "difficulty": "basic"
+    },
+    {
+      "caseId": "detective-m1w1d5-cleaning",
+      "module": "5.1",
+      "path": "cases/detective-m1w1d5-cleaning.json",
+      "title": "Выгрузка от франчайзи: что в ней «битое»",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "detective-m1w2d1-lookup",
+      "module": "5.1",
+      "path": "cases/detective-m1w2d1-lookup.json",
+      "title": "Связать заказы со справочником товаров",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "detective-m1w2d2-textnorm",
+      "module": "5.1",
+      "path": "cases/detective-m1w2d2-textnorm.json",
+      "title": "Сколько у нас реально клиентов: текстовая нормализация",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "detective-m1w2d3-dedup",
+      "module": "5.1",
+      "path": "cases/detective-m1w2d3-dedup.json",
+      "title": "Дубли в выгрузке: явные и «почти»",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "detective-m1w2d4-anomaly",
+      "module": "5.1",
+      "path": "cases/detective-m1w2d4-anomaly.json",
+      "title": "Условное форматирование: ищем аномалии в дневных продажах",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "detective-m1w2d5-churn",
+      "module": "5.1",
+      "path": "cases/detective-m1w2d5-churn.json",
+      "title": "Кто из клиентов «уснул» 90+ дней",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "detective-m1w2d6-reconcile",
+      "module": "5.1",
+      "path": "cases/detective-m1w2d6-reconcile.json",
+      "title": "Сверка двух выгрузок: CRM против бухгалтерии",
+      "difficulty": "advanced"
+    },
+    {
+      "caseId": "detective-m1w3d1-pivot",
+      "module": "5.1",
+      "path": "cases/detective-m1w3d1-pivot.json",
+      "title": "Сводная-в-голове: категория × канал",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "detective-m1w3d2-timeshare",
+      "module": "5.1",
+      "path": "cases/detective-m1w3d2-timeshare.json",
+      "title": "Группировка по месяцам и доли от итога",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "detective-m1w3d4-sumifs",
+      "module": "5.1",
+      "path": "cases/detective-m1w3d4-sumifs.json",
+      "title": "SUMIFS/COUNTIFS/AVERAGEIFS — анализ без сводных",
+      "difficulty": "intermediate"
+    },
+    {
+      "caseId": "detective-m1w4d3-powerquery",
+      "module": "5.1",
+      "path": "cases/detective-m1w4d3-powerquery.json",
+      "title": "Power Query: что именно сделало преобразование",
+      "difficulty": "intermediate"
     }
   ]
 }

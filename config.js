@@ -16,7 +16,7 @@ export const APP_VERSION = '1.0.0';
 // Когда нужно сбросить кэш браузера — измени значение здесь, затем запусти:
 //   bash scripts/bump-cache-version.sh
 // Скрипт подставит новое значение во все четыре места.
-export const APP_CACHE_VERSION = 'v1.0';
+export const APP_CACHE_VERSION = 'v1.3';
 
 // --- Лимиты контента ---
 // Максимальный размер исходного датасета одного кейса (PRD §3: 5 MB).

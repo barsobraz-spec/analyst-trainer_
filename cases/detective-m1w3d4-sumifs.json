@@ -1,0 +1,700 @@
+{
+  "caseId": "detective-m1w3d4-sumifs",
+  "module": "5.1",
+  "schemaVersion": 1,
+  "title": "SUMIFS/COUNTIFS/AVERAGEIFS — анализ без сводных",
+  "difficulty": "intermediate",
+  "skillTags": [
+    "analytical-thinking"
+  ],
+  "payload": {
+    "scenario": "Сводные — мощно, но иногда нужны ОДНА конкретная цифра в дашборде или в KPI-карточке: «выручка в Бишкеке онлайн в категории бытовая техника». Для этого и нужны SUMIFS/COUNTIFS/AVERAGEIFS — они дают одну цифру по нескольким условиям, без перестроения сводной.\n\nЭтот кейс — батарея коротких вопросов «по фильтрам».",
+    "question": "1) Сколько суммарной выручки даёт «Бытовая техника» в Бишкеке через онлайн? 2) Каков средний чек в Алматы оффлайн? 3) Сколько всего заказов с суммой ≥ 5 000 сом?",
+    "table": {
+      "columns": [
+        {
+          "key": "order_id",
+          "label": "ID",
+          "numeric": false
+        },
+        {
+          "key": "city",
+          "label": "Город",
+          "numeric": false
+        },
+        {
+          "key": "channel",
+          "label": "Канал",
+          "numeric": false
+        },
+        {
+          "key": "category",
+          "label": "Категория",
+          "numeric": false
+        },
+        {
+          "key": "amount",
+          "label": "Сумма",
+          "numeric": true
+        }
+      ],
+      "rows": [
+        {
+          "order_id": "O-100056",
+          "city": "Каракол",
+          "channel": "онлайн",
+          "category": "Освещение",
+          "amount": 284
+        },
+        {
+          "order_id": "O-100418",
+          "city": "Алматы",
+          "channel": "оффлайн",
+          "category": "Кухня и посуда",
+          "amount": 4781
+        },
+        {
+          "order_id": "O-100151",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Кухня и посуда",
+          "amount": 3656
+        },
+        {
+          "order_id": "O-100431",
+          "city": "Ош",
+          "channel": "оффлайн",
+          "category": "Текстиль",
+          "amount": 1903
+        },
+        {
+          "order_id": "O-100448",
+          "city": "Ош",
+          "channel": "онлайн",
+          "category": "Текстиль",
+          "amount": 1989
+        },
+        {
+          "order_id": "O-100004",
+          "city": "Ош",
+          "channel": "онлайн",
+          "category": "Бытовая техника",
+          "amount": 3426
+        },
+        {
+          "order_id": "O-100058",
+          "city": "Астана",
+          "channel": "онлайн",
+          "category": "Уборка",
+          "amount": 3112
+        },
+        {
+          "order_id": "O-100343",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Уборка",
+          "amount": 180
+        },
+        {
+          "order_id": "O-100460",
+          "city": "Алматы",
+          "channel": "оффлайн",
+          "category": "Кухня и посуда",
+          "amount": 2232
+        },
+        {
+          "order_id": "O-100211",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Освещение",
+          "amount": 29344
+        },
+        {
+          "order_id": "O-100396",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Кухня и посуда",
+          "amount": 6820
+        },
+        {
+          "order_id": "O-100307",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Уборка",
+          "amount": 1197
+        },
+        {
+          "order_id": "O-100373",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Текстиль",
+          "amount": 2023
+        },
+        {
+          "order_id": "O-100114",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Уборка",
+          "amount": 543
+        },
+        {
+          "order_id": "O-100226",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Освещение",
+          "amount": 2043
+        },
+        {
+          "order_id": "O-100463",
+          "city": "Ош",
+          "channel": "онлайн",
+          "category": "Уборка",
+          "amount": 366
+        },
+        {
+          "order_id": "O-100110",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Уборка",
+          "amount": 424
+        },
+        {
+          "order_id": "O-100001",
+          "city": "Алматы",
+          "channel": "онлайн",
+          "category": "Кухня и посуда",
+          "amount": 13320
+        },
+        {
+          "order_id": "O-100423",
+          "city": "Ош",
+          "channel": "онлайн",
+          "category": "Уборка",
+          "amount": 185
+        },
+        {
+          "order_id": "O-100339",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Уборка",
+          "amount": 2836
+        },
+        {
+          "order_id": "O-100279",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Уборка",
+          "amount": 1487
+        },
+        {
+          "order_id": "O-100036",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Текстиль",
+          "amount": 667
+        },
+        {
+          "order_id": "O-100007",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Уборка",
+          "amount": 4026
+        },
+        {
+          "order_id": "O-100249",
+          "city": "Алматы",
+          "channel": "онлайн",
+          "category": "Бытовая техника",
+          "amount": 15214
+        },
+        {
+          "order_id": "O-100406",
+          "city": "Ош",
+          "channel": "онлайн",
+          "category": "Бытовая техника",
+          "amount": 10528
+        },
+        {
+          "order_id": "O-100203",
+          "city": "Ош",
+          "channel": "оффлайн",
+          "category": "Уборка",
+          "amount": 1523
+        },
+        {
+          "order_id": "O-100322",
+          "city": "Астана",
+          "channel": "онлайн",
+          "category": "Уборка",
+          "amount": 704
+        },
+        {
+          "order_id": "O-100419",
+          "city": "Алматы",
+          "channel": "оффлайн",
+          "category": "Кухня и посуда",
+          "amount": 3371
+        },
+        {
+          "order_id": "O-100437",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Освещение",
+          "amount": 2111
+        },
+        {
+          "order_id": "O-100280",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Освещение",
+          "amount": 287
+        },
+        {
+          "order_id": "O-100020",
+          "city": "Алматы",
+          "channel": "онлайн",
+          "category": "Уборка",
+          "amount": 440
+        },
+        {
+          "order_id": "O-100125",
+          "city": "Каракол",
+          "channel": "онлайн",
+          "category": "Кухня и посуда",
+          "amount": 2465
+        },
+        {
+          "order_id": "O-100202",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Кухня и посуда",
+          "amount": 3694
+        },
+        {
+          "order_id": "O-100468",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Бытовая техника",
+          "amount": 13759
+        },
+        {
+          "order_id": "O-100428",
+          "city": "Алматы",
+          "channel": "онлайн",
+          "category": "Кухня и посуда",
+          "amount": 9300
+        },
+        {
+          "order_id": "O-100141",
+          "city": "Алматы",
+          "channel": "онлайн",
+          "category": "Освещение",
+          "amount": 6319
+        },
+        {
+          "order_id": "O-100038",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Бытовая техника",
+          "amount": 15367
+        },
+        {
+          "order_id": "O-100029",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Бытовая техника",
+          "amount": 7754
+        },
+        {
+          "order_id": "O-100424",
+          "city": "Алматы",
+          "channel": "онлайн",
+          "category": "Кухня и посуда",
+          "amount": 3544
+        },
+        {
+          "order_id": "O-100400",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Бытовая техника",
+          "amount": 13930
+        },
+        {
+          "order_id": "O-100078",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Уборка",
+          "amount": 376
+        },
+        {
+          "order_id": "O-100090",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Бытовая техника",
+          "amount": 7280
+        },
+        {
+          "order_id": "O-100037",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Бытовая техника",
+          "amount": 2182
+        },
+        {
+          "order_id": "O-100177",
+          "city": "Алматы",
+          "channel": "оффлайн",
+          "category": "Кухня и посуда",
+          "amount": 4756
+        },
+        {
+          "order_id": "O-100255",
+          "city": "Алматы",
+          "channel": "онлайн",
+          "category": "Освещение",
+          "amount": 20058
+        },
+        {
+          "order_id": "O-100139",
+          "city": "Астана",
+          "channel": "онлайн",
+          "category": "Бытовая техника",
+          "amount": 14611
+        },
+        {
+          "order_id": "O-100256",
+          "city": "Ош",
+          "channel": "оффлайн",
+          "category": "Кухня и посуда",
+          "amount": 4341
+        },
+        {
+          "order_id": "O-100455",
+          "city": "Алматы",
+          "channel": "оффлайн",
+          "category": "Бытовая техника",
+          "amount": 10027
+        },
+        {
+          "order_id": "O-100179",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Бытовая техника",
+          "amount": 2421
+        },
+        {
+          "order_id": "O-100370",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Уборка",
+          "amount": 1385
+        },
+        {
+          "order_id": "O-100443",
+          "city": "Ош",
+          "channel": "оффлайн",
+          "category": "Уборка",
+          "amount": 403
+        },
+        {
+          "order_id": "O-100317",
+          "city": "Ош",
+          "channel": "онлайн",
+          "category": "Кухня и посуда",
+          "amount": 2586
+        },
+        {
+          "order_id": "O-100096",
+          "city": "Алматы",
+          "channel": "оффлайн",
+          "category": "Уборка",
+          "amount": 177
+        },
+        {
+          "order_id": "O-100033",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Бытовая техника",
+          "amount": 8160
+        },
+        {
+          "order_id": "O-100026",
+          "city": "Ош",
+          "channel": "оффлайн",
+          "category": "Текстиль",
+          "amount": 1832
+        },
+        {
+          "order_id": "O-100244",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Освещение",
+          "amount": 6321
+        },
+        {
+          "order_id": "O-100332",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Кухня и посуда",
+          "amount": 9860
+        },
+        {
+          "order_id": "O-100178",
+          "city": "Астана",
+          "channel": "онлайн",
+          "category": "Освещение",
+          "amount": 279
+        },
+        {
+          "order_id": "O-100436",
+          "city": "Алматы",
+          "channel": "онлайн",
+          "category": "Уборка",
+          "amount": 438
+        },
+        {
+          "order_id": "O-100464",
+          "city": "Ош",
+          "channel": "онлайн",
+          "category": "Уборка",
+          "amount": 6108
+        },
+        {
+          "order_id": "O-100175",
+          "city": "Алматы",
+          "channel": "оффлайн",
+          "category": "Освещение",
+          "amount": 8556
+        },
+        {
+          "order_id": "O-100041",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Уборка",
+          "amount": 449
+        },
+        {
+          "order_id": "O-100417",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Освещение",
+          "amount": 4626
+        },
+        {
+          "order_id": "O-100188",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Кухня и посуда",
+          "amount": 9516
+        },
+        {
+          "order_id": "O-100410",
+          "city": "Астана",
+          "channel": "онлайн",
+          "category": "Кухня и посуда",
+          "amount": 5166
+        },
+        {
+          "order_id": "O-100376",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Кухня и посуда",
+          "amount": 2446
+        },
+        {
+          "order_id": "O-100480",
+          "city": "Алматы",
+          "channel": "оффлайн",
+          "category": "Бытовая техника",
+          "amount": 2078
+        },
+        {
+          "order_id": "O-100218",
+          "city": "Алматы",
+          "channel": "оффлайн",
+          "category": "Текстиль",
+          "amount": 1861
+        },
+        {
+          "order_id": "O-100260",
+          "city": "Алматы",
+          "channel": "онлайн",
+          "category": "Уборка",
+          "amount": 182
+        },
+        {
+          "order_id": "O-100130",
+          "city": "Алматы",
+          "channel": "онлайн",
+          "category": "Бытовая техника",
+          "amount": 56468
+        },
+        {
+          "order_id": "O-100236",
+          "city": "Ош",
+          "channel": "онлайн",
+          "category": "Кухня и посуда",
+          "amount": 1778
+        },
+        {
+          "order_id": "O-100224",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Освещение",
+          "amount": 2175
+        },
+        {
+          "order_id": "O-100198",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Бытовая техника",
+          "amount": 43758
+        },
+        {
+          "order_id": "O-100440",
+          "city": "Астана",
+          "channel": "онлайн",
+          "category": "Текстиль",
+          "amount": 14356
+        },
+        {
+          "order_id": "O-100461",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Бытовая техника",
+          "amount": 7190
+        },
+        {
+          "order_id": "O-100420",
+          "city": "Ош",
+          "channel": "онлайн",
+          "category": "Уборка",
+          "amount": 3022
+        },
+        {
+          "order_id": "O-100314",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Бытовая техника",
+          "amount": 4898
+        },
+        {
+          "order_id": "O-100194",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Уборка",
+          "amount": 179
+        },
+        {
+          "order_id": "O-100138",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Кухня и посуда",
+          "amount": 9876
+        },
+        {
+          "order_id": "O-100196",
+          "city": "Каракол",
+          "channel": "онлайн",
+          "category": "Текстиль",
+          "amount": 1396
+        },
+        {
+          "order_id": "O-100389",
+          "city": "Алматы",
+          "channel": "онлайн",
+          "category": "Бытовая техника",
+          "amount": 4522
+        },
+        {
+          "order_id": "O-100146",
+          "city": "Алматы",
+          "channel": "онлайн",
+          "category": "Освещение",
+          "amount": 584
+        },
+        {
+          "order_id": "O-100313",
+          "city": "Алматы",
+          "channel": "оффлайн",
+          "category": "Освещение",
+          "amount": 2212
+        },
+        {
+          "order_id": "O-100281",
+          "city": "Алматы",
+          "channel": "онлайн",
+          "category": "Бытовая техника",
+          "amount": 14138
+        },
+        {
+          "order_id": "O-100108",
+          "city": "Бишкек",
+          "channel": "онлайн",
+          "category": "Кухня и посуда",
+          "amount": 5938
+        },
+        {
+          "order_id": "O-100210",
+          "city": "Алматы",
+          "channel": "онлайн",
+          "category": "Текстиль",
+          "amount": 7722
+        },
+        {
+          "order_id": "O-100209",
+          "city": "Бишкек",
+          "channel": "оффлайн",
+          "category": "Кухня и посуда",
+          "amount": 10068
+        },
+        {
+          "order_id": "O-100429",
+          "city": "Ош",
+          "channel": "онлайн",
+          "category": "Бытовая техника",
+          "amount": 14116
+        },
+        {
+          "order_id": "O-100250",
+          "city": "Алматы",
+          "channel": "онлайн",
+          "category": "Бытовая техника",
+          "amount": 3551
+        },
+        {
+          "order_id": "O-100028",
+          "city": "Ош",
+          "channel": "оффлайн",
+          "category": "Кухня и посуда",
+          "amount": 9189
+        }
+      ]
+    },
+    "hints": [
+      "SUMIFS(сумма; диапазон1; условие1; диапазон2; условие2; …) — сумма по нескольким условиям.",
+      "COUNTIFS — то же самое, только считает строки. Подходит для вопроса «сколько заказов с суммой ≥ 5000».",
+      "AVERAGEIFS — среднее по условиям. Внимание: если ни одна строка не подходит, формула даст #DIV/0! — поэтому полезно обернуть IFERROR."
+    ],
+    "reference": {
+      "sections": [
+        {
+          "heading": "Вопрос 1: Бытовая техника · Бишкек · онлайн",
+          "body": "SUMIFS = 80 511 сом (по 6 заказам). Формула: =SUMIFS(E:E; B:B;\"Бишкек\"; C:C;\"онлайн\"; D:D;\"Бытовая техника\")."
+        },
+        {
+          "heading": "Вопрос 2: Средний чек Алматы оффлайн",
+          "body": "AVERAGEIFS = 4 005 сом по 10 заказам. Формула: =AVERAGEIFS(E:E; B:B;\"Алматы\"; C:C;\"оффлайн\")."
+        },
+        {
+          "heading": "Вопрос 3: Заказов с суммой ≥ 5 000",
+          "body": "COUNTIFS = 33. Формула: =COUNTIFS(E:E; \">=5000\")."
+        },
+        {
+          "heading": "Когда SUMIFS лучше сводной",
+          "body": "• В KPI-карточке дашборда — одна цифра, не нужна целая сводная.\n• В формуле, которая должна автоматически пересчитываться при добавлении строк.\n• Когда отчёт уходит в шаблон, и сводную потом «не пересоберёт» оператор."
+        }
+      ]
+    }
+  }
+}

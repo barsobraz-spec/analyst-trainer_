@@ -1,0 +1,44 @@
+{
+  "caseId": "sql-m2w1d2-select",
+  "module": "5.5",
+  "schemaVersion": 1,
+  "title": "День 2 · Базовая выборка: колонки, ORDER BY, LIMIT, DISTINCT",
+  "difficulty": "basic",
+  "skillTags": ["sql"],
+  "payload": {
+    "scenario": "Вы — стажёр-аналитик интернет-магазина Olist. Сегодня знакомитесь с базой: учитесь доставать ровно нужные колонки, сортировать строки, ограничивать вывод и убирать дубли значений.\n\nВ датасете 7 таблиц настоящего Olist (бразильский e-commerce): заказы, клиенты, товары, продавцы, позиции заказов, платежи, отзывы. Сегодня работаем только с двумя — orders и customers.\n\nДля каждой подзадачи напишите SQL в редакторе и нажмите «Проверить решение». Кнопкой «Выполнить» можно осмотреться в данных.",
+    "question": "Решите подзадачи, используя только SELECT, ORDER BY, LIMIT и DISTINCT — никаких WHERE, JOIN, агрегатов.",
+    "datasetPath": "cases/datasets/sql-m2-olist.json",
+    "starterSql": "SELECT * FROM orders LIMIT 10;",
+    "subtasks": [
+      {
+        "id": "s1",
+        "prompt": "Выведите столбцы order_id и order_status для первых 10 заказов (LIMIT 10). Сортировка не нужна.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT order_id, order_status FROM orders LIMIT 10;",
+        "explanation": "SELECT с явным списком колонок + LIMIT 10. Без сортировки порядок 10 строк не гарантирован — но автопроверка не зависит от порядка."
+      },
+      {
+        "id": "s2",
+        "prompt": "Список всех уникальных статусов заказов (один столбец order_status). Дубли убираем.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT DISTINCT order_status FROM orders;",
+        "explanation": "DISTINCT убирает повторы. В Olist 6 статусов: delivered (большинство), shipped, canceled, processing, unavailable, invoiced. Это карта возможных состояний заказа."
+      },
+      {
+        "id": "s3",
+        "prompt": "10 самых поздних заказов: выведите order_id и order_purchase_timestamp, отсортируйте по дате покупки по убыванию, оставьте 10 строк.",
+        "orderSensitive": true,
+        "referenceSql": "SELECT order_id, order_purchase_timestamp FROM orders ORDER BY order_purchase_timestamp DESC LIMIT 10;",
+        "explanation": "ORDER BY ... DESC + LIMIT — классический способ взять «топ-N последних». Подзадача orderSensitive: автопроверка требует именно убывающий порядок."
+      },
+      {
+        "id": "s4",
+        "prompt": "Уникальные города клиентов (один столбец customer_city), отсортированные по алфавиту по возрастанию.",
+        "orderSensitive": true,
+        "referenceSql": "SELECT DISTINCT customer_city FROM customers ORDER BY customer_city ASC;",
+        "explanation": "DISTINCT + ORDER BY. Обратите внимание: данные грязные — есть 'sao paulo', 'Sao Paulo', 'SAO PAULO' и опечатки. Для базы это РАЗНЫЕ значения, и DISTINCT их не схлопнет. Это задача недели 2 (ILIKE/нормализация) — пока просто заметьте проблему."
+      }
+    ]
+  }
+}

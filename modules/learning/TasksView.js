@@ -4,7 +4,7 @@ import { getAllTaskProgress, saveTaskProgress } from '../../core/db.js';
 import { calculateChecklistProgress, groupWeakSpots, TASK_STATUS } from '../../core/learningProgress.js';
 import { moduleButton } from '../../core/learningLinks.js';
 import { navigate } from '../../core/router.js';
-import { loadPracticeSlice, enrichContentWithPractice } from '../../core/learningContent.js?v=v1.0';
+import { loadPracticeSlice, enrichContentWithPractice } from '../../core/learningContent.js?v=v1.3';
 import { LearningRemindersPanel, REMINDER_SUGGESTIONS } from './LearningReminders.js';
 import {
   TASK_STATUS_LABELS,
@@ -19,7 +19,7 @@ import {
   text,
   toProgressMap,
   withLearningContent,
-} from './learningUi.js?v=practice-content-2';
+} from './learningUi.js?v=v1.3';
 
 // Максимум задач в первом рендере списка. Кнопка «Показать ещё» грузит остаток.
 const TASK_PAGE_SIZE = 50;

@@ -1,12 +1,13 @@
 // modules/learning/plan/DayDetail.js — отображение и fallback-модель дня плана.
 
 import { moduleButton } from '../../../core/learningLinks.js';
+import { caseHash } from '../../../core/courseNav.js';
 import { text } from '../learningUi.js';
 
 const STUDY_DAYS_PER_WEEK = 6;
 const REST_DAY_NUMBER = 7;
 
-export function DayDetail(day, month, week) {
+export function DayDetail(day, month, week, caseIndex) {
   const box = document.createElement('section');
   box.className = 'learning-day-detail';
   if (!day) {
@@ -25,6 +26,8 @@ export function DayDetail(day, month, week) {
   if (day.goal) facts.append(dayFact('Главная цель', day.goal));
   if (day.result) facts.append(dayFact('Результат дня', day.result));
   if (facts.childElementCount > 0) box.append(facts);
+
+  box.append(practiceLaunch(day, caseIndex));
 
   if (Array.isArray(day.blocks) && day.blocks.length > 0) {
     const blocks = document.createElement('div');
@@ -120,6 +123,37 @@ function normalizeRestDay(rawDay, week) {
     summary: rawDay?.summary || week.title,
     topics: topics.length > 0 ? topics : [rawDay?.title || week.title].filter(Boolean),
   };
+}
+
+// Кнопки запуска практики тренажёра прямо в карточке дня: day.caseIds →
+// конкретные кейсы (#/module/:id/case/:caseId). Если ссылок нет или индекс
+// кейсов недоступен — секция не отображается.
+function practiceLaunch(day, caseIndex) {
+  const ids = Array.isArray(day.caseIds) ? day.caseIds : [];
+  if (ids.length === 0 || !caseIndex) return document.createDocumentFragment();
+
+  const links = document.createElement('div');
+  links.className = 'learning-practice-links';
+  for (const id of ids) {
+    const entry = caseIndex.get(id);
+    if (!entry) continue;
+    const link = document.createElement('a');
+    link.className = 'learning-practice';
+    link.href = caseHash(entry);
+    link.textContent = `Начать практику: ${entry.title}`;
+    link.title = `Модуль ${entry.module} · ${entry.title}`;
+    links.append(link);
+  }
+  if (links.childElementCount === 0) return document.createDocumentFragment();
+
+  const section = document.createElement('section');
+  section.className = 'learning-day-section learning-day-practice';
+  section.append(
+    text('h4', 'learning-subtitle', 'Практика в тренажёре по теме дня'),
+    text('p', 'learning-muted', 'Закрепи тему сразу на кейсе тренажёра — параллельно с запросами в DBeaver.'),
+    links,
+  );
+  return section;
 }
 
 function dayFact(label, value) {

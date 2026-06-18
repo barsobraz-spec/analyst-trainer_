@@ -38,7 +38,7 @@ export async function FavoritesView() {
 
   function showEmpty() {
     body.replaceChildren(emptyState({
-      icon: '★',
+      icon: 'star',
       title: 'Пока ничего не отмечено',
       text: 'Откройте список кейсов и нажмите звёздочку на любом кейсе — он появится здесь.',
       ctaHref: '#/modules',

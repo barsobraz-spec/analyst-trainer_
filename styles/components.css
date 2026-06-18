@@ -1,0 +1,436 @@
+/* --- Контейнер экрана --- */
+main#app {
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem calc(var(--bottomnav-h) + 2.5rem);
+}
+main#app:focus { outline: none; }
+
+.screen > h1 { margin-top: 0; }
+
+/* На мобильном оставляем место под нижнюю навигацию, чтобы контент не прятался. */
+@media (max-width: 899px) {
+  main#app { padding-bottom: calc(var(--bottomnav-h) + 1.5rem); }
+}
+
+/* Узкие экраны (T10.3.3): на ширине ~375 px ужимаем поля,
+   чтобы контент и кнопки не уезжали за край. */
+@media (max-width: 480px) {
+  main#app { padding: 1rem 0.9rem calc(var(--bottomnav-h) + 1.5rem); }
+}
+
+/* --- Каталог модулей (T1.1) --- */
+.catalog__intro {
+  color: var(--text-muted);
+  margin-top: -0.25rem;
+}
+
+.catalog__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.module-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.1rem 1.15rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.module-card:hover,
+.module-card:focus-visible {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.14);
+  outline: none;
+}
+
+.module-card:focus-visible { box-shadow: 0 0 0 3px var(--accent-ring); }
+
+.module-card__title {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.module-card__desc {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  flex: 1;
+}
+
+.module-card__stats {
+  margin: 0.35rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.module-card__stats--muted {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-style: italic;
+}
+
+.module-card__metric { white-space: nowrap; }
+
+.module-card--analytics {
+  background: linear-gradient(180deg, var(--accent-tint) 0%, var(--surface) 70%);
+}
+
+/* --- Список кейсов модуля (T1.2) --- */
+.case-list__intro {
+  color: var(--text-muted);
+  margin-top: -0.25rem;
+}
+
+.case-list__banner {
+  margin: 0.75rem 0;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius);
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  color: var(--warning-fg);
+  font-size: 0.9rem;
+}
+
+.case-list__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.25rem 0 1rem;
+}
+
+.case-list__filter {
+  font: inherit;
+  font-size: 0.88rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.case-list__filter:hover { color: var(--text); border-color: var(--accent); }
+
+.case-list__filter:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.case-list__filter[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.case-list__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.case-list__empty {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Строка кейса. Рабочий кейс — <a>, ошибочный — <li class="case-row--error">. */
+.case-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.9rem 1.05rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+a.case-row:hover,
+a.case-row:focus-visible {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.14);
+  outline: none;
+}
+
+a.case-row:focus-visible { box-shadow: 0 0 0 3px var(--accent-ring); }
+
+.case-row--error {
+  border-style: dashed;
+  border-color: var(--danger-border);
+  background: var(--danger-bg);
+  cursor: not-allowed;
+}
+
+.case-row__head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.case-row__title {
+  margin: 0;
+  font-size: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.case-row__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+}
+
+.case-row__score { font-weight: 500; }
+.case-row__score--muted { color: var(--text-muted); font-weight: 400; font-style: italic; }
+
+.case-row__error {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--danger);
+}
+
+/* --- Бейджи (сложность + статус), общие для списков --- */
+.badge {
+  display: inline-block;
+  padding: 0.12rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.badge--difficulty { border: 1px solid transparent; }
+.badge--basic { background: var(--success-bg); color: var(--success); }
+.badge--intermediate { background: var(--warning-bg); color: var(--warning-fg); }
+.badge--advanced { background: var(--danger-bg); color: var(--danger); }
+.badge--unknown { background: var(--surface-2); color: var(--text-muted); }
+
+.badge--status { font-weight: 500; }
+.badge--status-not-started { background: var(--surface-2); color: var(--text-muted); }
+.badge--status-in-progress { background: var(--info-bg); color: var(--info-fg); }
+.badge--status-passed { background: var(--success-bg); color: var(--success); }
+.badge--status-unknown { background: var(--surface-2); color: var(--text-muted); font-style: italic; }
+
+/* --- Шапка экрана кейса с таймером попытки (T1.3) --- */
+.case-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.case-header__titles { min-width: 0; }
+.case-header__title { margin: 0; }
+
+.case-header__subtitle {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.case-header__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.case-header__attempt {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.case-header__timer {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+/* Достигнут кап 90 минут — дальше время не засчитывается (PRD §4). */
+.case-header__timer--capped {
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+
+/* --- Самооценка по критериям модуля (T1.4) --- */
+.self-assessment {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.self-assessment__head { margin-bottom: 1rem; }
+.self-assessment__title { margin: 0; }
+
+.self-assessment__hints {
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.self-assessment__criteria {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.self-assessment__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.self-assessment__label { font-weight: 500; }
+
+.self-assessment__control {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 220px;
+}
+
+.self-assessment__range { flex: 1; }
+
+.self-assessment__value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  min-width: 2.5ch;
+  text-align: right;
+}
+
+.self-assessment__checkbox { width: 1.1rem; height: 1.1rem; }
+
+.self-assessment__total {
+  margin: 1.1rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.self-assessment__actions {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.self-assessment__submit {
+  padding: 0.5rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.self-assessment__submit:hover:not(:disabled) { filter: brightness(1.05); }
+.self-assessment__submit:disabled { opacity: 0.6; cursor: default; }
+
+.self-assessment__status { margin: 0; font-size: 0.92rem; color: var(--text-muted); }
+.self-assessment__status--done { color: var(--success); font-weight: 600; }
+.self-assessment__status--error { color: var(--danger); font-weight: 600; }
+
+/* --- Панель подсказок (T1.5.2, PRD §5 Ф4) --- */
+.hints-panel {
+  margin-top: 1.5rem;
+  padding: 1.1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.hints-panel__title { margin: 0 0 0.6rem; font-size: 1.05rem; }
+.hints-panel__empty { margin: 0; color: var(--text-muted); font-size: 0.92rem; }
+
+.hints-panel__list {
+  margin: 0 0 0.9rem;
+  padding-left: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.hints-panel__item { line-height: 1.5; }
+
+.hints-panel__reveal {
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.hints-panel__reveal:hover:not(:disabled) { background: var(--accent-tint); }
+.hints-panel__reveal:disabled {
+  color: var(--text-muted);
+  border-color: var(--border);
+  cursor: default;
+}
+
+/* --- Эталонный разбор (T1.5.3, PRD §5 Ф5) --- */
+.reference-breakdown {
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background: linear-gradient(180deg, var(--accent-tint) 0%, var(--surface) 60%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.reference-breakdown:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.reference-breakdown__title { margin: 0 0 0.8rem; }
+.reference-breakdown__section { margin-bottom: 1rem; }
+.reference-breakdown__section:last-child { margin-bottom: 0; }
+.reference-breakdown__heading { margin: 0 0 0.4rem; font-size: 1rem; }
+.reference-breakdown__text { margin: 0 0 0.6rem; line-height: 1.55; }
+.reference-breakdown__text:last-child { margin-bottom: 0; }
+

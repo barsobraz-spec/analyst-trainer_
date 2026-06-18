@@ -288,11 +288,17 @@ function buildMetrics(metrics) {
   const dl = document.createElement('dl');
   dl.className = 'case-view__metrics';
   for (const m of metrics) {
+    // Каждая метрика — отдельная «плитка» (div-обёртка): так подпись и значение
+    // не разъезжаются по auto-fill сетке. Это чисто презентационная обёртка,
+    // допустимая внутри <dl> по HTML5; логика расчёта метрик не меняется.
+    const item = document.createElement('div');
+    item.className = 'case-view__metric';
     const dt = document.createElement('dt');
     dt.textContent = m.label ?? '';
     const dd = document.createElement('dd');
     dd.textContent = m.value ?? '';
-    dl.append(dt, dd);
+    item.append(dt, dd);
+    dl.append(item);
   }
   return dl;
 }

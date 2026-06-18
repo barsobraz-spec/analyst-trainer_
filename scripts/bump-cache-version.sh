@@ -6,10 +6,7 @@
 #   2. Запусти этот скрипт из корня проекта:
 #          bash scripts/bump-cache-version.sh
 #
-# Скрипт читает новое значение из config.js и обновляет четыре места:
-#   index.html      — styles.css?v=…  и  main.js?v=…
-#   main.js         — appRoutes.js?v=…
-#   core/appRoutes.js — TasksView.js?v=…
+# Скрипт читает новое значение из config.js и обновляет все места, где уже есть ?v=….
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -26,13 +23,9 @@ echo "Применяю версию: $VERSION"
 # macOS-совместимая замена (sed -i '' вместо sed -i)
 SED="sed -i ''"
 
-# index.html: оба ?v=
-eval "$SED 's/?v=[^\"'\'']*/?v=$VERSION/g' index.html"
+FILES=$(grep -RIl --include='*.html' --include='*.js' '?v=' .)
+for file in $FILES; do
+  eval "$SED 's/?v=[^\"'\'']*/?v=$VERSION/g' \"$file\""
+done
 
-# main.js
-eval "$SED 's/?v=[^\"'\'']*/?v=$VERSION/g' main.js"
-
-# core/appRoutes.js
-eval "$SED 's/?v=[^\"'\'']*/?v=$VERSION/g' core/appRoutes.js"
-
-echo "Готово. Проверь: grep -n '?v=' index.html main.js core/appRoutes.js"
+echo "Готово. Проверь: grep -R \"?v=\" -n --include='*.html' --include='*.js' ."

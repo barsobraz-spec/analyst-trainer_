@@ -1,0 +1,271 @@
+{
+  "caseId": "simulator-011",
+  "module": "5.6",
+  "schemaVersion": 1,
+  "title": "Unit-economics: масштабирование убивает маржу",
+  "difficulty": "intermediate",
+  "skillTags": [
+    "business-thinking"
+  ],
+  "payload": {
+    "scenario": "Стартап доставки продуктов BringIt (Казахстан). Текущая ситуация выглядит нормально: база растёт, MAU увеличивается. Но CFO насторожён — юнит-экономика пока не сходится: LTV/CAC = 2.0, а инвесторы ждут минимум 3.0 до следующего раунда. Нужно принять 3 стратегических решения.",
+    "metrics": [
+      {
+        "key": "users",
+        "label": "Активных пользователей",
+        "format": "int"
+      },
+      {
+        "key": "cac",
+        "label": "CAC, ₸",
+        "format": "money"
+      },
+      {
+        "key": "arpu",
+        "label": "ARPU, ₸/мес",
+        "format": "money"
+      },
+      {
+        "key": "churn",
+        "label": "Ежемесячный отток",
+        "format": "percent"
+      },
+      {
+        "key": "margin",
+        "label": "Маржа на пользователя",
+        "format": "percent"
+      },
+      {
+        "key": "ltv",
+        "label": "LTV, ₸",
+        "format": "money"
+      },
+      {
+        "key": "ltv_cac",
+        "label": "LTV / CAC",
+        "format": "number"
+      },
+      {
+        "key": "monthly_profit",
+        "label": "Ежемесячная прибыль, ₸",
+        "format": "money"
+      }
+    ],
+    "startState": {
+      "users": 5000,
+      "cac": 3500,
+      "arpu": 4200,
+      "churn": 0.15,
+      "margin": 0.25,
+      "ltv": 7000,
+      "ltv_cac": 2.0,
+      "monthly_profit": 5250000
+    },
+    "rounds": [
+      {
+        "title": "Раунд 1: стратегия привлечения",
+        "description": "Как растить пользовательскую базу в следующем квартале? Выберите канал привлечения.",
+        "decisions": [
+          {
+            "key": "channel",
+            "type": "choice",
+            "label": "Канал привлечения",
+            "options": [
+              {
+                "value": "aggressive",
+                "label": "Агрессивный paid-маркетинг",
+                "description": "+2 000 пользователей, но CAC вырастет до 5 000 ₸",
+                "params": {
+                  "acquired": 2000,
+                  "cac_next": 5000
+                }
+              },
+              {
+                "value": "balanced",
+                "label": "Смешанный (paid + SEO)",
+                "description": "+1 200 пользователей, CAC остаётся 3 500 ₸",
+                "params": {
+                  "acquired": 1200,
+                  "cac_next": 3500
+                }
+              },
+              {
+                "value": "organic",
+                "label": "Organic + реферальная программа",
+                "description": "+600 пользователей, CAC снижается до 2 000 ₸",
+                "params": {
+                  "acquired": 600,
+                  "cac_next": 2000
+                }
+              }
+            ]
+          }
+        ],
+        "justificationPrompt": "Объясните, почему выбрали этот канал и как это повлияет на LTV/CAC",
+        "model": [
+          {
+            "key": "users",
+            "formula": "round(users * (1 - churn) + acquired)"
+          },
+          {
+            "key": "cac",
+            "formula": "cac_next"
+          },
+          {
+            "key": "ltv",
+            "formula": "round(arpu * margin / churn)"
+          },
+          {
+            "key": "ltv_cac",
+            "formula": "round(ltv / cac * 10) / 10"
+          },
+          {
+            "key": "monthly_profit",
+            "formula": "round(users * arpu * margin)"
+          }
+        ],
+        "explanation": "Агрессивный рост снижает LTV/CAC, так как CAC растёт быстрее базы. Organic-канал медленнее наращивает базу, но резко улучшает соотношение LTV/CAC — именно это интересует инвесторов."
+      },
+      {
+        "title": "Раунд 2: управление оттоком",
+        "description": "Текущий отток 15%/мес — выше нормы для категории. Как снижать чурн?",
+        "decisions": [
+          {
+            "key": "churn_strategy",
+            "type": "choice",
+            "label": "Стратегия снижения оттока",
+            "options": [
+              {
+                "value": "loyalty",
+                "label": "Программа лояльности (бонусы, кэшбэк)",
+                "description": "Churn −3 п.п., но маржа снизится на 2 п.п. из-за расходов на бонусы",
+                "params": {
+                  "churn_delta": -0.03,
+                  "margin_delta": -0.02
+                }
+              },
+              {
+                "value": "product",
+                "label": "Инвестиция в продукт (ускорение доставки, новые SKU)",
+                "description": "Churn −2 п.п., маржа не меняется — эффект медленнее, но устойчивее",
+                "params": {
+                  "churn_delta": -0.02,
+                  "margin_delta": 0.0
+                }
+              },
+              {
+                "value": "nothing",
+                "label": "Сосредоточиться на привлечении, отток не трогать",
+                "description": "Churn остаётся 15% — компенсируем новыми пользователями",
+                "params": {
+                  "churn_delta": 0.0,
+                  "margin_delta": 0.0
+                }
+              }
+            ]
+          }
+        ],
+        "justificationPrompt": "Объясните выбор: как он влияет на LTV и почему это важнее альтернатив?",
+        "model": [
+          {
+            "key": "churn",
+            "formula": "clamp(churn + churn_delta, 0.05, 0.5)"
+          },
+          {
+            "key": "margin",
+            "formula": "clamp(margin + margin_delta, 0.1, 0.9)"
+          },
+          {
+            "key": "ltv",
+            "formula": "round(arpu * margin / churn)"
+          },
+          {
+            "key": "ltv_cac",
+            "formula": "round(ltv / cac * 10) / 10"
+          },
+          {
+            "key": "monthly_profit",
+            "formula": "round(users * arpu * margin)"
+          }
+        ],
+        "explanation": "Снижение churn с 15% до 13% увеличивает LTV примерно на 15%. Программа лояльности снижает churn сильнее, но бьёт по марже. Инвестиция в продукт — более устойчивое решение."
+      },
+      {
+        "title": "Раунд 3: ценообразование",
+        "description": "Последнее решение: стоит ли менять цены?",
+        "decisions": [
+          {
+            "key": "pricing",
+            "type": "choice",
+            "label": "Стратегия цен",
+            "options": [
+              {
+                "value": "keep",
+                "label": "Держать текущие цены",
+                "description": "ARPU не меняется, churn стабилен",
+                "params": {
+                  "arpu_delta": 0,
+                  "churn_delta": 0.0
+                }
+              },
+              {
+                "value": "premium",
+                "label": "Ввести премиум-тариф (+500 ₸, возьмут 15%)",
+                "description": "Средний ARPU вырастет на 500 ₸, но churn вырастет на 2 п.п.",
+                "params": {
+                  "arpu_delta": 500,
+                  "churn_delta": 0.02
+                }
+              },
+              {
+                "value": "discount",
+                "label": "Скидка для активных: −300 ₸, зато сильно удерживают",
+                "description": "ARPU −300 ₸, но churn снизится на 3 п.п.",
+                "params": {
+                  "arpu_delta": -300,
+                  "churn_delta": -0.03
+                }
+              }
+            ]
+          }
+        ],
+        "justificationPrompt": "Обоснуйте: как изменится LTV/CAC и почему это правильно на текущем этапе?",
+        "model": [
+          {
+            "key": "arpu",
+            "formula": "arpu + arpu_delta"
+          },
+          {
+            "key": "churn",
+            "formula": "clamp(churn + churn_delta, 0.05, 0.5)"
+          },
+          {
+            "key": "ltv",
+            "formula": "round(arpu * margin / churn)"
+          },
+          {
+            "key": "ltv_cac",
+            "formula": "round(ltv / cac * 10) / 10"
+          },
+          {
+            "key": "monthly_profit",
+            "formula": "round(users * arpu * margin)"
+          }
+        ],
+        "explanation": "Все три варианта могут привести к разным LTV/CAC. Ключевой урок: LTV зависит от tripe: ARPU, маржа и churn одновременно. Оптимизировать одно без учёта других — типичная ошибка."
+      }
+    ],
+    "target": {
+      "metric": "ltv_cac",
+      "value": 3.0,
+      "direction": "max",
+      "label": "LTV / CAC ≥ 3.0"
+    },
+    "reference": [
+      "Оптимальный путь: Organic (CAC 2 000 ₸) → Инвестиция в продукт (churn −2 п.п.) → Держать цены.",
+      "После 3 раундов: LTV = round(4 200 × 0.25 / 0.13) = 8 077 ₸, LTV/CAC = 8 077 / 2 000 = 4.0 — цель достигнута.",
+      "Агрессивный paid-маркетинг (CAC 5 000 ₸) при том же LTV даёт LTV/CAC ≈ 1.4 — бизнес не масштабируется, инвесторы не дадут раунд.",
+      "Главный урок: снизить CAC через качественный канал привлечения + удержать маржу > попытка купить рост дорогой рекламой."
+    ]
+  }
+}

@@ -2,16 +2,9 @@
 // Поднимает конфиг, запускает роутер и инициализирует хранилище.
 
 import { CONFIG } from './config.js';
-import { openDB, smokeTest } from './core/db.js';
-import { smokeTest as smokeCases } from './core/caseLoader.js';
-import { smokeTest as smokeEvent } from './core/event.js';
-import { smokeTest as smokeBackup } from './core/backup.js';
-import { smokeTest as smokeSim } from './core/simulationEngine.js';
-import { smokeTest as smokeAutomation } from './core/automationArtifacts.js';
-import { smokeTest as smokeAnalytics } from './core/analytics.js';
-import { smokeTest as smokeLearningProgress } from './core/learningProgress.js';
+import { openDB } from './core/db.js';
 // Cache-bust version — менять через scripts/bump-cache-version.sh (источник: config.js APP_CACHE_VERSION)
-import { APP_ROUTES } from './core/appRoutes.js?v=v1.0';
+import { APP_ROUTES } from './core/appRoutes.js?v=v1.3';
 import { defineRoutes, startRouter } from './core/router.js';
 import { applyStoredTheme } from './core/theme.js';
 import { installNavigation } from './core/components/Sidebar.js';
@@ -34,18 +27,27 @@ applyStoredTheme();
 
 // Инициализируем хранилище прогресса (создаст БД и применит миграции при первом запуске).
 openDB()
-  .then(() => {
+  .then(async () => {
     console.info('[Analyst Trainer] хранилище IndexedDB готово.');
     // Ручные smoke-check'и: открыть страницу с ?smoke=db или ?smoke=cases
     const smoke = new URLSearchParams(location.search).get('smoke');
-    if (smoke === 'db') return smokeTest();
-    if (smoke === 'cases') return smokeCases();
-    if (smoke === 'event') return smokeEvent();
-    if (smoke === 'backup') return smokeBackup();
-    if (smoke === 'sim') return smokeSim();
-    if (smoke === 'automation') return smokeAutomation();
-    if (smoke === 'analytics') return smokeAnalytics();
-    if (smoke === 'learning-progress') return smokeLearningProgress();
+    if (smoke) {
+      const SMOKE_MODULES = {
+        'db':               './core/db.js',
+        'cases':            './core/caseLoader.js',
+        'event':            './core/event.js',
+        'backup':           './core/backup.js',
+        'sim':              './core/simulationEngine.js',
+        'automation':       './core/automationArtifacts.js',
+        'analytics':        './core/analytics.js',
+        'learning-progress':'./core/learningProgress.js',
+        'dom':              './core/dom.js',
+      };
+      const path = SMOKE_MODULES[smoke];
+      if (!path) { console.warn('[smoke] неизвестный режим:', smoke); return; }
+      const { smokeTest } = await import(path);
+      return smokeTest();
+    }
   })
   .catch((err) => {
     // StorageError несёт понятное сообщение и признак offerRawBackup (PRD §4).

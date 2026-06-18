@@ -43,7 +43,7 @@ export async function HistoryView() {
 
   if (events.length === 0) {
     root.append(emptyState({
-      icon: '🕑',
+      icon: 'clock',
       title: 'История пуста',
       text: 'Здесь появятся все пройденные кейсы. Пройдите первый кейс, чтобы начать вести историю.',
       ctaHref: '#/modules',

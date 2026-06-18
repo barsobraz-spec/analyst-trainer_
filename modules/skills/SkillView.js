@@ -87,7 +87,7 @@ export async function SkillView({ id }) {
   root.append(sectionTitle('Какие кейсы пройдены'));
   if (total === 0) {
     root.append(emptyState({
-      icon: '📚',
+      icon: 'book',
       title: 'В этом навыке пока нет кейсов',
       text: 'Загляните в каталог — возможно, кейсы появятся позже.',
       ctaHref: '#/modules',

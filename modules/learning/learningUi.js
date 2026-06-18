@@ -1,8 +1,8 @@
 // modules/learning/learningUi.js — общие DOM-помощники учебной системы.
 
 import { pageHeader } from '../shared/ui.js';
-import { loadLearningContent, safeContentFallback } from '../../core/learningContent.js?v=practice-content-2';
-import { searchLearningContent } from '../../core/learningSearch.js?v=practice-content-2';
+import { loadLearningContent, safeContentFallback } from '../../core/learningContent.js?v=v1.3';
+import { searchLearningContent } from '../../core/learningSearch.js?v=v1.3';
 import { resolveTrainerModules } from '../../core/learningLinks.js';
 
 export const TASK_STATUS_LABELS = Object.freeze({

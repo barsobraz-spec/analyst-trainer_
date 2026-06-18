@@ -1,0 +1,56 @@
+/* ===========================================================================
+   Оболочка навигации (навигация в стиле буткемпов: Codecademy / Scrimba / ZTM)
+   • десктоп: постоянный сайдбар-навигатор слева + контент справа;
+   • мобильный: сайдбар → выдвижная шторка, плюс нижняя навигация.
+   =========================================================================== */
+
+/* Доступная ссылка «к содержимому» — видна только при фокусе с клавиатуры. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  padding: 0.5rem 0.9rem;
+  border-radius: 0 0 8px 0;
+}
+.skip-link:focus { left: 0; }
+
+/* Двухколоночная раскладка: сайдбар фиксированной ширины + гибкий контент. */
+.layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+/* Верхняя панель — только мобильный (на десктопе скрыта, см. медиазапрос ниже). */
+.topbar {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  height: var(--topbar-h);
+  padding: 0 0.8rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 35;
+}
+.topbar__toggle {
+  font: inherit;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  width: 2.2rem;
+  height: 2.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.topbar__brand { font-weight: 700; color: var(--text); text-decoration: none; }
+

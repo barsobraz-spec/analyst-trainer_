@@ -1,0 +1,50 @@
+{
+  "caseId": "sql-011",
+  "module": "5.5",
+  "schemaVersion": 1,
+  "title": "Retention и LTV по каналам привлечения",
+  "difficulty": "intermediate",
+  "skillTags": [
+    "sql"
+  ],
+  "datasetPath": "cases/datasets/product-001.json",
+  "payload": {
+    "scenario": "Продуктовая команда финтех-стартапа собрала данные за первые 2 недели работы: таблицы пользователей, событий и покупок. Нужно понять, какие каналы привлечения дают лучшее удержание и LTV.",
+    "question": "Используй таблицы users, events и purchases. Ответь на 4 вопроса о retention и юнит-экономике по каналам.",
+    "starterSql": "-- Таблицы:\n-- users(user_id, signup_date, channel, plan)\n-- events(user_id, event_name, event_date)\n-- purchases(user_id, purchase_date, amount)\n\nSELECT * FROM users LIMIT 5;",
+    "subtasks": [
+      {
+        "id": "retention_d7",
+        "title": "D7 Retention по каналам",
+        "description": "Посчитай, сколько пользователей вернулось на 7-й день (событие return_visit) в разрезе каналов привлечения. Покажи: канал, всего пользователей, вернулись на D7, retention %.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT u.channel,\n       COUNT(DISTINCT u.user_id) AS total_users,\n       COUNT(DISTINCT e.user_id) AS retained_d7,\n       ROUND(100.0 * COUNT(DISTINCT e.user_id) / COUNT(DISTINCT u.user_id)) AS d7_pct\nFROM users u\nLEFT JOIN events e ON u.user_id = e.user_id AND e.event_name = 'return_visit'\nGROUP BY u.channel\nORDER BY d7_pct DESC",
+        "explanation": "Referral = 80%, Organic = 70%, Paid = 40%. Платный трафик хуже удерживается — важно учитывать при расчёте CAC-окупаемости."
+      },
+      {
+        "id": "ltv_channel",
+        "title": "LTV за 30 дней по каналам",
+        "description": "Посчитай суммарную выручку от покупок и средний LTV на пользователя по каждому каналу привлечения.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT u.channel,\n       COUNT(DISTINCT u.user_id) AS users,\n       COALESCE(SUM(p.amount), 0) AS total_revenue,\n       ROUND(COALESCE(SUM(p.amount), 0) * 1.0 / COUNT(DISTINCT u.user_id)) AS avg_ltv\nFROM users u\nLEFT JOIN purchases p ON u.user_id = p.user_id\nGROUP BY u.channel\nORDER BY avg_ltv DESC",
+        "explanation": "Referral = 5 000 ₸/user, Organic = 4 000 ₸, Paid = 1 750 ₸. При CAC ≈ 3 500 ₸ paid-канал убыточен в краткосрочной перспективе."
+      },
+      {
+        "id": "activation_funnel",
+        "title": "Воронка активации (signup → first_action)",
+        "description": "Построй воронку: подсчитай уникальных пользователей по каждому шагу онбординга. Шаги: signup, onboard_start, onboard_complete, first_action. Отсортируй от большего к меньшему.",
+        "orderSensitive": true,
+        "referenceSql": "SELECT event_name,\n       COUNT(DISTINCT user_id) AS users\nFROM events\nWHERE event_name IN ('signup', 'onboard_start', 'onboard_complete', 'first_action')\nGROUP BY event_name\nORDER BY users DESC",
+        "explanation": "Из 30 зарегистрированных: 25 начали онбординг (83%), 18 завершили (60%), 14 совершили первое действие (47%). Самый большой дроп — последний шаг: только 14 из 18 (78%) дошли до first_action."
+      },
+      {
+        "id": "ltv_by_plan",
+        "title": "LTV по тарифному плану",
+        "description": "Посчитай суммарную выручку и средний LTV на пользователя по каждому тарифному плану (free, basic, pro).",
+        "orderSensitive": false,
+        "referenceSql": "SELECT u.plan,\n       COUNT(DISTINCT u.user_id) AS users,\n       COALESCE(SUM(p.amount), 0) AS total_revenue,\n       ROUND(COALESCE(SUM(p.amount), 0) * 1.0 / COUNT(DISTINCT u.user_id)) AS avg_ltv\nFROM users u\nLEFT JOIN purchases p ON u.user_id = p.user_id\nGROUP BY u.plan\nORDER BY avg_ltv DESC",
+        "explanation": "Pro = 10 000 ₸, Basic = 2 500 ₸, Free = 0 ₸. Конвертация free → basic — ключевой рычаг роста выручки."
+      }
+    ]
+  }
+}

@@ -1,0 +1,94 @@
+/* ===========================================================================
+   СЛОЙ ПОЛИРОВКИ — «тихая роскошь» (Linear / Vercel / Arc)
+   Подключается ПОСЛЕДНИМ, поэтому аккуратно усиливает уже существующие правила
+   через каскад, не переписывая разметку. Только внешний вид: глубина (стекло),
+   мягкое свечение акцента, выверенные микро-анимации появления и наведения.
+   =========================================================================== */
+
+/* --- Глубина «стекла»: тонкий верхний блик ребра у всех ключевых поверхностей.
+       Идёт ПОСЛЕ их объявлений, поэтому выигрывает по порядку каскада. --- */
+.module-card,
+.home-hero,
+.home-widget,
+.home-focus-card,
+.panel,
+.sb-quick {
+  box-shadow: var(--shadow), var(--glass-highlight);
+}
+
+/* --- Боковая панель: лёгкий вертикальный «чернильный» градиент + блик ребра,
+       чтобы был объём, а не плоская заливка. --- */
+.sidebar {
+  background:
+    linear-gradient(180deg, var(--sidebar-surface-2) 0%, var(--sidebar-bg) 32%);
+  box-shadow: var(--glass-highlight);
+}
+
+/* --- Лого-метка: мягкое свечение под индиго. --- */
+.sidebar__logo {
+  box-shadow: 0 6px 18px -8px var(--accent-glow), var(--glass-highlight);
+}
+
+/* --- Активный пункт «модуль» в сайдбаре: тонкая акцентная грань слева. --- */
+.sb-module.is-active > .sb-module__row {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+/* --- Карточки быстрого входа: спокойное акцентное свечение при наведении
+       вместо резкой подсветки рамки. --- */
+.home-focus-card {
+  transition:
+    border-color 0.18s ease,
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.18s ease;
+}
+.home-focus-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow), var(--glass-highlight), 0 0 0 1px var(--accent-tint),
+    0 18px 40px -22px var(--accent-glow);
+}
+
+/* --- Единый «дорогой» отклик карточек-модулей: мягче и со свечением. --- */
+.module-card {
+  transition:
+    border-color 0.18s ease,
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.18s ease;
+}
+.module-card:hover,
+.module-card:focus-visible {
+  border-color: var(--border-strong);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow), var(--glass-highlight),
+    0 18px 40px -22px var(--accent-glow);
+}
+
+/* --- Первичные CTA: тактильный «нажим» + мягкое свечение под акцентом. --- */
+.home-hero__cta--primary,
+.case-view__submit {
+  box-shadow: 0 10px 26px -12px var(--accent-glow);
+}
+.home-hero__cta--primary:active,
+.case-view__submit:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* --- Вопрос кейса: чуть больше «воздуха» и мягкий градиент к акценту. --- */
+.case-view__question {
+  padding: 0.9rem 1.15rem;
+  background:
+    linear-gradient(90deg, var(--accent-tint), transparent 80%);
+  line-height: 1.5;
+}
+
+/* --- Плавное появление контента экрана при загрузке/переходе. --- */
+@media (prefers-reduced-motion: no-preference) {
+  #app {
+    animation: at-rise 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+@keyframes at-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}

@@ -2,7 +2,8 @@
 
 import { getAllMonthlyExamProgress, saveMonthlyExamProgress } from '../../core/db.js';
 import { buildMonthlyExamChecklist, calculateMonthlyExamProgress } from '../../core/learningProgress.js';
-import { DayDetail, buildWeekDays, dayLabel } from './plan/DayDetail.js';
+import { loadIndex } from '../../core/caseLoader.js';
+import { DayDetail, buildWeekDays, dayLabel } from './plan/DayDetail.js?v=v1.3';
 import {
   LearningSearchPanel,
   card,
@@ -24,12 +25,14 @@ export function LearningPlanView() {
 async function renderPlan(content) {
   const examRows = await getAllMonthlyExamProgress().catch(() => []);
   const examsByMonth = new Map(examRows.map((row) => [row.month, row]));
+  const { entries } = await loadIndex().catch(() => ({ entries: [] }));
+  const caseIndex = new Map((entries || []).filter((entry) => entry && entry.caseId).map((entry) => [entry.caseId, entry]));
   const section = screen('learning learning-plan');
   section.append(
     learningHeader('План обучения', 'Семь месяцев, четырнадцать спринтов, недели, проекты, карьерные действия и связи с тренажером.'),
     searchPanel(content),
     overview(content),
-    monthsRoadmap(content, examsByMonth),
+    monthsRoadmap(content, examsByMonth, caseIndex),
   );
   return section;
 }
@@ -67,7 +70,7 @@ function overview(content) {
   return box;
 }
 
-function monthsRoadmap(content, examsByMonth) {
+function monthsRoadmap(content, examsByMonth, caseIndex) {
   const wrap = document.createElement('div');
   wrap.className = 'learning-plan-browser';
   const months = content.plan.months || [];
@@ -106,7 +109,7 @@ function monthsRoadmap(content, examsByMonth) {
   const day = days.find((item) => item.day === selectedDay) || days[0];
 
   wrap.append(
-    monthPanel(months, month, week, day, days, examsByMonth.get(month.month)),
+    monthPanel(months, month, week, day, days, examsByMonth.get(month.month), caseIndex),
     planNavigator(months, month, week, day),
   );
   return wrap;
@@ -200,13 +203,13 @@ function planNavigator(months, selectedMonth, selectedWeek, selectedDay) {
   return box;
 }
 
-function monthPanel(months, month, selectedWeek, selectedDay, days, savedExam) {
+function monthPanel(months, month, selectedWeek, selectedDay, days, savedExam, caseIndex) {
   const box = card('learning-month');
   box.id = `month-${month.month}`;
   box.classList.add('is-highlighted');
   box.append(
     focusHeader(months, month, selectedWeek, selectedDay),
-    DayDetail(selectedDay, month, selectedWeek),
+    DayDetail(selectedDay, month, selectedWeek, caseIndex),
   );
 
   const monthInfo = disclosurePanel('Информация о месяце', false);

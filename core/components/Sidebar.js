@@ -19,6 +19,7 @@ import { getOutline, caseHash } from '../courseNav.js';
 import { getModule } from '../modules.js';
 import { BOTTOM_NAV_ITEMS, NAV_GROUPS } from '../navigation.js';
 import { loadProgressMap, moduleProgress, getResumeTarget } from '../progress.js';
+import { PROGRESS_EVENT } from '../event.js';
 import { ProgressRing } from './ProgressRing.js';
 
 // Точка входа: заполняет каркас оболочки (index.html) и подключает поведение.
@@ -224,7 +225,7 @@ export function installNavigation() {
 
   // --- Слушатели -------------------------------------------------------------
   window.addEventListener('hashchange', () => { setDrawer(false); updateActive(); });
-  window.addEventListener('at:progress-changed', refresh);
+  window.addEventListener(PROGRESS_EVENT, refresh);
 
   updateActive();
   refresh();

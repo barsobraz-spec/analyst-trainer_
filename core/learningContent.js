@@ -8,6 +8,15 @@
 //   • Ленивый: practiceContent грузится по навыку через loadPracticeSlice(skillId)
 //     или весь сразу через loadAllPracticeContent() — только когда экран это требует.
 
+import { APP_CACHE_VERSION } from '../config.js';
+
+// Добавляет к пути данных версию кэша приложения, чтобы при обновлении контента
+// (bump APP_CACHE_VERSION) браузер гарантированно перечитывал свежий JSON, а не
+// отдавал устаревшую копию из HTTP-кэша.
+function withVersion(path) {
+  return `${path}${path.includes('?') ? '&' : '?'}v=${APP_CACHE_VERSION}`;
+}
+
 const CONTENT_PATHS = Object.freeze({
   plan: './learning-plan/data/plan.json',
   tasks: './learning-plan/data/tasks.json',
@@ -34,7 +43,7 @@ export class LearningContentError extends Error {
 export function loadLearningContent() {
   if (contentPromise) return contentPromise;
   contentPromise = Promise.all(Object.entries(CONTENT_PATHS).map(async ([key, path]) => {
-    const response = await fetch(path);
+    const response = await fetch(withVersion(path));
     if (!response.ok) {
       throw new LearningContentError(`Не удалось загрузить ${path}: HTTP ${response.status}`);
     }
@@ -145,7 +154,7 @@ export function safeContentFallback(error) {
 // Загрузить индекс чанков практики (2.5 КБ). Кешируется на весь сеанс.
 export function loadPracticeIndex() {
   if (!practiceIndexPromise) {
-    practiceIndexPromise = fetch(PRACTICE_INDEX_PATH)
+    practiceIndexPromise = fetch(withVersion(PRACTICE_INDEX_PATH))
       .then((r) => {
         if (!r.ok) throw new LearningContentError(`Индекс практики недоступен (HTTP ${r.status})`);
         return r.json();
@@ -163,7 +172,7 @@ export function loadPracticeIndex() {
 export function loadPracticeSlice(skillId) {
   if (!practiceSlicePromises.has(skillId)) {
     const path = `${PRACTICE_CHUNK_BASE}practice-${skillId}.json`;
-    const promise = fetch(path)
+    const promise = fetch(withVersion(path))
       .then((r) => {
         if (!r.ok) throw new LearningContentError(`Чанк практики '${skillId}' недоступен (HTTP ${r.status})`);
         return r.json();

@@ -23,15 +23,50 @@ export function pageHeader(title, subtitle) {
   return head;
 }
 
+// Встроенные линейные SVG-иконки в едином стиле с сайдбаром (currentColor, без
+// эмодзи) — чтобы пустые состояния выглядели «дорого», а не как стикеры. Если
+// в `icon` передано имя из набора — рисуем линейную иконку, иначе оставляем
+// текст (обратная совместимость с эмодзи на ещё не переведённых экранах).
+const LINE_ICONS = {
+  clock: [['circle', { cx: '12', cy: '12', r: '8' }], ['path', { d: 'M12 8v4l3 2' }]],
+  star: [['path', { d: 'M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9 6.8 19.6l1-5.8L3.5 9.7l5.9-.9L12 3z' }]],
+  chart: [['path', { d: 'M4 20V4' }], ['path', { d: 'M4 20h16' }], ['rect', { x: '7', y: '12', width: '3', height: '5' }], ['rect', { x: '12', y: '8', width: '3', height: '9' }], ['rect', { x: '17', y: '5', width: '3', height: '12' }]],
+  database: [['ellipse', { cx: '12', cy: '6', rx: '7', ry: '3' }], ['path', { d: 'M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6' }], ['path', { d: 'M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6' }]],
+  briefcase: [['rect', { x: '3', y: '7', width: '18', height: '13', rx: '2' }], ['path', { d: 'M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' }], ['path', { d: 'M3 12h18' }]],
+  book: [['path', { d: 'M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z' }], ['path', { d: 'M19 19H6a2 2 0 0 1-2-2' }]],
+  play: [['circle', { cx: '12', cy: '12', r: '9' }], ['path', { d: 'm10 8 6 4-6 4z' }]],
+  target: [['circle', { cx: '12', cy: '12', r: '8' }], ['circle', { cx: '12', cy: '12', r: '3' }]],
+  dice: [['rect', { x: '4', y: '4', width: '16', height: '16', rx: '3' }], ['path', { d: 'M9 9h.01' }], ['path', { d: 'M15 15h.01' }], ['path', { d: 'M15 9h.01' }], ['path', { d: 'M9 15h.01' }]],
+};
+
+function svgEl(name, attrs = {}) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', name);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+
+// Рисует линейную иконку по имени из LINE_ICONS (или null, если имени нет).
+function lineIcon(name) {
+  if (!LINE_ICONS[name]) return null;
+  const svg = svgEl('svg', {
+    viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+    'stroke-width': '1.75', 'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+  });
+  for (const [tag, attrs] of LINE_ICONS[name]) svg.append(svgEl(tag, attrs));
+  return svg;
+}
+
 // Пустое состояние с иконкой, текстом и необязательной кнопкой-ссылкой.
-export function emptyState({ icon = '★', title, text, ctaHref, ctaText }) {
+export function emptyState({ icon = 'star', title, text, ctaHref, ctaText }) {
   const wrap = document.createElement('div');
   wrap.className = 'empty-state';
 
   const ic = document.createElement('div');
   ic.className = 'empty-state__icon';
   ic.setAttribute('aria-hidden', 'true');
-  ic.textContent = icon;
+  const svg = lineIcon(icon);
+  if (svg) ic.append(svg);
+  else ic.textContent = icon;
   wrap.append(ic);
 
   const h2 = document.createElement('h2');

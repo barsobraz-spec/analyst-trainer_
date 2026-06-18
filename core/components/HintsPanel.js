@@ -14,39 +14,29 @@
 //
 // ES-модуль: `import { HintsPanel } from './core/components/HintsPanel.js'`.
 
-export function HintsPanel({ hints = [], onReveal } = {}) {
-  const panel = document.createElement('section');
-  panel.className = 'hints-panel';
+import { h } from '../dom.js';
 
-  const title = document.createElement('h2');
-  title.className = 'hints-panel__title';
-  title.textContent = 'Подсказки';
-  panel.append(title);
+export function HintsPanel({ hints = [], onReveal } = {}) {
+  const panel = h('section', { className: 'hints-panel' },
+    h('h2', { className: 'hints-panel__title' }, 'Подсказки'),
+  );
 
   // Нормализуем элементы: допускаем массив строк или объектов { text }.
   const items = hints
-    .map((h) => (typeof h === 'string' ? h : (h && h.text) || ''))
+    .map((hint) => (typeof hint === 'string' ? hint : (hint && hint.text) || ''))
     .filter((t) => t.trim().length > 0);
 
   let hintsUsed = 0;
 
   if (items.length === 0) {
-    const empty = document.createElement('p');
-    empty.className = 'hints-panel__empty';
-    empty.textContent = 'Для этого кейса подсказок нет.';
-    panel.append(empty);
+    panel.append(h('p', { className: 'hints-panel__empty' }, 'Для этого кейса подсказок нет.'));
     return { element: panel, getHintsUsed: () => 0 };
   }
 
   // Список открытых подсказок (наполняется по одной).
-  const list = document.createElement('ol');
-  list.className = 'hints-panel__list';
-  panel.append(list);
-
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'hints-panel__reveal';
-  panel.append(button);
+  const list = h('ol', { className: 'hints-panel__list' });
+  const button = h('button', { type: 'button', className: 'hints-panel__reveal' });
+  panel.append(list, button);
 
   function updateButton() {
     const remaining = items.length - hintsUsed;
@@ -60,10 +50,7 @@ export function HintsPanel({ hints = [], onReveal } = {}) {
 
   button.addEventListener('click', () => {
     if (hintsUsed >= items.length) return;
-    const li = document.createElement('li');
-    li.className = 'hints-panel__item';
-    li.textContent = items[hintsUsed];
-    list.append(li);
+    list.append(h('li', { className: 'hints-panel__item' }, items[hintsUsed]));
     hintsUsed += 1;
     updateButton();
     if (onReveal) onReveal(hintsUsed);

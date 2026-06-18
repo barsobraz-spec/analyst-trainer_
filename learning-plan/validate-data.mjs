@@ -177,7 +177,7 @@ function validateTasks(tasksDoc, plan) {
   assertSourceDocuments('tasks.json', tasksDoc);
   expect(JSON.stringify(tasksDoc.statuses) === JSON.stringify(TASK_STATUSES), 'tasks.json: статусы задач не совпадают с MVP-контрактом');
   expect(Array.isArray(tasksDoc.skills) && tasksDoc.skills.length > 0, 'tasks.json: должен содержать skills');
-  expect(Array.isArray(tasksDoc.tasks) && tasksDoc.tasks.length === 100, `tasks.json: основных задач должно быть 100, сейчас ${tasksDoc.tasks?.length}`);
+  expect(Array.isArray(tasksDoc.tasks) && tasksDoc.tasks.length >= 100, `tasks.json: основных задач должно быть не менее 100, сейчас ${tasksDoc.tasks?.length}`);
   expect(Array.isArray(tasksDoc.supplementalTasks), 'tasks.json: supplementalTasks должен быть массивом');
 
   const planMonths = new Set((plan?.months || []).map((month) => month.month));
@@ -216,7 +216,7 @@ function validateTasks(tasksDoc, plan) {
 
   expect(uniqueValues(ids), 'tasks.json: id задач должны быть уникальными');
   expect(uniqueValues(numbers), 'tasks.json: numbers основных задач должны быть уникальными');
-  expect(numbers.every((number, index) => number === index + 1), 'tasks.json: основные задачи должны иметь номера 1-100 по порядку');
+  expect(numbers.every((number, index) => number === index + 1), 'tasks.json: основные задачи должны иметь последовательные номера начиная с 1');
   for (const month of planMonths) {
     expect(taskMonths.has(month), `tasks.json: месяц ${month} не покрыт обязательными задачами`);
   }

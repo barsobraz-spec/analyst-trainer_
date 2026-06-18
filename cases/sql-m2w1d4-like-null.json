@@ -1,0 +1,51 @@
+{
+  "caseId": "sql-m2w1d4-like-null",
+  "module": "5.5",
+  "schemaVersion": 1,
+  "title": "День 4 · Поиск по шаблону (LIKE) и логика NULL",
+  "difficulty": "basic",
+  "skillTags": ["sql"],
+  "payload": {
+    "scenario": "База Olist — реальная: в полях встречаются NULL и грязный текст (разный регистр городов, без диакритики). Сегодня учимся искать по шаблону и правильно работать с пустыми значениями.\n\nВажно: SQL-движок здесь — SQLite. У LIKE в SQLite поведение по умолчанию НЕРЕГИСТРОЗАВИСИМОЕ (для ASCII). В PostgreSQL LIKE регистрозависим, а нечувствительный к регистру вариант — ILIKE. Логика NULL одинаковая везде.",
+    "question": "Решите подзадачи: научитесь ловить строки по шаблону и не терять NULL в фильтрах.",
+    "datasetPath": "cases/datasets/sql-m2-olist.json",
+    "starterSql": "SELECT customer_id, customer_city FROM customers LIMIT 20;",
+    "subtasks": [
+      {
+        "id": "s1",
+        "prompt": "Все клиенты из городов, чьё название начинается на букву 'r'. Выведите customer_id и customer_city.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT customer_id, customer_city FROM customers WHERE customer_city LIKE 'r%';",
+        "explanation": "LIKE 'r%' — начинается на 'r'. В SQLite LIKE ловит и 'rio de janeiro', и 'RIO DE JANEIRO', и 'Recife' благодаря регистронезависимости по умолчанию. В PostgreSQL пришлось бы писать ILIKE 'r%'."
+      },
+      {
+        "id": "s2",
+        "prompt": "Уникальные города клиентов, содержащие подстроку 'paulo' (LIKE '%paulo%'). Один столбец.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT DISTINCT customer_city FROM customers WHERE customer_city LIKE '%paulo%';",
+        "explanation": "Шаблон '%paulo%' — подстрока в середине. DISTINCT покажет, сколько вариантов записи (sao paulo / Sao Paulo / SAO PAULO) реально лежит в данных — это «грязь» Olist, и её придётся чистить."
+      },
+      {
+        "id": "s3",
+        "prompt": "Товары без категории (product_category_name IS NULL). Выведите product_id.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT product_id FROM products WHERE product_category_name IS NULL;",
+        "explanation": "= NULL никогда не вернёт строки — сравнение с NULL даёт «неизвестно» (UNKNOWN), а WHERE оставляет только TRUE. Правильно: IS NULL / IS NOT NULL. Эти 4 товара без категории — кандидаты на проверку в источнике."
+      },
+      {
+        "id": "s4",
+        "prompt": "Заказы без даты доставки клиенту (order_delivered_customer_date IS NULL). Это все «незавершённые» заказы. Выведите order_id и order_status.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT order_id, order_status FROM orders WHERE order_delivered_customer_date IS NULL;",
+        "explanation": "Здесь сразу два сигнала: заказы canceled/shipped/processing — там логично, что доставки нет. Но среди них найдутся и delivered с NULL-датой — это уже расхождение данных (Olist известен такой грязью)."
+      },
+      {
+        "id": "s5",
+        "prompt": "Заказы с заполненной датой доставки (IS NOT NULL). Один столбец order_id.",
+        "orderSensitive": false,
+        "referenceSql": "SELECT order_id FROM orders WHERE order_delivered_customer_date IS NOT NULL;",
+        "explanation": "IS NOT NULL — обратный фильтр. Сумма IS NULL + IS NOT NULL даёт общее число строк — это удобная проверка целостности фильтра."
+      }
+    ]
+  }
+}

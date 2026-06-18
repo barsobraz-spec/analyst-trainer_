@@ -11,7 +11,7 @@ import { getModule } from '../../core/modules.js';
 import { getOutline, caseHash } from '../../core/courseNav.js';
 import { loadProgressMap, statusOf } from '../../core/progress.js';
 import { getAllTaskProgress } from '../../core/db.js';
-import { loadLearningContent, loadAllPracticeContent, enrichContentWithPractice } from '../../core/learningContent.js?v=v1.0';
+import { loadLearningContent, loadAllPracticeContent, enrichContentWithPractice } from '../../core/learningContent.js?v=v1.3';
 import { TASK_STATUS } from '../../core/learningProgress.js';
 import { StatusBadge, DifficultyBadge } from '../../core/components/StatusBadge.js';
 import { FavoriteButton } from '../../core/components/FavoriteButton.js';

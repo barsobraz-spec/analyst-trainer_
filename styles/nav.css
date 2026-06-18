@@ -1,0 +1,403 @@
+/* --- Сайдбар-навигатор курса --- */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 1.1rem;
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar__logo {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--accent-contrast);
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+}
+.sidebar__brand-name { font-weight: 700; font-size: 1.02rem; color: var(--text); }
+.sidebar__brand-sub { font-size: 0.78rem; color: var(--text-muted); }
+
+.sidebar__scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.6rem 0.55rem 1rem;
+}
+
+.sidebar__heading {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  padding: 0.3rem 0.5rem;
+}
+
+.sidebar__foot {
+  border-top: 1px solid var(--border);
+  padding: 0.6rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.sidebar__theme { display: flex; }
+.sidebar__data { display: flex; }
+
+/* --- Модуль в сайдбаре --- */
+.sb-modules { list-style: none; margin: 0.2rem 0 0.4rem; padding: 0; }
+.sb-module { margin-bottom: 0.1rem; }
+
+.sb-module__row {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  border-radius: 8px;
+}
+.sb-module__row:hover { background: var(--surface-2); }
+.sb-module.is-active > .sb-module__row { background: var(--accent-tint); }
+
+.sb-module__chev {
+  flex: none;
+  width: 1.6rem;
+  height: 1.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.sb-module.is-open > .sb-module__row .sb-module__chev { transform: rotate(90deg); }
+
+.sb-module__link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem 0.4rem 0;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.sb-module__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sb-module.is-active > .sb-module__row .sb-module__link { color: var(--accent); }
+
+.sb-module__count {
+  flex: none;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.sb-module__count.is-complete { color: var(--success); }
+
+.sb-module__bar {
+  height: 4px;
+  border-radius: 3px;
+  background: var(--border);
+  overflow: hidden;
+  margin: 0 0.5rem 0.3rem 1.7rem;
+}
+.sb-module__bar > span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 3px;
+  background: var(--accent);
+  transition: width 0.35s ease;
+}
+.sb-module__bar > span.is-complete { background: var(--success); }
+
+.sb-module__cases {
+  list-style: none;
+  margin: 0.1rem 0 0.5rem 1.7rem;
+  padding-left: 0.55rem;
+  border-left: 1px solid var(--border);
+}
+.sb-case-item { margin: 0; }
+.sb-case-empty {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding: 0.3rem 0.5rem;
+}
+
+.sb-case {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.34rem 0.5rem;
+  border-radius: 6px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+.sb-case:hover { background: var(--surface-2); color: var(--text); }
+.sb-case.is-current {
+  background: var(--accent-tint);
+  color: var(--accent);
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+/* Метка статуса кейса: ✓ пройден / точка «в процессе» / пустой круг «не начат». */
+.sb-case__mark {
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.66rem;
+  line-height: 1;
+  color: var(--text-muted);
+}
+.sb-case__mark[data-status="passed"] {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+.sb-case__mark[data-status="in_progress"] { border-color: var(--warning); position: relative; }
+.sb-case__mark[data-status="in_progress"]::after {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--warning);
+}
+
+.sb-case__title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.sb-case__tag {
+  flex: none;
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--warning-fg);
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  border-radius: 999px;
+  padding: 0.05rem 0.4rem;
+}
+
+/* Learning Analytics — закреплённый пункт (всегда в один клик). */
+.sb-analytics {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.sb-analytics:hover { background: var(--surface-2); }
+.sb-analytics.is-current { background: var(--accent-tint); color: var(--accent); border-color: var(--accent); }
+.sb-analytics__icon { display: inline-flex; }
+.sb-analytics__icon svg { width: 18px; height: 18px; display: block; }
+
+/* --- Нижняя навигация (мобильная) --- */
+.bottom-nav {
+  display: none;
+  align-items: center;
+  gap: 0.45rem;
+  position: fixed;
+  left: calc(var(--sidebar-w) + 1rem);
+  right: 1rem;
+  bottom: 1rem;
+  max-width: 540px;
+  height: auto;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(16px);
+  z-index: 40;
+  padding: 0.4rem;
+}
+[data-theme="dark"] .bottom-nav {
+  background: rgba(19, 22, 31, 0.78);
+}
+.bottom-nav__actions {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border-radius: 13px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.bottom-nav__item {
+  min-width: 0;
+  min-height: 3.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font: inherit;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.bottom-nav > .bottom-nav__item {
+  flex: 0 0 4.45rem;
+  color: var(--accent);
+  background: var(--accent-tint);
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
+}
+.bottom-nav__item.is-current {
+  color: var(--accent-contrast);
+  background: var(--accent);
+}
+.bottom-nav__icon { display: inline-flex; }
+.bottom-nav__icon svg { width: 22px; height: 22px; display: block; }
+.bottom-nav__label {
+  max-width: 100%;
+  line-height: 1.05;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* --- Затемнение под выдвижной шторкой --- */
+.nav-scrim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 38;
+}
+
+/* === Мобильный режим: сайдбар сворачивается в шторку + нижняя навигация ===== */
+@media (max-width: 899px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .topbar { display: flex; }
+  .screen { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0)); }
+  .bottom-nav {
+    display: flex;
+    left: 0.7rem;
+    right: 0.7rem;
+    bottom: max(0.65rem, env(safe-area-inset-bottom, 0));
+    max-width: none;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100vh;
+    width: min(86vw, 320px);
+    z-index: 45;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: var(--shadow);
+  }
+  body.nav-open .sidebar { transform: none; }
+  body.nav-open .nav-scrim { display: block; }
+}
+
+/* Переключатель темы (T10.3.2): квадратная иконка-кнопка в шапке. */
+.theme-toggle {
+  font: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.theme-toggle:hover { color: var(--text); background: var(--surface-2); }
+.theme-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.data-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.data-controls__btn,
+.data-controls__confirm-yes,
+.data-controls__confirm-no {
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.45rem 0.95rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.data-controls__btn:hover:not(:disabled),
+.data-controls__confirm-no:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-tint);
+}
+
+.data-controls__btn:disabled { opacity: 0.5; cursor: default; }
+
+/* Подтверждение импорта (замена данных) — выделяем как основное действие. */
+.data-controls__confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.data-controls__confirm-text { font-size: 0.85rem; color: var(--text-muted); }
+
+.data-controls__confirm-yes {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.data-controls__status { font-size: 0.85rem; color: var(--text-muted); }
+.data-controls__status[data-kind="success"] { color: var(--success); }
+.data-controls__status[data-kind="error"] { color: var(--danger); }
+
