@@ -45,17 +45,12 @@ export async function HomeDashboard() {
   section.className = 'home screen';
 
   // --- Данные одним заходом ---------------------------------------------------
-  const [outline, progress, learningSnapshot] = await Promise.all([
-    getOutline(),
-    loadProgressMap(),
-    loadLearningDashboardSnapshot(),
+  const [outline, progress, learningSnapshot, events] = await Promise.all([
+    withFallback(getOutline(), { modules: [], flat: [] }, '[home] не удалось загрузить маршрут курса'),
+    withFallback(loadProgressMap(), null, '[home] не удалось загрузить прогресс'),
+    withFallback(loadLearningDashboardSnapshot(), { error: new Error('learning_snapshot_timeout') }, '[home] не удалось загрузить сводку обучения'),
+    withFallback(getEvents({}), [], '[home] не удалось загрузить события активности'),
   ]);
-  let events = [];
-  try {
-    events = await getEvents({});
-  } catch (err) {
-    console.error('[home] не удалось загрузить события активности', err);
-  }
 
   // Прогресс по каждому модулю маршрута (id → { passed, total, avgScore }).
   const progByModule = new Map();
@@ -89,6 +84,26 @@ export async function HomeDashboard() {
   section.append(widgets);
 
   return section;
+}
+
+function withFallback(promise, fallback, label, timeoutMs = 2500) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const done = (value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(value);
+    };
+    const timer = setTimeout(() => {
+      console.error(`${label}: timeout ${timeoutMs}ms`);
+      done(fallback);
+    }, timeoutMs);
+    Promise.resolve(promise).then(done).catch((err) => {
+      console.error(label, err);
+      done(fallback);
+    });
+  });
 }
 
 // --- Сводка учебной системы ---------------------------------------------------

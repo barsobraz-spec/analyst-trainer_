@@ -34,20 +34,46 @@ export { MIGRATIONS };
 // --- Открытие БД с миграциями (T0.2.2, T0.2.3) ------------------------------
 
 let dbPromise = null;
+const DB_OPEN_TIMEOUT_MS = 5000;
 
 export function openDB() {
   if (dbPromise) return dbPromise;
 
   dbPromise = new Promise((resolve, reject) => {
     let request;
+    let settled = false;
+    let timeoutId = null;
+
+    const finishResolve = (db) => {
+      if (settled) {
+        try { db?.close?.(); } catch {}
+        return;
+      }
+      settled = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      resolve(db);
+    };
+
+    const finishReject = (err) => {
+      if (settled) return;
+      settled = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      dbPromise = null;
+      reject(err);
+    };
+
     try {
       request = indexedDB.open(DB_NAME, APP_SCHEMA_VERSION);
     } catch (err) {
       // Синхронно бросается VersionError, если версия данных выше требуемой.
-      dbPromise = null;
-      reject(classifyOpenError(err));
+      finishReject(classifyOpenError(err));
       return;
     }
+
+    timeoutId = setTimeout(() => {
+      finishReject(new StorageError('open_timeout',
+        'Локальное хранилище прогресса не ответило вовремя. Приложение продолжит работу без сохранённого прогресса.'));
+    }, DB_OPEN_TIMEOUT_MS);
 
     let migrationError = null;
     // Классифицирует и запоминает первую ошибку миграции — синхронную или
@@ -84,19 +110,17 @@ export function openDB() {
       db.onversionchange = () => db.close();
       // Фиксируем версию схемы как данные (нужно экспорту/импорту, T2.1).
       persistSchemaVersion(db)
-        .then(() => resolve(db))
-        .catch(() => resolve(db)); // запись метаданных не критична для открытия
+        .then(() => finishResolve(db))
+        .catch(() => finishResolve(db)); // запись метаданных не критична для открытия
     };
 
     request.onerror = () => {
-      dbPromise = null;
-      if (migrationError) { reject(migrationError); return; }
-      reject(classifyOpenError(request.error));
+      if (migrationError) { finishReject(migrationError); return; }
+      finishReject(classifyOpenError(request.error));
     };
 
     request.onblocked = () => {
-      dbPromise = null;
-      reject(new StorageError('open_blocked',
+      finishReject(new StorageError('open_blocked',
         'База занята другой вкладкой приложения. Закройте лишние вкладки и обновите страницу.'));
     };
   });

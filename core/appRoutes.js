@@ -12,12 +12,12 @@ import { HistoryView } from '../modules/history/HistoryView.js';
 import { SkillView } from '../modules/skills/SkillView.js';
 import { PracticeView } from '../modules/practice/PracticeView.js';
 import { ResourcesView } from '../modules/resources/ResourcesView.js';
-import { SettingsView } from '../modules/settings/SettingsView.js?v=v1.5';
+import { SettingsView } from '../modules/settings/SettingsView.js?v=v1.6';
 import { AboutView } from '../modules/about/AboutView.js';
 import { LearningTodayView } from '../modules/learning/TodayView.js';
-import { LearningPlanView } from '../modules/learning/PlanView.js?v=v1.5';
+import { LearningPlanView } from '../modules/learning/PlanView.js?v=v1.6';
 // Cache-bust version — менять через scripts/bump-cache-version.sh (источник: config.js APP_CACHE_VERSION)
-import { LearningTasksView } from '../modules/learning/TasksView.js?v=v1.5';
+import { LearningTasksView } from '../modules/learning/TasksView.js?v=v1.6';
 import { LearningProjectsView } from '../modules/learning/ProjectsView.js';
 import { LearningCareerView } from '../modules/learning/CareerView.js';
 import { LearningMockInterviewView } from '../modules/learning/MockInterviewView.js';

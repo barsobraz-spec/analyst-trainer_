@@ -1,11 +1,11 @@
 /* Порядок @import воспроизводит точный каскад оригинального styles.css — не менять. */
-@import url('./tokens.css?v=v1.5');
-@import url('./base.css?v=v1.5');
-@import url('./nav.css?v=v1.5');
-@import url('./components.css?v=v1.5');
-@import url('./screens-cases.css?v=v1.5');
-@import url('./screens-modules.css?v=v1.5');
-@import url('./screens.css?v=v1.5');
-@import url('./screens-app.css?v=v1.5');
-@import url('./screens-learning.css?v=v1.5');
-@import url('./polish.css?v=v1.5');
+@import url('./tokens.css?v=v1.6');
+@import url('./base.css?v=v1.6');
+@import url('./nav.css?v=v1.6');
+@import url('./components.css?v=v1.6');
+@import url('./screens-cases.css?v=v1.6');
+@import url('./screens-modules.css?v=v1.6');
+@import url('./screens.css?v=v1.6');
+@import url('./screens-app.css?v=v1.6');
+@import url('./screens-learning.css?v=v1.6');
+@import url('./polish.css?v=v1.6');
