@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 1,
+  "title": "Связи учебных тем",
+  "description": "MVP-граф тем для связанных задач, кейсов, модулей и проектов Analyst Trainer.",
+  "topics": [
+    {
+      "id": "excel-basics",
+      "title": "Excel: очистка, сводные и базовые метрики",
+      "skill": "excel",
+      "month": 1,
+      "prerequisites": [],
+      "next": ["sql-select"],
+      "related": ["business-conclusions", "power-bi-dashboard"],
+      "taskRefs": ["task-001", "task-002", "task-003", "task-005", "task-006"],
+      "caseRefs": ["detective-m1w1d2-formulas", "detective-m1w2d1-lookup", "detective-m1w3d1-pivot"],
+      "moduleRefs": ["5.1", "5.3"],
+      "projectRefs": [],
+      "commonMistakes": [
+        "Считать итоговую метрику без проверки дублей и пропусков.",
+        "Делать график раньше, чем понятна структура таблицы.",
+        "Использовать ручные правки вместо воспроизводимого преобразования."
+      ]
+    },
+    {
+      "id": "sql-select",
+      "title": "SQL: SELECT, сортировка и первые срезы",
+      "skill": "sql",
+      "month": 2,
+      "prerequisites": ["excel-basics"],
+      "next": ["sql-where", "sql-group-by"],
+      "related": ["business-conclusions"],
+      "taskRefs": ["task-016"],
+      "caseRefs": ["sql-001", "sql-002"],
+      "moduleRefs": ["5.5"],
+      "projectRefs": ["python-eda"],
+      "commonMistakes": [
+        "Выводить лишние столбцы и терять фокус на вопросе.",
+        "Сортировать после LIMIT не в той логике задачи.",
+        "Путать DISTINCT с исправлением дублей в данных."
+      ]
+    },
+    {
+      "id": "sql-where",
+      "title": "SQL: WHERE, NULL и текстовые фильтры",
+      "skill": "sql",
+      "month": 2,
+      "prerequisites": ["sql-select"],
+      "next": ["sql-join", "sql-group-by"],
+      "related": ["business-conclusions"],
+      "taskRefs": ["task-017", "task-045"],
+      "caseRefs": ["sql-005", "sql-006", "sql-009"],
+      "moduleRefs": ["5.5"],
+      "projectRefs": ["python-eda"],
+      "commonMistakes": [
+        "Проверять NULL через = NULL вместо IS NULL.",
+        "Фильтровать текст без нормализации регистра и пробелов.",
+        "Смешивать бизнес-условие и техническую очистку в одном нечитабельном WHERE."
+      ]
+    },
+    {
+      "id": "sql-join",
+      "title": "SQL: JOIN и потерянные строки",
+      "skill": "sql",
+      "month": 2,
+      "prerequisites": ["sql-select", "sql-where"],
+      "next": ["sql-group-by", "funnels"],
+      "related": ["retention"],
+      "taskRefs": ["task-021", "task-022", "task-023", "task-048"],
+      "caseRefs": ["sql-007", "sql-011"],
+      "moduleRefs": ["5.5", "5.1"],
+      "projectRefs": ["python-eda", "product-funnel-retention"],
+      "commonMistakes": [
+        "Использовать INNER JOIN там, где нужны строки без пары.",
+        "Не проверять кратность связей и случайно размножать выручку.",
+        "Фильтровать правую таблицу после LEFT JOIN так, что он превращается в INNER JOIN."
+      ]
+    },
+    {
+      "id": "sql-group-by",
+      "title": "SQL: GROUP BY, HAVING и условная агрегация",
+      "skill": "sql",
+      "month": 2,
+      "prerequisites": ["sql-select", "sql-where"],
+      "next": ["funnels", "retention", "unit-economics"],
+      "related": ["power-bi-dashboard", "business-conclusions"],
+      "taskRefs": ["task-018", "task-019", "task-033", "task-038", "task-046"],
+      "caseRefs": ["sql-003", "sql-008", "sql-010"],
+      "moduleRefs": ["5.5", "5.3"],
+      "projectRefs": ["python-eda", "product-funnel-retention"],
+      "commonMistakes": [
+        "Фильтровать агрегаты через WHERE вместо HAVING.",
+        "Группировать не на том уровне детализации.",
+        "Считать доли от уже отфильтрованного итога, когда нужен общий знаменатель."
+      ]
+    },
+    {
+      "id": "funnels",
+      "title": "Воронки и поиск слабого шага",
+      "skill": "product-analytics",
+      "month": 6,
+      "prerequisites": ["sql-group-by"],
+      "next": ["retention", "unit-economics"],
+      "related": ["business-conclusions", "ab-tests"],
+      "taskRefs": ["task-038", "task-093", "task-102"],
+      "caseRefs": ["detective-001", "sql-010", "simulator-009"],
+      "moduleRefs": ["5.1", "5.5", "5.6"],
+      "projectRefs": ["product-funnel-retention"],
+      "commonMistakes": [
+        "Смотреть только итоговую конверсию и не раскладывать переходы между шагами.",
+        "Сравнивать разные периоды без учета трафика и состава пользователей.",
+        "Путать падение на шаге с причиной падения без дополнительных проверок."
+      ]
+    },
+    {
+      "id": "retention",
+      "title": "Retention и когортное мышление",
+      "skill": "product-analytics",
+      "month": 6,
+      "prerequisites": ["sql-join", "sql-group-by"],
+      "next": ["unit-economics", "business-conclusions"],
+      "related": ["funnels", "ab-tests"],
+      "taskRefs": ["task-036", "task-094"],
+      "caseRefs": ["sql-011", "simulator-005", "hypothesis-001"],
+      "moduleRefs": ["5.5", "5.6", "5.2"],
+      "projectRefs": ["product-funnel-retention"],
+      "commonMistakes": [
+        "Смешивать календарный месяц и возраст когорты.",
+        "Считать retention по пользователям, которые не имели шанса вернуться.",
+        "Делать вывод по общей базе без сегментов и когорт."
+      ]
+    },
+    {
+      "id": "ab-tests",
+      "title": "A/B tests: дизайн, метрики и интерпретация",
+      "skill": "statistics",
+      "month": 4,
+      "prerequisites": ["business-conclusions"],
+      "next": ["unit-economics"],
+      "related": ["retention", "funnels"],
+      "taskRefs": ["task-074", "task-077", "task-121", "task-129"],
+      "caseRefs": ["hypothesis-003", "hypothesis-005", "hypothesis-011"],
+      "moduleRefs": ["5.2", "5.4", "5.5"],
+      "projectRefs": ["product-funnel-retention"],
+      "commonMistakes": [
+        "Менять первичную метрику после просмотра результата.",
+        "Игнорировать guardrail-метрики и SRM.",
+        "Останавливать тест досрочно, когда результат временно понравился."
+      ]
+    },
+    {
+      "id": "unit-economics",
+      "title": "Unit economics и связь метрик с деньгами",
+      "skill": "product-banking",
+      "month": 6,
+      "prerequisites": ["sql-group-by", "funnels"],
+      "next": ["business-conclusions"],
+      "related": ["retention", "ab-tests"],
+      "taskRefs": ["task-095", "task-109"],
+      "caseRefs": ["detective-003", "simulator-001", "simulator-011"],
+      "moduleRefs": ["5.1", "5.6", "5.2"],
+      "projectRefs": ["product-funnel-retention", "capstone"],
+      "commonMistakes": [
+        "Радоваться росту выручки без проверки маржи.",
+        "Сравнивать LTV и CAC в разных горизонтах.",
+        "Давать рекомендацию без оценки влияния на деньги."
+      ]
+    },
+    {
+      "id": "power-bi-dashboard",
+      "title": "Power BI и дашборды для решений",
+      "skill": "power-bi",
+      "month": 3,
+      "prerequisites": ["excel-basics", "sql-group-by"],
+      "next": ["business-conclusions"],
+      "related": ["funnels", "unit-economics"],
+      "taskRefs": ["task-051", "task-055", "task-059", "task-063", "task-065"],
+      "caseRefs": ["dashboard-001", "dashboard-003", "dashboard-m1w4d1-chartchoice"],
+      "moduleRefs": ["5.3"],
+      "projectRefs": ["python-eda", "capstone"],
+      "commonMistakes": [
+        "Ставить все графики на один экран без вопроса, на который они отвечают.",
+        "Не отделять KPI от диагностических разрезов.",
+        "Оформлять визуал красиво, но без управленческого вывода."
+      ]
+    },
+    {
+      "id": "business-conclusions",
+      "title": "Бизнес-выводы и аналитическое письмо",
+      "skill": "communications",
+      "month": 7,
+      "prerequisites": ["excel-basics"],
+      "next": ["power-bi-dashboard", "unit-economics"],
+      "related": ["funnels", "retention", "ab-tests"],
+      "taskRefs": ["excel-extra-020", "task-101", "task-103", "task-110"],
+      "caseRefs": ["detective-012", "dashboard-010", "simulator-006"],
+      "moduleRefs": ["5.1", "5.3", "5.6"],
+      "projectRefs": ["python-eda", "product-funnel-retention", "capstone"],
+      "commonMistakes": [
+        "Описывать действия в инструменте вместо ответа бизнесу.",
+        "Делать вывод без числа, сравнения или сегмента.",
+        "Заканчивать анализ наблюдением, а не рекомендацией."
+      ]
+    }
+  ]
+}

@@ -6,6 +6,8 @@ import {
   saveMockInterviewRun,
   updateMockInterviewRun,
 } from '../../core/db.js';
+import { AiMentor } from '../../core/components/AiMentor.js';
+import { buildMockInterviewReviewContext, isSubstantialStudentAnswer, MENTOR_MODES } from '../../core/mentorContext.js';
 import { navigate } from '../../core/router.js';
 import {
   LearningSearchPanel,
@@ -181,31 +183,78 @@ function runForm(mock, runs) {
   }
   form.append(actions, message);
 
+  const readCurrentRun = () => readMockRunFormState({
+    date,
+    result,
+    duration,
+    sectionControls,
+    rubricControls,
+    mistakesNotes,
+    actionPlan,
+  });
+  const readMentorAnswer = () => buildMockInterviewStudentAnswer(mock, readCurrentRun());
+
+  let mentorControl = null;
+  const refreshMentor = () => mentorControl?.refreshPreview?.();
+  form.addEventListener('input', refreshMentor);
+  form.addEventListener('change', refreshMentor);
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const durationMinutes = Number(duration.value);
-    if (!date.value || !Number.isFinite(durationMinutes) || durationMinutes <= 0) {
+    const payload = readCurrentRun();
+    if (!payload.date || !Number.isFinite(payload.durationMinutes) || payload.durationMinutes <= 0) {
       message.dataset.kind = 'error';
       message.textContent = 'Укажите дату и корректную длительность.';
       return;
     }
-    const payload = {
-      date: date.value,
-      result: result.value,
-      durationMinutes,
-      sectionScores: sectionControls.readScores(),
-      sectionNotes: sectionControls.readNotes(),
-      rubricChecks: rubricControls.readChecks(),
-      mistakesNotes: mistakesNotes.value,
-      actionPlan: actionPlan.value,
-    };
     if (editing) await updateMockInterviewRun(editing.runId, payload);
     else await saveMockInterviewRun(payload);
     navigate('/learning/mock-interview');
   });
 
   box.append(form);
+  mentorControl = AiMentor({
+    title: 'AI-разбор mock-интервью',
+    description: 'Оценит заметки по прогону, найдет слабые секции и задаст следующий вопрос как интервьюер.',
+    modes: [MENTOR_MODES.mockInterview],
+    defaultMode: MENTOR_MODES.mockInterview,
+    buildContext: () => buildMockInterviewReviewContext({
+      mock,
+      run: readCurrentRun(),
+      studentAnswer: readMentorAnswer(),
+    }),
+    getStudentAnswer: readMentorAnswer,
+    onFocusAnswer: () => mistakesNotes.focus(),
+    resolveModeState: () => {
+      const currentRun = readCurrentRun();
+      const hasEnoughNotes = hasMockRunSignal(mock, currentRun) && isSubstantialStudentAnswer(readMentorAnswer());
+      return {
+        disabled: !hasEnoughNotes,
+        disabledMessage: 'Добавьте оценки секций, заметки по ошибкам или план повтора, чтобы AI смог разобрать mock-интервью.',
+        submitLabel: 'Разобрать mock',
+      };
+    },
+    historyScope: {
+      caseId: 'learning:mock-interview',
+      module: 'career',
+      caseTitle: mock.title || 'Mock-интервью аналитика',
+    },
+  });
+  box.append(mentorControl.element);
   return box;
+}
+
+function readMockRunFormState({ date, result, duration, sectionControls, rubricControls, mistakesNotes, actionPlan }) {
+  return {
+    date: date.value,
+    result: result.value,
+    durationMinutes: Number(duration.value),
+    sectionScores: sectionControls.readScores(),
+    sectionNotes: sectionControls.readNotes(),
+    rubricChecks: rubricControls.readChecks(),
+    mistakesNotes: mistakesNotes.value,
+    actionPlan: actionPlan.value,
+  };
 }
 
 function sectionAssessment(sections, editing) {
@@ -344,6 +393,49 @@ function averageRunScore(run) {
   if (scores.length === 0) return null;
   const avg = scores.reduce((sum, score) => sum + score, 0) / scores.length;
   return Math.round(avg * 10) / 10;
+}
+
+function buildMockInterviewStudentAnswer(mock, run) {
+  if (!hasMockRunSignal(mock, run)) return '';
+  const parts = [];
+  const resultLabel = MOCK_RESULT_LABELS[run.result] || run.result || 'не указан';
+  parts.push(`Прогон: ${run.date || 'без даты'}, результат ${resultLabel}, длительность ${run.durationMinutes || 0} минут.`);
+
+  const sections = mock.sections || [];
+  const sectionNotes = [];
+  for (const section of sections) {
+    const score = run.sectionScores?.[section.id];
+    const note = run.sectionNotes?.[section.id];
+    if (score || note) {
+      sectionNotes.push(`${section.title}: ${score ? `${score}/5` : 'без оценки'}${note ? `, ${note}` : ''}`);
+    }
+  }
+  if (sectionNotes.length) parts.push(`Секции: ${sectionNotes.join('; ')}.`);
+
+  const rubric = mock.selfAssessmentRubric || [];
+  const checked = rubric
+    .map((item, index) => ({ item, checked: Boolean(run.rubricChecks?.[`rubric-${index + 1}`]) }))
+    .filter((item) => item.checked)
+    .map((item) => item.item);
+  const missed = rubric
+    .map((item, index) => ({ item, checked: Boolean(run.rubricChecks?.[`rubric-${index + 1}`]) }))
+    .filter((item) => !item.checked)
+    .map((item) => item.item);
+  if (checked.length) parts.push(`Получилось: ${checked.join('; ')}.`);
+  if (missed.length && (checked.length || run.mistakesNotes || run.actionPlan)) {
+    parts.push(`Не отмечено: ${missed.join('; ')}.`);
+  }
+  if (run.mistakesNotes) parts.push(`Ошибки и наблюдения: ${run.mistakesNotes}`);
+  if (run.actionPlan) parts.push(`План повтора: ${run.actionPlan}`);
+  return parts.join('\n');
+}
+
+function hasMockRunSignal(mock, run) {
+  if (run.mistakesNotes?.trim() || run.actionPlan?.trim()) return true;
+  if (Object.keys(run.sectionScores || {}).length > 0) return true;
+  if (Object.keys(run.sectionNotes || {}).length > 0) return true;
+  const rubric = mock.selfAssessmentRubric || [];
+  return rubric.some((_, index) => Boolean(run.rubricChecks?.[`rubric-${index + 1}`]));
 }
 
 function scoreSelect(value) {

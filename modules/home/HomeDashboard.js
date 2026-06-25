@@ -180,8 +180,22 @@ function buildHero(resume, progByModule) {
   const body = document.createElement('div');
   body.className = 'home-hero__body';
 
+  if (resume.kind === 'empty') {
+    body.append(eyebrow('ОБУЧЕНИЕ'));
+    body.append(heroTitle('Начните обучение'));
+    body.append(heroDesc('Выберите модуль, чтобы тренироваться на кейсах. Прогресс сохраняется локально.'));
+
+    const actions = document.createElement('div');
+    actions.className = 'home-hero__actions';
+    actions.append(heroCta('#/modules', 'Выбрать другой модуль', true));
+    body.append(actions);
+
+    box.append(body);
+    return box;
+  }
+
   // Курс пройден целиком — предлагаем аналитику.
-  if (resume.kind === 'done' || resume.kind === 'empty') {
+  if (resume.kind === 'done') {
     body.append(eyebrow('ОБУЧЕНИЕ'));
     body.append(heroTitle('Вы прошли все кейсы курса'));
     body.append(heroDesc('Загляните в Learning Analytics — посмотрите сводку прогресса по навыкам.'));

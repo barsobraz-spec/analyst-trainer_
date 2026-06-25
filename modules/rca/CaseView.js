@@ -23,7 +23,9 @@
 
 import { CaseHeader } from '../../core/components/CaseHeader.js';
 import { ReferenceBreakdown } from '../../core/components/ReferenceBreakdown.js';
+import { mountCaseAiMentor } from '../../core/components/caseAiMentor.js';
 import { textBlock, factsBlock, mountSelfAssessment } from '../../core/components/caseScaffold.js';
+import { MENTOR_MODES } from '../../core/mentorContext.js';
 import { CauseAnalysis } from './CauseAnalysis.js';
 import { saveDraftState, getDraftState } from '../../core/db.js';
 
@@ -74,14 +76,32 @@ export async function RcaCaseView({ caseData, attemptNo } = {}) {
   }
 
   // --- Ф1–Ф4: рабочая область (черновик ведёт экран → autosave:false) ---------
+  let aiMentor = null;
   const analysis = await CauseAnalysis({
     payload,
     caseId,
     initialState: draft,
     autosave: false,
-    onChange: () => { scheduleDraftSave(); refreshSubmitState(); },
+    onChange: () => { scheduleDraftSave(); refreshSubmitState(); aiMentor?.refreshPreview?.(); },
   });
   root.append(analysis.element);
+  let submitted = false;
+
+  aiMentor = await mountCaseAiMentor({
+    caseData,
+    modes: [
+      MENTOR_MODES.hint,
+      MENTOR_MODES.referenceCheck,
+      MENTOR_MODES.explainError,
+      MENTOR_MODES.nextStep,
+    ],
+    getStudentAnswer: () => summarizeRca(analysis.getResult()),
+    getStudentArtifacts: () => ({ rca: analysis.getResult() }),
+    isSubmitted: () => submitted,
+    isReadyForReference: () => analysis.isReady(),
+    onBeforeReferenceCheck: () => submitAnswerAndRevealReference(),
+  });
+  root.append(aiMentor.element);
 
   // --- Кнопка «Сверить с эталоном» (открывает Ф5 + Ф6) ------------------------
   const submitBar = document.createElement('div');
@@ -130,9 +150,16 @@ export async function RcaCaseView({ caseData, attemptNo } = {}) {
   }
 
   // --- Отправка: зафиксировать ввод, раскрыть эталон, включить самооценку ------
-  let submitted = false;
   submit.addEventListener('click', () => {
-    if (submitted || !analysis.isReady()) return;
+    submitAnswerAndRevealReference();
+  });
+
+  function submitAnswerAndRevealReference() {
+    if (submitted) return true;
+    if (!analysis.isReady()) {
+      refreshSubmitState();
+      throw new Error('Постройте дерево причин перед проверкой по эталону.');
+    }
     submitted = true;
     clearTimeout(draftTimer);
 
@@ -143,6 +170,7 @@ export async function RcaCaseView({ caseData, attemptNo } = {}) {
     submitHint.textContent = '';
 
     reference.reveal();
+    aiMentor.refreshPreview();
 
     // Ф6: самооценка. 5.4 — чистая самооценка (autoFraction:null), подсказок нет.
     mountSelfAssessment(selfHost, {
@@ -151,7 +179,8 @@ export async function RcaCaseView({ caseData, attemptNo } = {}) {
       criteria: SELF_CRITERIA,
       getNotes: () => summarizeRca(analysis.getResult()),
     });
-  });
+    return true;
+  }
 
   refreshSubmitState();
   // unmount-хук роутера: останавливаем таймер шапки при уходе с кейса (идемпотентно).

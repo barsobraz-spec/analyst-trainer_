@@ -25,7 +25,9 @@
 
 import { CaseHeader } from '../../core/components/CaseHeader.js';
 import { ReferenceBreakdown } from '../../core/components/ReferenceBreakdown.js';
+import { mountCaseAiMentor } from '../../core/components/caseAiMentor.js';
 import { textBlock, mountSelfAssessment } from '../../core/components/caseScaffold.js';
+import { MENTOR_MODES } from '../../core/mentorContext.js';
 import { ChartRenderer } from './ChartRenderer.js';
 import { QuestionChecker } from './QuestionChecker.js';
 import { AnomalyMarker } from './AnomalyMarker.js';
@@ -66,9 +68,10 @@ export async function DashboardCaseView({ caseData, attemptNo } = {}) {
   root.append(dashboard.element);
 
   // --- Ф2: вопросы с автопроверкой --------------------------------------------
+  let aiMentor = null;
   const questions = QuestionChecker({
     questions: payload.questions,
-    onChange: () => { refreshInsightState(); refreshSubmitState(); },
+    onChange: () => { refreshInsightState(); refreshSubmitState(); aiMentor?.refreshPreview?.(); },
   });
   root.append(questions.element);
 
@@ -81,7 +84,7 @@ export async function DashboardCaseView({ caseData, attemptNo } = {}) {
     // Аномалия меняет состояние авто-задач — пересчитываем гейтинг по клику.
     anomaly.element.addEventListener('click', () => {
       // клик отрабатывает после обработчика кнопки → состояние уже обновлено
-      setTimeout(() => { refreshInsightState(); refreshSubmitState(); }, 0);
+      setTimeout(() => { refreshInsightState(); refreshSubmitState(); aiMentor?.refreshPreview?.(); }, 0);
     });
     root.append(anomaly.element);
   }
@@ -99,12 +102,41 @@ export async function DashboardCaseView({ caseData, attemptNo } = {}) {
   insight.rows = 3;
   insight.placeholder = 'Сформулируйте вывод уровня «что произошло и какое действие из этого следует»…';
   insight.disabled = true;
-  insight.addEventListener('input', refreshSubmitState);
+  insight.addEventListener('input', () => { refreshSubmitState(); aiMentor?.refreshPreview?.(); });
   const insightHint = document.createElement('p');
   insightHint.className = 'case-view__answer-hint';
   insightHint.textContent = 'Поле откроется после ответа на вопросы и отметки аномалии.';
   insightWrap.append(insightLabel, insight, insightHint);
   root.append(insightWrap);
+  let submitted = false;
+
+  aiMentor = await mountCaseAiMentor({
+    caseData,
+    modes: [
+      MENTOR_MODES.hint,
+      MENTOR_MODES.businessReview,
+      MENTOR_MODES.referenceCheck,
+      MENTOR_MODES.explainError,
+      MENTOR_MODES.nextStep,
+    ],
+    defaultMode: MENTOR_MODES.hint,
+    getStudentAnswer: () => insight.value,
+    getStudentArtifacts: () => ({
+      dashboardChecks: questions.getResults(),
+      anomaly: anomaly?.getResult?.() || null,
+    }),
+    getProgressSummary: () => ({
+      autoFraction: computeAutoFraction(),
+      autoTasksDone: autoTasksDone(),
+    }),
+    isSubmitted: () => submitted,
+    isReadyForReference: () => autoTasksDone() && insight.value.trim() !== '',
+    onFocusAnswer: () => {
+      if (!submitted && !insight.disabled) insight.focus();
+    },
+    onBeforeReferenceCheck: () => submitAnswerAndRevealReference(),
+  });
+  root.append(aiMentor.element);
 
   // --- Кнопка «Сверить с эталоном» --------------------------------------------
   const submitBar = document.createElement('div');
@@ -166,9 +198,18 @@ export async function DashboardCaseView({ caseData, attemptNo } = {}) {
   }
 
   // --- Отправка: зафиксировать, раскрыть эталон, включить самооценку ----------
-  let submitted = false;
   submit.addEventListener('click', () => {
-    if (submitted || submit.disabled) return;
+    submitAnswerAndRevealReference();
+  });
+
+  function submitAnswerAndRevealReference() {
+    if (submitted) return true;
+    if (!autoTasksDone() || insight.value.trim() === '') {
+      refreshSubmitState();
+      throw new Error(!autoTasksDone()
+        ? 'Сначала ответьте на все вопросы и отметьте аномалию.'
+        : 'Напишите инсайт перед проверкой по эталону.');
+    }
     submitted = true;
 
     questions.lock();
@@ -179,6 +220,7 @@ export async function DashboardCaseView({ caseData, attemptNo } = {}) {
     submitHint.textContent = '';
 
     reference.reveal();
+    aiMentor.refreshPreview();
 
     const autoFraction = computeAutoFraction();
 
@@ -193,7 +235,8 @@ export async function DashboardCaseView({ caseData, attemptNo } = {}) {
       // освободить инстансы Chart.js перед записью (нет unmount-хука у роутера).
       beforeFinalize: () => dashboard.destroy(),
     });
-  });
+    return true;
+  }
 
   refreshInsightState();
   refreshSubmitState();

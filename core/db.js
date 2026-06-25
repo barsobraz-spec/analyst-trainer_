@@ -270,6 +270,23 @@ function makeId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+function cleanStoredText(value, max = 800) {
+  return typeof value === 'string'
+    ? value.replace(/\s+/g, ' ').trim().slice(0, max)
+    : '';
+}
+
+function summarizeAiReviewForStorage(review = {}) {
+  const candidates = [
+    review.feedback,
+    ...(Array.isArray(review.issues) ? review.issues : []),
+    ...(Array.isArray(review.improvements) ? review.improvements : []),
+    ...(Array.isArray(review.nextSteps) ? review.nextSteps : []),
+    ...(Array.isArray(review.strengths) ? review.strengths : []),
+  ];
+  return cleanStoredText(candidates.find((item) => typeof item === 'string' && item.trim()) || '', 260);
+}
+
 export function saveLearningSettings(settings) {
   assertObject(settings, 'Настройки обучения');
   const record = {
@@ -377,6 +394,7 @@ export function saveProjectProgress(progress) {
     readmeReady: Boolean(progress.readmeReady),
     screenshotsReady: Boolean(progress.screenshotsReady),
     videoDemoReady: Boolean(progress.videoDemoReady),
+    readmeDraft: String(progress.readmeDraft ?? ''),
     notes: String(progress.notes ?? ''),
     qualityChecklist: progress.qualityChecklist && typeof progress.qualityChecklist === 'object'
       ? progress.qualityChecklist
@@ -546,6 +564,49 @@ export function deleteLearningReminder(reminderId) {
   return withStore('learningReminders', 'readwrite', (store) => runRequest(store.delete(reminderId)));
 }
 
+export function saveAiMentorReview(entry) {
+  assertObject(entry, 'AI-проверка');
+  assertId(entry.caseId, 'caseId');
+  const review = entry.review && typeof entry.review === 'object' ? entry.review : {};
+  const timestamp = Number.isFinite(entry.createdAt) ? entry.createdAt : now();
+  const record = {
+    reviewId: entry.reviewId || makeId('ai-review'),
+    caseId: String(entry.caseId),
+    module: String(entry.module ?? ''),
+    caseTitle: String(entry.caseTitle ?? ''),
+    mode: String(entry.mode ?? review.mode ?? ''),
+    model: String(entry.model ?? ''),
+    score: Number.isFinite(review.score) ? review.score : null,
+    verdict: cleanStoredText(review.verdict, 220),
+    summary: summarizeAiReviewForStorage(review),
+    feedback: '',
+    strengths: [],
+    issues: [],
+    mentorQuestion: cleanStoredText(review.mentorQuestion, 260),
+    improvements: [],
+    nextSteps: [],
+    previewSummary: cleanStoredText(entry.previewSummary),
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+  return withStore('aiMentorReviews', 'readwrite', (store) => runRequest(store.put(record)))
+    .then(() => record);
+}
+
+export async function getAiMentorReviews({ caseId, limit } = {}) {
+  const rows = await withStore('aiMentorReviews', 'readonly', (store) => {
+    if (caseId !== undefined) return runRequest(store.index('caseId').getAll(String(caseId)));
+    return runRequest(store.getAll());
+  });
+  rows.sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0));
+  return typeof limit === 'number' ? rows.slice(0, limit) : rows;
+}
+
+export function deleteAiMentorReview(reviewId) {
+  assertId(reviewId, 'reviewId');
+  return withStore('aiMentorReviews', 'readwrite', (store) => runRequest(store.delete(reviewId)));
+}
+
 export function saveMonthlyExamProgress(progress) {
   assertObject(progress, 'Прогресс экзамена месяца');
   const month = Number(progress.month);
@@ -672,6 +733,7 @@ export async function smokeTest() {
     status: 'in_progress',
     githubUrl: 'https://example.test/repo',
     readmeReady: true,
+    readmeDraft: 'README smoke draft',
     qualityChecklist: { business: true },
   });
   const application = await saveCareerApplication({
@@ -698,6 +760,23 @@ export async function smokeTest() {
     detail: 'Вернуться к учебному дню',
     href: '#/learning/today',
   });
+  const aiReview = await saveAiMentorReview({
+    caseId,
+    module: '5.1',
+    caseTitle: 'Smoke case',
+    mode: 'reference_check',
+    model: 'mock-model',
+    review: {
+      score: 77,
+      verdict: 'Smoke review',
+      feedback: 'Полный AI-feedback smoke не должен сохраняться целиком.',
+      strengths: ['Есть вывод'],
+      issues: ['Нужна проверка'],
+      nextSteps: ['Повторить тему'],
+      raw: { shouldNotPersist: true },
+    },
+    previewSummary: 'Минимальный контекст smoke-проверки',
+  });
   const monthlyExam = await saveMonthlyExamProgress({
     month: 99,
     checks: { artifact: true, 'skill-sql': true },
@@ -716,6 +795,7 @@ export async function smokeTest() {
   const savedApplication = await getCareerApplication(application.applicationId);
   const savedMock = await getMockInterviewRun(mock.runId);
   const savedReminder = await getLearningReminder(reminder.reminderId);
+  const savedAiReviews = await getAiMentorReviews({ caseId });
   const savedMonthlyExam = await getMonthlyExamProgress(monthlyExam.month);
   const meta = await getLearningMeta('__smoke_meta');
 
@@ -728,9 +808,16 @@ export async function smokeTest() {
     && journal?.learned === 'storage'
     && task?.status === 'repeat'
     && project?.githubUrl.includes('example.test')
+    && project?.readmeDraft === 'README smoke draft'
     && savedApplication?.company === 'Smoke Inc'
     && savedMock?.result === 'passed'
     && savedReminder?.status === 'active'
+    && savedAiReviews[0]?.reviewId === aiReview.reviewId
+    && savedAiReviews[0]?.raw === undefined
+    && savedAiReviews[0]?.feedback === ''
+    && savedAiReviews[0]?.summary === 'Полный AI-feedback smoke не должен сохраняться целиком.'
+    && savedAiReviews[0]?.issues?.length === 0
+    && savedAiReviews[0]?.score === 77
     && savedMonthlyExam?.checks?.artifact === true
     && meta?.value === 'ok';
 
@@ -746,12 +833,13 @@ export async function smokeTest() {
   await deleteCareerApplication(caseId);
   await deleteMockInterviewRun(caseId);
   await deleteLearningReminder(caseId);
+  await deleteAiMentorReview(aiReview.reviewId);
   await withStore('monthlyExamProgress', 'readwrite', (s) => runRequest(s.delete(monthlyExam.month)));
   await withStore('learningMeta', 'readwrite', (s) => runRequest(s.delete('__smoke_meta')));
 
   console[ok ? 'info' : 'error'](
     `[db.smokeTest] ${ok ? 'OK — запись/чтение работают' : 'FAIL — результат не совпал'}`,
-    { last, draft, note, settings, day, journal, task, project, savedApplication, savedMock, savedReminder, savedMonthlyExam, meta },
+    { last, draft, note, settings, day, journal, task, project, savedApplication, savedMock, savedReminder, savedAiReviews, savedMonthlyExam, meta },
   );
   return ok;
 }

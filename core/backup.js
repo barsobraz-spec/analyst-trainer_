@@ -24,6 +24,7 @@ import {
   LEARNING_STORE_NAMES,
   LEARNING_STATE_VERSION,
   LEARNING_META_KEYS,
+  DEFAULT_LEARNING_SETTINGS_KEY,
 } from './db.js';
 
 // Маркеры формата файла — чтобы отличить нашу резервную копию от произвольного JSON.
@@ -183,6 +184,33 @@ export async function importAll(backup) {
   const counts = await replaceAllStores(db, targetStores, migrated);
 
   return { fromVersion, toVersion: APP_SCHEMA_VERSION, counts };
+}
+
+// Очищает пользовательский прогресс, не трогая учебный контент. По умолчанию
+// сохраняет настройки старта курса, чтобы после сброса не нужно было заново
+// выбирать дату и режим расписания.
+export async function clearProgress({ keepLearningSettings = true } = {}) {
+  const snapshot = await buildBackup();
+  const stores = {};
+
+  if (keepLearningSettings) {
+    const currentSettings = (snapshot.stores.learningSettings || [])
+      .filter((row) => row?.key === DEFAULT_LEARNING_SETTINGS_KEY);
+    if (currentSettings.length > 0) stores.learningSettings = currentSettings;
+  }
+
+  if (Array.isArray(snapshot.stores.learningMeta)) {
+    stores.learningMeta = snapshot.stores.learningMeta.filter((row) => (
+      row?.key === LEARNING_META_KEYS.schemaVersion
+      || row?.key === LEARNING_META_KEYS.contentVersion
+    ));
+  }
+
+  const db = await openDB();
+  const targetStores = Array.from(db.objectStoreNames);
+  ensureTargetStores(stores, targetStores);
+  const counts = await replaceAllStores(db, targetStores, stores);
+  return { counts, keptSettings: Boolean(stores.learningSettings?.length) };
 }
 
 // Применяет шаги миграций к простым массивам записей. Зеркало applyMigrationStep

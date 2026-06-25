@@ -2,6 +2,8 @@
 
 import { getAllProjectProgress, saveProjectProgress } from '../../core/db.js';
 import { calculateProjectProgress } from '../../core/learningProgress.js';
+import { AiMentor } from '../../core/components/AiMentor.js';
+import { buildProjectReviewContext, isSubstantialStudentAnswer, MENTOR_MODES } from '../../core/mentorContext.js';
 import { LearningRemindersPanel, REMINDER_SUGGESTIONS } from './LearningReminders.js';
 import {
   LearningSearchPanel,
@@ -71,21 +73,30 @@ function projectCard(content, project, saved, highlighted) {
 
   const status = statusSelect(content.projects.statuses || Object.keys(PROJECT_STATUS_LABELS), PROJECT_STATUS_LABELS, state.status || 'not_started');
   const github = input('url', state.githubUrl || '', 'https://github.com/...');
+  const readmeDraft = textarea(state.readmeDraft || '', 8);
   const notes = textarea(state.notes || '');
   const readme = checkbox(state.readmeReady);
   const screenshots = checkbox(state.screenshotsReady);
   const video = checkbox(state.videoDemoReady);
   readme.dataset.field = 'readme';
+  readmeDraft.dataset.field = 'readmeDraft';
+  notes.dataset.field = 'notes';
   screenshots.dataset.field = 'screenshots';
   video.dataset.field = 'video';
+
+  const readmeDraftField = field('README / описание проекта для AI-проверки', readmeDraft);
+  readmeDraftField.classList.add('learning-field--wide');
+  const notesField = field('Заметки', notes);
+  notesField.classList.add('learning-field--wide');
 
   form.append(
     field('Статус', status),
     field('GitHub URL', github),
+    readmeDraftField,
     checkboxField('README готов', readme),
     checkboxField('Скриншоты готовы', screenshots),
     checkboxField('Видео-демо готово', video),
-    field('Заметки', notes),
+    notesField,
   );
 
   const quality = document.createElement('div');
@@ -98,8 +109,13 @@ function projectCard(content, project, saved, highlighted) {
   }
   form.append(quality);
 
-  form.addEventListener('input', () => saveProject(project, form));
-  form.addEventListener('change', () => saveProject(project, form));
+  let mentorControl = null;
+  const persistAndRefresh = () => {
+    saveProject(project, form);
+    mentorControl?.refreshPreview?.();
+  };
+  form.addEventListener('input', persistAndRefresh);
+  form.addEventListener('change', persistAndRefresh);
   box.append(form);
 
   const details = document.createElement('details');
@@ -109,15 +125,47 @@ function projectCard(content, project, saved, highlighted) {
   details.append(summary, listBlock(project.deliverables), listBlock(project.readmeStructure));
   box.append(details);
 
+  mentorControl = AiMentor({
+    title: 'AI-проверка проекта',
+    description: 'Проверит README или краткое описание как портфолио-проект Data Analyst.',
+    modes: [MENTOR_MODES.readmeReview],
+    defaultMode: MENTOR_MODES.readmeReview,
+    buildContext: () => buildProjectReviewContext({
+      project,
+      progress: readProjectFormState(project, form),
+      globalQualityChecklist: content.projects.globalQualityChecklist,
+    }),
+    getStudentAnswer: () => readmeDraft.value,
+    onFocusAnswer: () => readmeDraft.focus(),
+    resolveModeState: () => {
+      const hasReadmeText = isSubstantialStudentAnswer(readmeDraft.value);
+      return {
+        disabled: !hasReadmeText,
+        disabledMessage: 'Вставьте README или краткое описание проекта, чтобы AI смог проверить содержание.',
+        submitLabel: 'Проверить README',
+      };
+    },
+    historyScope: {
+      caseId: `project:${project.id}`,
+      module: 'portfolio',
+      caseTitle: project.fullTitle || project.title,
+    },
+  });
+  box.append(mentorControl.element);
+
   return box;
 }
 
 async function saveProject(project, form) {
+  await saveProjectProgress(readProjectFormState(project, form));
+}
+
+function readProjectFormState(project, form) {
   const qualityChecklist = {};
   for (const inputEl of form.querySelectorAll('[data-quality-id]')) {
     qualityChecklist[inputEl.dataset.qualityId] = inputEl.checked;
   }
-  await saveProjectProgress({
+  return {
     projectId: project.id,
     month: project.month,
     status: form.querySelector('select')?.value || 'not_started',
@@ -125,9 +173,10 @@ async function saveProject(project, form) {
     readmeReady: form.querySelector('[data-field="readme"]')?.checked || false,
     screenshotsReady: form.querySelector('[data-field="screenshots"]')?.checked || false,
     videoDemoReady: form.querySelector('[data-field="video"]')?.checked || false,
-    notes: form.querySelector('textarea')?.value || '',
+    readmeDraft: form.querySelector('[data-field="readmeDraft"]')?.value || '',
+    notes: form.querySelector('[data-field="notes"]')?.value || '',
     qualityChecklist,
-  });
+  };
 }
 
 function normalizeQuality(projectChecklist = [], globalChecklist = []) {
@@ -154,9 +203,9 @@ function input(type, value, placeholder) {
   return el;
 }
 
-function textarea(value) {
+function textarea(value, rows = 3) {
   const el = document.createElement('textarea');
-  el.rows = 3;
+  el.rows = rows;
   el.value = value;
   return el;
 }

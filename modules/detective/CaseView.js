@@ -24,9 +24,15 @@
 import { CaseHeader } from '../../core/components/CaseHeader.js';
 import { HintsPanel } from '../../core/components/HintsPanel.js';
 import { ReferenceBreakdown } from '../../core/components/ReferenceBreakdown.js';
+import { TopicGraphPanel } from '../../core/components/TopicGraphPanel.js';
+import { mountCaseAiMentor } from '../../core/components/caseAiMentor.js';
 import { textBlock, mountSelfAssessment } from '../../core/components/caseScaffold.js';
 import { ReasoningChain } from './ReasoningChain.js';
 import { saveDraftState, getDraftState } from '../../core/db.js';
+import { loadIndex } from '../../core/caseLoader.js';
+import { loadLearningContent } from '../../core/learningContent.js';
+import { loadTopicGraph, topicsForCase } from '../../core/topicGraph.js';
+import { MENTOR_MODES } from '../../core/mentorContext.js';
 
 // Критерии самооценки модуля 5.1 (PRD §5.1 Ф6). Все — шкала 0–100, авто-части нет.
 const SELF_CRITERIA = [
@@ -77,11 +83,14 @@ export async function DetectiveCaseView({ caseData, attemptNo } = {}) {
     root.append(q);
   }
 
+  mountCaseTopicPanel(root, caseId);
+
   // --- Ф2: цепочка рассуждений + черновик -------------------------------------
+  let aiMentor = null;
   const chain = ReasoningChain({
     initialSteps: draft?.chain,
     prompts: payload.reasoning?.stepPrompts,
-    onChange: () => { scheduleDraftSave(); refreshSubmitState(); },
+    onChange: () => { scheduleDraftSave(); refreshSubmitState(); aiMentor?.refreshPreview?.(); },
   });
   root.append(chain.element);
 
@@ -98,9 +107,33 @@ export async function DetectiveCaseView({ caseData, attemptNo } = {}) {
   answer.rows = 3;
   answer.placeholder = 'Итоговый вывод по расследованию…';
   answer.value = draft?.finalAnswer || '';
-  answer.addEventListener('input', scheduleDraftSave);
+  answer.addEventListener('input', () => { scheduleDraftSave(); aiMentor?.refreshPreview?.(); });
   answerWrap.append(answerLabel, answer);
   root.append(answerWrap);
+
+  let submitted = false;
+  aiMentor = await mountCaseAiMentor({
+    caseData,
+    modes: [
+      MENTOR_MODES.hint,
+      MENTOR_MODES.referenceCheck,
+      MENTOR_MODES.explainError,
+      MENTOR_MODES.nextStep,
+    ],
+    getStudentAnswer: () => answer.value,
+    getStudentArtifacts: () => ({ reasoningSteps: chain.getRawSteps() }),
+    getDraftSnapshot: () => ({
+      chain: chain.getRawSteps(),
+      finalAnswer: answer.value,
+    }),
+    isSubmitted: () => submitted,
+    isReadyForReference: () => !chain.isEmpty(),
+    onFocusAnswer: () => {
+      if (!submitted) answer.focus();
+    },
+    onBeforeReferenceCheck: () => submitAnswerAndRevealReference(),
+  });
+  root.append(aiMentor.element);
 
   // --- Ф4: подсказки ----------------------------------------------------------
   const hints = HintsPanel({ hints: payload.hints || [] });
@@ -156,9 +189,17 @@ export async function DetectiveCaseView({ caseData, attemptNo } = {}) {
   }
 
   // --- Отправка ответа: раскрыть эталон + активировать самооценку -------------
-  let submitted = false;
   submit.addEventListener('click', () => {
-    if (submitted || chain.isEmpty()) return;
+    submitAnswerAndRevealReference();
+  });
+
+  function submitAnswerAndRevealReference() {
+    if (submitted) return true;
+    if (chain.isEmpty()) {
+      refreshSubmitState();
+      throw new Error('Заполните хотя бы один шаг цепочки рассуждений перед проверкой по эталону.');
+    }
+
     submitted = true;
     clearTimeout(draftTimer);
 
@@ -171,6 +212,7 @@ export async function DetectiveCaseView({ caseData, attemptNo } = {}) {
     submitHint.textContent = '';
 
     reference.reveal();
+    aiMentor.refreshPreview();
 
     // Самооценка (Ф6). 5.1 — только самооценка (autoFraction:null).
     mountSelfAssessment(selfHost, {
@@ -181,11 +223,80 @@ export async function DetectiveCaseView({ caseData, attemptNo } = {}) {
       hintsTotal: (payload.hints || []).length,
       getNotes: () => answer.value.trim(),
     });
-  });
+    return true;
+  }
 
   refreshSubmitState();
   // unmount-хук роутера: останавливаем таймер шапки при уходе с кейса (идемпотентно).
   return { element: root, destroy: () => { header.stop(); } };
+}
+
+function mountCaseTopicPanel(root, caseId) {
+  const host = document.createElement('div');
+  host.className = 'topic-graph-panel-slot';
+  host.append(TopicGraphPanel({
+    title: 'Что повторить',
+    topics: [],
+    showEmpty: true,
+    emptyText: 'Загружаем связи тем…',
+    className: 'topic-graph-panel--case',
+  }));
+  root.append(host);
+
+  buildCaseTopicPanel(caseId)
+    .then((panel) => {
+      if (!host.isConnected) return;
+      host.replaceChildren(panel);
+    })
+    .catch((err) => {
+      console.warn('[detective] topic graph panel недоступна:', err.message || err);
+      if (!host.isConnected) return;
+      host.replaceChildren(TopicGraphPanel({
+        title: 'Что повторить',
+        topics: [],
+        graph: { error: err },
+        showEmpty: true,
+        errorText: 'Связи тем сейчас недоступны, кейс можно продолжать.',
+        className: 'topic-graph-panel--case',
+      }));
+    });
+}
+
+async function buildCaseTopicPanel(caseId) {
+  const graph = await loadTopicGraph();
+  const topics = topicsForCase(graph, caseId, 3);
+  const [content, casesById] = topics.length > 0
+    ? await Promise.all([
+      loadLearningContent().catch((err) => {
+        console.warn('[detective] learning content для topic panel недоступен:', err.message || err);
+        return null;
+      }),
+      loadCasesById().catch((err) => {
+        console.warn('[detective] case index для topic panel недоступен:', err.message || err);
+        return new Map();
+      }),
+    ])
+    : [null, new Map()];
+
+  return TopicGraphPanel({
+    title: 'Что повторить',
+    topics,
+    graph,
+    content,
+    casesById,
+    maxTopics: 3,
+    showEmpty: true,
+    emptyText: 'Для этого кейса связанные темы пока не настроены.',
+    errorText: 'Связи тем сейчас недоступны, кейс можно продолжать.',
+    className: 'topic-graph-panel--case',
+  });
+}
+
+async function loadCasesById() {
+  const { entries } = await loadIndex();
+  return new Map((entries || [])
+    .filter((item) => item.caseId && item.module && item.status !== 'error')
+    .map((item) => [item.caseId, item]));
 }
 
 // --- Ф1: таблица данных с сортировкой по столбцам ----------------------------

@@ -1,14 +1,9 @@
-/* styles.css — премиальная дизайн-система Analyst Trainer.
+/* Design system — modern SaaS dashboard.
  *
- * Светлая тема — ОСНОВНАЯ (тёплый кремовый фон + белые карточки), один акцентный
- * цвет (золото) + нейтральная шкала, тёмно-синий «чернильный» сайдбар в обеих темах.
- * Типографика: Manrope (заголовки/крупные числа) + Inter (текст/UI),
- * подключаются локально из vendor/fonts. Сетка отступов 4px, единые радиусы и тени.
- *
- * Тёмная палитра — в :root, светлая — переопределение в [data-theme="light"]
- * (основная, ставится по умолчанию). Разметка тему не знает: переключатель ставит
- * data-theme на <html> и пишет выбор в localStorage (core/theme.js). Все цвета —
- * семантические токены, поэтому смена палитры не требует правок правил. */
+ * The product shell is intentionally consistent in both saved theme states:
+ * a dark navy sidebar, light canvas, white cards, soft depth, cool blue/violet
+ * accents, and a single semantic token layer consumed by all screens.
+ */
 
 @font-face {
   font-family: 'Inter';
@@ -50,7 +45,7 @@
   unicode-range: U+0301, U+0400-045F, U+0490-0491, U+2116;
 }
 
-/* === Тёмная тема — ОСНОВНАЯ (по умолчанию) ================================== */
+/* === Base SaaS theme ======================================================== */
 :root {
   /* --- Типографика --- */
   --font-sans: 'Manrope', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -62,130 +57,136 @@
   --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
   --space-12: 48px; --space-16: 64px;
 
-  /* --- База (тёмная): тёплый глубокий графит, не «чёрный в ноль».
-         Лёгкая тёплая нота (R>G>B) даёт «дорогой» уют, на котором холодный
-         индиго-акцент читается особенно собранно. --- */
-  --bg: #13110f;             /* тёплый глубокий шарколь — фон страницы */
-  --surface: #1c1915;        /* карточки/панели */
-  --surface-2: #24201b;      /* поля ввода / таблицы / hover */
-  --surface-3: #2e2922;      /* активные «лунки» */
-  --border: #2a2620;         /* тонкая граница 1px */
-  --border-strong: #3a342c;
-  --text: #f1ede7;           /* тёплый off-white */
-  --text-muted: #a8a097;
-  --text-faint: #746b61;
+  --bg: #f6f8fc;
+  --bg-soft: #eef4ff;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #eef2ff;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --text-faint: #94a3b8;
 
-  /* --- Акцент (холодный индиго, в духе Linear/Vercel) --- */
-  --accent: #7098ff;
-  --accent-rgb: 112, 152, 255;
-  --accent-hover: #8eacff;
-  --accent-contrast: #0b1330;                 /* тёмный навигатор-текст на заливке */
-  --accent-tint: rgba(112, 152, 255, 0.13);   /* подсветка/hover на акценте */
-  --accent-ring: rgba(112, 152, 255, 0.45);   /* кольцо фокуса */
-  --accent-glow: rgba(112, 152, 255, 0.20);   /* мягкое свечение под акцентом */
+  --accent: #4361ee;
+  --accent-rgb: 67, 97, 238;
+  --accent-2: #7c3aed;
+  --accent-2-rgb: 124, 58, 237;
+  --accent-hover: #5b5ff4;
+  --accent-contrast: #ffffff;
+  --accent-tint: rgba(67, 97, 238, 0.10);
+  --accent-tint-strong: rgba(67, 97, 238, 0.16);
+  --accent-ring: rgba(67, 97, 238, 0.28);
+  --accent-glow: rgba(67, 97, 238, 0.24);
+  --violet-tint: rgba(124, 58, 237, 0.10);
 
   /* --- Стеклянный блик: тонкая верхняя подсветка ребра у карточек/панелей --- */
-  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.78);
 
-  /* --- Первичная кнопка (CTA): на тёмной теме — индиго (как акцент) --- */
   --btn-primary-bg: var(--accent);
   --btn-primary-fg: var(--accent-contrast);
-  --btn-primary-hover: var(--accent-hover);
+  --btn-primary-hover: #3454df;
+  --btn-primary-gradient: linear-gradient(135deg, var(--accent), var(--accent-2));
+  --btn-primary-gradient-hover: linear-gradient(135deg, #3454df, #6d32d7);
 
   /* --- Радиусы и тени (мягкие, со слоистой глубиной) --- */
-  --radius-sm: 10px;
-  --radius: 14px;
-  --radius-lg: 20px;
+  --radius-sm: 12px;
+  --radius: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 24px;
   --radius-full: 999px;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 14px 36px -16px rgba(0, 0, 0, 0.62);
-  --shadow-lg: 0 28px 70px -28px rgba(0, 0, 0, 0.78);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 18px -16px rgba(15, 23, 42, 0.18);
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 16px 38px -24px rgba(15, 23, 42, 0.24);
+  --shadow-lg: 0 12px 30px -20px rgba(15, 23, 42, 0.30), 0 28px 70px -44px rgba(67, 97, 238, 0.32);
 
   /* --- Размеры оболочки навигации (сайдбар / верхняя / нижняя панели) --- */
-  --sidebar-w: 284px;
+  --sidebar-w: 292px;
   --topbar-h: 52px;
   --bottomnav-h: 72px;
 
-  /* --- Боковая панель: чуть более глубокий тёплый «чернильный» слой в ОБЕИХ темах.
-         Светлая тема эти токены НЕ переопределяет — сайдбар остаётся тёмным. --- */
-  --sidebar-bg: #100e0c;
-  --sidebar-surface-2: #1d1915;
-  --sidebar-surface-3: #26201a;
-  --sidebar-border: #241f1a;
-  --sidebar-border-strong: #352e26;
-  --sidebar-text: #f0ece6;
-  --sidebar-text-muted: #a39b91;
-  --sidebar-text-faint: #6f675d;
+  --sidebar-bg: #07142d;
+  --sidebar-bg-2: #0b1b3d;
+  --sidebar-surface-2: rgba(255, 255, 255, 0.065);
+  --sidebar-surface-3: rgba(255, 255, 255, 0.105);
+  --sidebar-border: rgba(226, 232, 240, 0.11);
+  --sidebar-border-strong: rgba(226, 232, 240, 0.18);
+  --sidebar-text: #f8fbff;
+  --sidebar-text-muted: #c7d2fe;
+  --sidebar-text-faint: #7f8faa;
+  --sidebar-active: linear-gradient(135deg, rgba(67, 97, 238, 0.62), rgba(124, 58, 237, 0.52));
 
   /* --- Статусы: успех (зелёный, чуть приглушённый) --- */
-  --success: #5fcf86;
-  --success-bg: #17271c;
-  --success-border: #2f5e40;
+  --success: #16a34a;
+  --success-bg: #ecfdf5;
+  --success-border: #bbf7d0;
 
   /* --- Статусы: ошибка/опасность (красный) --- */
-  --danger: #ff7a7a;
-  --danger-bg: #2e1a1a;
-  --danger-border: #5e3636;
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
 
-  /* --- Статусы: предупреждение (тёплый янтарь) --- */
-  --warning: #e6b94f;
-  --warning-fg: #ecc36a;
-  --warning-bg: #2b2413;
-  --warning-border: #5e4f24;
+  --warning: #d97706;
+  --warning-fg: #92400e;
+  --warning-bg: #fff7ed;
+  --warning-border: #fed7aa;
 
   /* --- Статусы: информация (= акцент-индиго) --- */
-  --info-fg: #9cb4ff;
-  --info-bg: rgba(112, 152, 255, 0.15);
+  --info-fg: #3454df;
+  --info-bg: rgba(67, 97, 238, 0.10);
 }
 
-/* === Светлая тема — ОСНОВНАЯ (по умолчанию, как на макете) ================== */
+/* The saved light state intentionally maps to the same SaaS shell tokens. */
 [data-theme="light"] {
-  --bg: #f4f1ea;             /* тёплый кремовый фон страницы */
-  --surface: #ffffff;        /* карточки */
-  --surface-2: #f3efe7;      /* поля ввода / hover (тёплый off-white) */
-  --surface-3: #ebe5da;      /* активные «лунки» */
-  --border: #e7e0d2;         /* тёплая граница */
-  --border-strong: #d6ccba;
-  --text: #1d2230;           /* тёмные «чернила» */
-  --text-muted: #5f6675;
-  --text-faint: #9aa0ab;
+  --bg: #f6f8fc;
+  --bg-soft: #eef4ff;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #eef2ff;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text: #0f172a;
+  --text-muted: #64748b;
+  --text-faint: #94a3b8;
 
-  /* Тот же холодный индиго, что и в тёмной теме (единый акцент на весь продукт),
-     но глубже — чтобы держать контраст на белом. */
-  --accent: #4f6bd6;
-  --accent-rgb: 79, 107, 214;
-  --accent-hover: #6a83e6;
+  --accent: #4361ee;
+  --accent-rgb: 67, 97, 238;
+  --accent-2: #7c3aed;
+  --accent-2-rgb: 124, 58, 237;
+  --accent-hover: #5b5ff4;
   --accent-contrast: #ffffff;
-  --accent-tint: rgba(79, 107, 214, 0.12);
-  --accent-ring: rgba(79, 107, 214, 0.40);
-  --accent-glow: rgba(79, 107, 214, 0.18);
+  --accent-tint: rgba(67, 97, 238, 0.10);
+  --accent-tint-strong: rgba(67, 97, 238, 0.16);
+  --accent-ring: rgba(67, 97, 238, 0.28);
+  --accent-glow: rgba(67, 97, 238, 0.24);
+  --violet-tint: rgba(124, 58, 237, 0.10);
 
   --glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.6);
 
-  /* Первичная кнопка (CTA): индиго-заливка (единый акцент). */
   --btn-primary-bg: var(--accent);
   --btn-primary-fg: #ffffff;
-  --btn-primary-hover: #3f59c4;
+  --btn-primary-hover: #3454df;
+  --btn-primary-gradient: linear-gradient(135deg, var(--accent), var(--accent-2));
+  --btn-primary-gradient-hover: linear-gradient(135deg, #3454df, #6d32d7);
 
-  --shadow-sm: 0 1px 2px rgba(40, 34, 20, 0.05);
-  --shadow: 0 1px 2px rgba(40, 34, 20, 0.05), 0 12px 30px -14px rgba(40, 34, 20, 0.16);
-  --shadow-lg: 0 22px 56px -22px rgba(40, 34, 20, 0.22);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 18px -16px rgba(15, 23, 42, 0.18);
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 16px 38px -24px rgba(15, 23, 42, 0.24);
+  --shadow-lg: 0 12px 30px -20px rgba(15, 23, 42, 0.30), 0 28px 70px -44px rgba(67, 97, 238, 0.32);
 
-  --success: #2e9e58;
-  --success-bg: #e7f4ea;
-  --success-border: #b3dabf;
+  --success: #16a34a;
+  --success-bg: #ecfdf5;
+  --success-border: #bbf7d0;
 
-  --danger: #cf3a3a;
-  --danger-bg: #fbe6e3;
-  --danger-border: #efc2bb;
+  --danger: #dc2626;
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
 
-  --warning: #b9820f;
-  --warning-fg: #8a6310;
-  --warning-bg: #fbf2d9;
-  --warning-border: #ecd28f;
+  --warning: #d97706;
+  --warning-fg: #92400e;
+  --warning-bg: #fff7ed;
+  --warning-border: #fed7aa;
 
-  --info-fg: #3f59c4;
-  --info-bg: rgba(79, 107, 214, 0.12);
+  --info-fg: #3454df;
+  --info-bg: rgba(67, 97, 238, 0.10);
 }
 
 /* Плавный переход темы для основных поверхностей. */
@@ -198,10 +199,9 @@ body,
   transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-/* На скрытие мерцания при старте: тема ставится на <html> до отрисовки (theme.js).
-   Тёмная — по умолчанию; светлая включается только атрибутом data-theme="light". */
-html { color-scheme: dark; }
-html[data-theme="light"] { color-scheme: light; }
+html { color-scheme: light; }
+html[data-theme="light"],
+html[data-theme="dark"] { color-scheme: light; }
 
 * { box-sizing: border-box; }
 
@@ -209,7 +209,10 @@ body {
   margin: 0;
   font-family: var(--font-sans);
   color: var(--text);
-  background: var(--bg);
+  background:
+    radial-gradient(circle at top left, rgba(var(--accent-rgb), 0.08), transparent 30rem),
+    radial-gradient(circle at top right, rgba(var(--accent-2-rgb), 0.07), transparent 34rem),
+    var(--bg);
   line-height: 1.55;
   letter-spacing: 0;
   -webkit-font-smoothing: antialiased;
@@ -217,17 +220,15 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Заголовки — локальная дисплейная гарнитура с плотной высотой строки и тонким
-   отрицательным трекингом: на крупном кегле это даёт собранный «дорогой» вид. */
 h1, h2, h3, h4, h5 {
   font-family: var(--font-display);
   font-weight: 700;
-  letter-spacing: -0.014em;
+  letter-spacing: 0;
   line-height: 1.16;
   color: var(--text);
 }
-h1 { font-size: 1.7rem; letter-spacing: -0.022em; }
-h2 { letter-spacing: -0.018em; }
+h1 { font-size: 1.9rem; }
+h2 { letter-spacing: 0; }
 
 /* Поля ввода: тёмная «лунка», акцентная галочка/ползунок, читаемый плейсхолдер. */
 input, textarea, select, button { font-family: inherit; }
@@ -254,4 +255,3 @@ input, textarea, select { accent-color: var(--accent); }
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-faint); background-clip: content-box; }
 ::-webkit-scrollbar-track { background: transparent; }
-

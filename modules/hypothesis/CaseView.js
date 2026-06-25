@@ -21,7 +21,9 @@
 
 import { CaseHeader } from '../../core/components/CaseHeader.js';
 import { ReferenceBreakdown } from '../../core/components/ReferenceBreakdown.js';
+import { mountCaseAiMentor } from '../../core/components/caseAiMentor.js';
 import { textBlock, factsBlock, mountSelfAssessment } from '../../core/components/caseScaffold.js';
+import { MENTOR_MODES } from '../../core/mentorContext.js';
 import { HypothesisForm } from './HypothesisForm.js';
 import { PrioritizationMatrix } from './PrioritizationMatrix.js';
 import { saveDraftState, getDraftState } from '../../core/db.js';
@@ -73,12 +75,13 @@ export async function HypothesisCaseView({ caseData, attemptNo } = {}) {
   }
 
   // --- Ф1–Ф3: конструктор гипотез (черновик ведёт экран → autosave:false) ------
+  let aiMentor = null;
   const form = await HypothesisForm({
     payload,
     caseId,
     initialHypotheses: draft?.hypotheses,
     autosave: false,
-    onChange: () => { syncMatrix(); scheduleDraftSave(); refreshSubmitState(); },
+    onChange: () => { syncMatrix(); scheduleDraftSave(); refreshSubmitState(); aiMentor?.refreshPreview?.(); },
   });
   root.append(form.element);
 
@@ -86,13 +89,33 @@ export async function HypothesisCaseView({ caseData, attemptNo } = {}) {
   const matrix = PrioritizationMatrix({
     items: form.getItems().filter((it) => it.filled),
     initialPlacement: draft?.matrix,
-    onChange: scheduleDraftSave,
+    onChange: () => { scheduleDraftSave(); aiMentor?.refreshPreview?.(); },
   });
   root.append(matrix.element);
+  let submitted = false;
 
   function syncMatrix() {
     matrix.setItems(form.getItems().filter((it) => it.filled));
   }
+
+  aiMentor = await mountCaseAiMentor({
+    caseData,
+    modes: [
+      MENTOR_MODES.hint,
+      MENTOR_MODES.referenceCheck,
+      MENTOR_MODES.explainError,
+      MENTOR_MODES.nextStep,
+    ],
+    getStudentAnswer: () => summarizeHypotheses(form.getHypotheses()),
+    getStudentArtifacts: () => ({
+      hypotheses: form.getHypotheses(),
+      prioritization: matrix.getPlacement(),
+    }),
+    isSubmitted: () => submitted,
+    isReadyForReference: () => form.isReady(),
+    onBeforeReferenceCheck: () => submitAnswerAndRevealReference(),
+  });
+  root.append(aiMentor.element);
 
   // --- Кнопка «Сверить с эталоном» (открывает Ф5 + Ф6) ------------------------
   const submitBar = document.createElement('div');
@@ -144,9 +167,16 @@ export async function HypothesisCaseView({ caseData, attemptNo } = {}) {
   }
 
   // --- Отправка: зафиксировать ввод, раскрыть эталон, включить самооценку ------
-  let submitted = false;
   submit.addEventListener('click', () => {
-    if (submitted || !form.isReady()) return;
+    submitAnswerAndRevealReference();
+  });
+
+  function submitAnswerAndRevealReference() {
+    if (submitted) return true;
+    if (!form.isReady()) {
+      refreshSubmitState();
+      throw new Error(`Заполните все поля как минимум для ${form.requiredCount} гипотез.`);
+    }
     submitted = true;
     clearTimeout(draftTimer);
 
@@ -158,6 +188,7 @@ export async function HypothesisCaseView({ caseData, attemptNo } = {}) {
     submitHint.textContent = '';
 
     reference.reveal();
+    aiMentor.refreshPreview();
 
     // Ф6: самооценка. 5.2 — чистая самооценка (autoFraction:null), подсказок нет.
     mountSelfAssessment(selfHost, {
@@ -166,7 +197,8 @@ export async function HypothesisCaseView({ caseData, attemptNo } = {}) {
       criteria: SELF_CRITERIA,
       getNotes: () => summarizeHypotheses(form.getHypotheses()),
     });
-  });
+    return true;
+  }
 
   refreshSubmitState();
   // unmount-хук роутера: останавливаем таймер шапки при уходе с кейса (идемпотентно).

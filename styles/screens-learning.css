@@ -270,6 +270,10 @@
 
 .learning-field textarea { resize: vertical; }
 
+.learning-field--wide {
+  grid-column: 1 / -1;
+}
+
 .learning-button,
 .learning-practice {
   min-height: 2.25rem;
@@ -1076,4 +1080,3 @@
     white-space: nowrap;
   }
 }
-

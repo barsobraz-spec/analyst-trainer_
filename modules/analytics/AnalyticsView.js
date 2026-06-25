@@ -18,6 +18,9 @@
 import { getEvents } from '../../core/db.js';
 import { loadIndex } from '../../core/caseLoader.js';
 import { getCaseStatus } from '../../core/stats.js';
+import { AiMentor } from '../../core/components/AiMentor.js';
+import { buildMentorContext, MENTOR_MODES } from '../../core/mentorContext.js';
+import { loadTopicGraph, topicsForCase } from '../../core/topicGraph.js';
 import { WEAK_MIN_ATTEMPTS } from '../../config.js';
 import {
   summarize,
@@ -103,12 +106,14 @@ export async function AnalyticsView() {
   if (summary.solvedCases >= WEAK_MIN_ATTEMPTS) {
     root.append(SkillProgress({ groups: aggregateBySkillGroup(enriched) }));
 
+    const topicGraph = await loadTopicGraph().catch(() => null);
     const recItems = await buildRecommendations(enriched, entries);
     if (recItems.length > 0) {
       root.append(Recommendations({ items: recItems }));
     } else {
       root.append(note('Слабых мест не обнаружено — так держать! Продолжайте проходить новые кейсы.'));
     }
+    root.append(buildAiNextStepMentor({ summary, enriched, recItems, topicGraph }));
   } else {
     const left = WEAK_MIN_ATTEMPTS - summary.solvedCases;
     root.append(note(
@@ -121,6 +126,78 @@ export async function AnalyticsView() {
   root.append(ReflectionJournal({ events: enriched }));
 
   return root;
+}
+
+function buildAiNextStepMentor({ summary, enriched, recItems, topicGraph }) {
+  const topics = topicsForRecommendationItems(topicGraph, recItems);
+  const weakSpots = weakSpotsForAi(recItems);
+  const progressSummary = {
+    solvedCases: summary.solvedCases,
+    avgScore: summary.avgScore,
+    totalAttempts: enriched.length,
+    weakModules: recItems.map((item) => ({
+      moduleId: item.module.moduleId,
+      title: item.module.title,
+      avgAdjScore: item.module.avgAdjScore,
+      avgHints: item.module.avgHints,
+      reasons: item.module.reasons,
+    })),
+    recentScores: enriched.slice(-6).map((event) => ({
+      module: event.module,
+      caseId: event.caseId,
+      score: Number.isFinite(event.score) ? event.score : null,
+    })),
+  };
+  return AiMentor({
+    title: 'AI-наставник по слабым местам',
+    description: 'Соберет план повторения на ближайшие 1-3 дня по агрегированному прогрессу.',
+    modes: [MENTOR_MODES.nextStep],
+    defaultMode: MENTOR_MODES.nextStep,
+    buildContext: () => buildMentorContext({
+      mode: MENTOR_MODES.nextStep,
+      topics,
+      weakSpots,
+      progressSummary,
+    }),
+    getStudentAnswer: () => '',
+    compactDisabled: true,
+  }).element;
+}
+
+function topicsForRecommendationItems(graph, recItems) {
+  if (!graph?.topics) return [];
+  const byId = new Map();
+  for (const item of recItems) {
+    for (const topic of graph.topics.filter((candidate) => candidate.moduleRefs?.includes(item.module.moduleId))) {
+      if (topic?.id) byId.set(topic.id, topic);
+    }
+    for (const c of item.cases || []) {
+      for (const topic of topicsForCase(graph, c.caseId, 4)) {
+        if (topic?.id) byId.set(topic.id, topic);
+      }
+    }
+  }
+  return Array.from(byId.values()).slice(0, 6);
+}
+
+function weakSpotsForAi(recItems) {
+  const result = [];
+  for (const item of recItems) {
+    result.push({
+      label: `${item.module.moduleId} · ${item.module.title}`,
+      reason: item.module.reasons.join(', '),
+      score: item.module.avgAdjScore,
+    });
+    for (const c of (item.cases || []).slice(0, 3)) {
+      result.push({
+        caseId: c.caseId,
+        label: c.title || c.caseId,
+        reason: c.status === 'passed' ? 'низкий последний балл' : 'кейс еще не закрыт',
+        score: Number.isFinite(c.lastScore) ? c.lastScore : null,
+      });
+    }
+  }
+  return result.slice(0, 12);
 }
 
 // Слабые модули + отфильтрованные кейсы для тренировки. Статусы кейсов берём только

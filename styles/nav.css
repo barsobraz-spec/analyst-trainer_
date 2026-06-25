@@ -380,6 +380,17 @@
   background: var(--accent-tint);
 }
 
+.data-controls__btn--danger {
+  border-color: var(--danger-border);
+  color: var(--danger);
+}
+
+.data-controls__btn--danger:hover:not(:disabled) {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
 .data-controls__btn:disabled { opacity: 0.5; cursor: default; }
 
 /* Подтверждение импорта (замена данных) — выделяем как основное действие. */
@@ -397,7 +408,12 @@
   color: var(--accent-contrast);
 }
 
+.data-controls__confirm-yes--danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--accent-contrast);
+}
+
 .data-controls__status { font-size: 0.85rem; color: var(--text-muted); }
 .data-controls__status[data-kind="success"] { color: var(--success); }
 .data-controls__status[data-kind="error"] { color: var(--danger); }
-

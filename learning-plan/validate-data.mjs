@@ -229,6 +229,14 @@ function collectTaskIds(tasksDoc) {
   ].filter(Boolean));
 }
 
+function collectSkillIds(tasksDoc) {
+  return new Set((tasksDoc?.skills || []).map((skill) => skill.id).filter(Boolean));
+}
+
+function collectProjectIds(projectsDoc) {
+  return new Set((projectsDoc?.projects || []).map((project) => project.id).filter(Boolean));
+}
+
 function collectPracticeIds(practiceDoc) {
   return new Set((practiceDoc?.items || []).map((item, index) => (
     item.id || `practice-${item.taskId || index + 1}`
@@ -322,6 +330,59 @@ function validateCareer(career) {
   }
 }
 
+function validateTopicGraph(topicGraph, refs = {}) {
+  if (!topicGraph) return;
+  expect(topicGraph.schemaVersion === 1, 'topicGraph.json: schemaVersion должен быть 1');
+  expect(Array.isArray(topicGraph.topics), 'topicGraph.json: topics должен быть массивом');
+  expect((topicGraph.topics || []).length >= 10, `topicGraph.json: должно быть минимум 10 тем, сейчас ${topicGraph.topics?.length}`);
+
+  const topicIds = new Set();
+  for (const [index, topic] of (topicGraph.topics || []).entries()) {
+    const owner = topic?.id || `topic ${index + 1}`;
+    expect(isPlainObject(topic), `topicGraph.json: ${owner}: тема должна быть объектом`);
+    expect(hasNonEmptyString(topic, 'id'), `topicGraph.json: ${owner}: нет id`);
+    expect(hasNonEmptyString(topic, 'title'), `topicGraph.json: ${owner}: нет title`);
+    expect(hasNonEmptyString(topic, 'skill'), `topicGraph.json: ${owner}: нет skill`);
+    if (topic?.id) topicIds.add(topic.id);
+    if (topic?.skill && refs.skillIds) {
+      expect(refs.skillIds.has(topic.skill), `topicGraph.json: ${owner}: skill ${topic.skill} не найден в tasks.json`);
+    }
+    expect(Number.isInteger(topic?.month) && topic.month >= 1 && topic.month <= 7, `topicGraph.json: ${owner}: month должен быть 1..7`);
+
+    for (const key of ['prerequisites', 'next', 'related', 'taskRefs', 'caseRefs', 'moduleRefs', 'projectRefs', 'commonMistakes']) {
+      expect(Array.isArray(topic?.[key]), `topicGraph.json: ${owner}: ${key} должен быть массивом`);
+      for (const value of topic?.[key] || []) {
+        expect(typeof value === 'string' && value.trim().length > 0, `topicGraph.json: ${owner}: ${key} содержит пустое значение`);
+      }
+      expect(uniqueValues(topic?.[key] || []), `topicGraph.json: ${owner}: ${key} содержит дубли`);
+    }
+  }
+
+  expect(uniqueValues((topicGraph.topics || []).map((topic) => topic.id)), 'topicGraph.json: id тем должны быть уникальными');
+
+  for (const topic of topicGraph.topics || []) {
+    const owner = topic.id || topic.title || 'topic';
+    for (const key of ['prerequisites', 'next', 'related']) {
+      for (const id of topic[key] || []) {
+        expect(topicIds.has(id), `topicGraph.json: ${owner}: ${key} ссылается на неизвестную тему ${id}`);
+        expect(id !== topic.id, `topicGraph.json: ${owner}: ${key} ссылается на саму тему`);
+      }
+    }
+    for (const taskId of topic.taskRefs || []) {
+      if (refs.taskIds) expect(refs.taskIds.has(taskId), `topicGraph.json: ${owner}: taskRefs ссылается на неизвестную задачу ${taskId}`);
+    }
+    for (const caseId of topic.caseRefs || []) {
+      if (refs.caseIds) expect(refs.caseIds.has(caseId), `topicGraph.json: ${owner}: caseRefs ссылается на неизвестный кейс ${caseId}`);
+    }
+    for (const moduleId of topic.moduleRefs || []) {
+      expect(KNOWN_MODULES.has(moduleId), `topicGraph.json: ${owner}: moduleRefs ссылается на неизвестный модуль ${moduleId}`);
+    }
+    for (const projectId of topic.projectRefs || []) {
+      if (refs.projectIds) expect(refs.projectIds.has(projectId), `topicGraph.json: ${owner}: projectRefs ссылается на неизвестный проект ${projectId}`);
+    }
+  }
+}
+
 async function validateReadme() {
   let readme = '';
   try {
@@ -382,6 +443,7 @@ const tasks = await readJson('tasks.json');
 const practiceContent = await readJson('practiceContent.json');
 const projects = await readJson('projects.json');
 const career = await readJson('career.json');
+const topicGraph = await readJson('topicGraph.json');
 const caseIds = await collectCaseIds();
 
 validateTasks(tasks, plan);
@@ -393,6 +455,12 @@ validatePlan(plan, {
 });
 validateProjects(projects);
 validateCareer(career);
+validateTopicGraph(topicGraph, {
+  skillIds: collectSkillIds(tasks),
+  taskIds: collectTaskIds(tasks),
+  caseIds,
+  projectIds: collectProjectIds(projects),
+});
 await validateReadme();
 await validateScheduleModel();
 

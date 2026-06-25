@@ -10,8 +10,9 @@
 // Вся логика выгрузки/загрузки и миграций — в core/backup.js; здесь только UI.
 // ES-модуль: `import { DataControls } from './core/components/DataControls.js'`.
 
-import { exportAll, parseBackupFile, importAll } from '../backup.js';
+import { exportAll, parseBackupFile, importAll, clearProgress } from '../backup.js?v=v1.5';
 import { navigate } from '../router.js';
+import { PROGRESS_EVENT } from '../event.js?v=v1.5';
 
 export function DataControls() {
   const root = document.createElement('div');
@@ -22,6 +23,9 @@ export function DataControls() {
 
   const importBtn = button('Импорт', 'data-controls__btn');
   importBtn.title = 'Загрузить прогресс из ранее сохранённого файла';
+
+  const resetBtn = button('Сброс', 'data-controls__btn data-controls__btn--danger');
+  resetBtn.title = 'Очистить весь прогресс прохождения, сохранив настройки курса';
 
   // Скрытый файловый input — клик по «Импорт» открывает выбор файла.
   const fileInput = document.createElement('input');
@@ -39,7 +43,7 @@ export function DataControls() {
   status.className = 'data-controls__status';
   status.setAttribute('aria-live', 'polite');
 
-  root.append(exportBtn, importBtn, fileInput, confirmBar, status);
+  root.append(exportBtn, importBtn, resetBtn, fileInput, confirmBar, status);
 
   function setStatus(text, kind = 'info') {
     status.textContent = text;
@@ -51,6 +55,7 @@ export function DataControls() {
   function setBusy(busy) {
     exportBtn.disabled = busy;
     importBtn.disabled = busy;
+    resetBtn.disabled = busy;
   }
 
   // --- Экспорт: скачивание без подтверждения (действие не разрушительное) -----
@@ -71,6 +76,10 @@ export function DataControls() {
   importBtn.addEventListener('click', () => {
     fileInput.value = ''; // позволяем выбрать тот же файл повторно
     fileInput.click();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    askResetConfirm();
   });
 
   fileInput.addEventListener('change', async () => {
@@ -117,6 +126,44 @@ export function DataControls() {
         navigate(location.hash || '#/');
       } catch (err) {
         reportError('импорт', err);
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    confirmBar.append(text, yes, no);
+    confirmBar.hidden = false;
+  }
+
+  function askResetConfirm() {
+    setStatus('');
+    setBusy(true);
+    confirmBar.replaceChildren();
+
+    const text = document.createElement('span');
+    text.className = 'data-controls__confirm-text';
+    text.textContent = 'Сброс очистит прохождение, черновики, задачи, проекты и карьерный трек. Продолжить?';
+
+    const yes = button('Сбросить', 'data-controls__confirm-yes data-controls__confirm-yes--danger');
+    const no = button('Отмена', 'data-controls__confirm-no');
+
+    no.addEventListener('click', () => {
+      hideConfirmBar();
+      setBusy(false);
+      setStatus('Сброс отменён — данные не изменены.');
+    });
+
+    yes.addEventListener('click', async () => {
+      hideConfirmBar();
+      setStatus('Очищаю прогресс…');
+      try {
+        const result = await clearProgress({ keepLearningSettings: true });
+        const totalKept = Object.values(result.counts).reduce((n, c) => n + c, 0);
+        setStatus(`Прогресс сброшен. Сохранено служебных записей: ${totalKept}.`, 'success');
+        window.dispatchEvent(new CustomEvent(PROGRESS_EVENT, { detail: { reset: true } }));
+        navigate(location.hash || '#/');
+      } catch (err) {
+        reportError('сброс', err);
       } finally {
         setBusy(false);
       }

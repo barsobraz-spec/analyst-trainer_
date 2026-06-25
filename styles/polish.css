@@ -1,94 +1,672 @@
 /* ===========================================================================
-   СЛОЙ ПОЛИРОВКИ — «тихая роскошь» (Linear / Vercel / Arc)
-   Подключается ПОСЛЕДНИМ, поэтому аккуратно усиливает уже существующие правила
-   через каскад, не переписывая разметку. Только внешний вид: глубина (стекло),
-   мягкое свечение акцента, выверенные микро-анимации появления и наведения.
+   SaaS dashboard polish layer.
+   This file is loaded last and only normalizes visual treatment across existing
+   components: navy sidebar, light workspace, white cards, soft shadows, cool
+   blue/violet accents, and consistent controls.
    =========================================================================== */
 
-/* --- Глубина «стекла»: тонкий верхний блик ребра у всех ключевых поверхностей.
-       Идёт ПОСЛЕ их объявлений, поэтому выигрывает по порядку каскада. --- */
+body {
+  overflow-x: hidden;
+}
+
+.layout {
+  min-width: 0;
+}
+
+main#app {
+  min-width: 0;
+}
+
+.screen {
+  min-width: 0;
+}
+
+.screen > h1,
+.page-head__title,
+.home-greet__title {
+  font-size: clamp(1.7rem, 1.24rem + 1.45vw, 2.45rem);
+  font-weight: 820;
+  line-height: 1.1;
+}
+
+.catalog__intro,
+.case-list__intro,
+.page-head__sub,
+.home-greet__sub,
+.learning-subtitle,
+.analytics__intro {
+  color: var(--text-muted);
+  font-size: 0.98rem;
+}
+
+/* --- Sidebar --------------------------------------------------------------- */
+.sidebar {
+  --surface: transparent;
+  --surface-2: var(--sidebar-surface-2);
+  --surface-3: var(--sidebar-surface-3);
+  --border: var(--sidebar-border);
+  --border-strong: var(--sidebar-border-strong);
+  --text: var(--sidebar-text);
+  --text-muted: var(--sidebar-text-muted);
+  --text-faint: var(--sidebar-text-faint);
+  background:
+    linear-gradient(180deg, rgba(67, 97, 238, 0.16) 0%, transparent 18rem),
+    linear-gradient(180deg, var(--sidebar-bg-2), var(--sidebar-bg) 42%, #061128);
+  border-right: 1px solid rgba(226, 232, 240, 0.12);
+  box-shadow: 18px 0 44px -36px rgba(15, 23, 42, 0.65);
+}
+
+.sidebar__brand {
+  min-height: 4.55rem;
+  padding: 1rem 1.05rem;
+  border-bottom-color: rgba(226, 232, 240, 0.11);
+}
+
+.sidebar__logo {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 12px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #3b82f6, #6d5dfc);
+  box-shadow: 0 12px 26px -14px rgba(var(--accent-rgb), 0.9), var(--glass-highlight);
+}
+
+.sidebar__brand-name {
+  color: var(--sidebar-text);
+  font-family: var(--font-sans);
+  font-size: 1.04rem;
+  font-weight: 800;
+}
+
+.sidebar__scroll {
+  padding: 0.9rem 0.75rem 1rem;
+}
+
+.sb-quick {
+  min-height: 4.8rem;
+  margin: 0 0 1rem;
+  padding: 0.8rem;
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(67, 97, 238, 0.30), rgba(124, 58, 237, 0.18)),
+    rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(226, 232, 240, 0.14);
+  box-shadow: 0 18px 38px -28px rgba(0, 0, 0, 0.86), var(--glass-highlight);
+}
+
+.sb-quick:hover {
+  border-color: rgba(199, 210, 254, 0.52);
+  background:
+    linear-gradient(135deg, rgba(67, 97, 238, 0.40), rgba(124, 58, 237, 0.25)),
+    rgba(255, 255, 255, 0.08);
+}
+
+.sb-quick__icon {
+  width: 2.55rem;
+  height: 2.55rem;
+  border-radius: 13px;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.11);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.sb-quick__label,
+.sb-nav__heading {
+  color: var(--sidebar-text-faint);
+}
+
+.sb-quick__title {
+  color: #ffffff;
+  font-size: 0.92rem;
+}
+
+.sb-nav__trigger,
+.sb-nav__item {
+  min-height: 2.55rem;
+  border-radius: 12px;
+  color: rgba(248, 251, 255, 0.82);
+  font-weight: 760;
+}
+
+.sb-nav__trigger:hover,
+.sb-nav__item:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #ffffff;
+}
+
+.sidebar .sb-nav__item.is-current {
+  background: var(--sidebar-active);
+  color: #ffffff;
+  box-shadow: inset 3px 0 0 rgba(255, 255, 255, 0.54), 0 18px 30px -24px rgba(67, 97, 238, 0.95);
+}
+
+.sidebar .sb-nav__trigger.is-current {
+  background: rgba(67, 97, 238, 0.20);
+  color: #ffffff;
+}
+
+.sidebar .sb-nav__item.is-current .sb-nav__icon,
+.sidebar .sb-nav__trigger.is-current .sb-nav__icon {
+  color: #ffffff;
+}
+
+.sb-nav__list--nested {
+  border-left-color: rgba(226, 232, 240, 0.12);
+}
+
+.sidebar__foot {
+  padding: 0.75rem;
+  border-top-color: rgba(226, 232, 240, 0.11);
+}
+
+.sb-goal {
+  padding: 0.85rem;
+  border-radius: 15px;
+  background:
+    linear-gradient(135deg, rgba(67, 97, 238, 0.16), rgba(255, 255, 255, 0.06)),
+    rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(226, 232, 240, 0.14);
+}
+
+.progress-ring__track {
+  stroke: rgba(226, 232, 240, 0.38);
+}
+
+.sidebar .progress-ring__label,
+.sidebar .sb-goal__title {
+  color: #ffffff;
+}
+
+.sidebar .sb-goal__hint {
+  color: rgba(248, 251, 255, 0.68);
+}
+
+/* --- Card system ----------------------------------------------------------- */
 .module-card,
+.case-row,
+.learning-card,
 .home-hero,
 .home-widget,
 .home-focus-card,
-.panel,
-.sb-quick {
+.analytics-section,
+.empty-state,
+.practice-card,
+.practice-filters,
+.practice-linked-card,
+.settings-card,
+.about-card,
+.about-step,
+.skill__note,
+.skill-summary,
+.history-row,
+.schema-panel,
+.decision-form,
+.round-result,
+.final-result,
+.user-case-creator__form,
+.step-card,
+.readiness,
+.artifacts,
+.analytics__empty,
+.analytics__note,
+.recommendations__module,
+.recommendations__case,
+.journal-entry,
+.hypothesis-form__card,
+.quality-checklist,
+.method-picker,
+.prioritization__cell,
+.case-view__metric,
+.subtasks__active,
+.learning-day-item,
+.learning-task-row,
+.learning-day-detail,
+.learning-day-fact,
+.learning-day-block,
+.learning-topic-button,
+.learning-search__item,
+.learning-month,
+.learning-project-card,
+.learning-career-actions,
+.learning-applications,
+.learning-sprint,
+.learning-week,
+.learning-mini-card,
+.learning-career-month,
+.learning-mock-mini,
+.learning-exam,
+.learning-level__component,
+.learning-mock-protocol__list li,
+.learning-mock-section-row,
+.learning-details {
+  background: var(--surface);
+  border-color: var(--border);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow), var(--glass-highlight);
 }
 
-/* --- Боковая панель: лёгкий вертикальный «чернильный» градиент + блик ребра,
-       чтобы был объём, а не плоская заливка. --- */
-.sidebar {
-  background:
-    linear-gradient(180deg, var(--sidebar-surface-2) 0%, var(--sidebar-bg) 32%);
-  box-shadow: var(--glass-highlight);
+.learning-small-stat,
+.summary-panel__stat,
+.final-result__stat,
+.learning-reminder,
+.learning-disclosure,
+.learning-day-block__head span,
+.learning-practice-meta span,
+.practice-linked-card__meta span,
+.journal-entry__chip,
+.subtasks__reference-sql,
+.artifacts__pre,
+.result-table__scroll,
+.state-panel__table-wrap,
+.case-view__table,
+.learning-table {
+  border-color: var(--border);
+  background: var(--surface-2);
+  border-radius: var(--radius);
 }
 
-/* --- Лого-метка: мягкое свечение под индиго. --- */
-.sidebar__logo {
-  box-shadow: 0 6px 18px -8px var(--accent-glow), var(--glass-highlight);
-}
-
-/* --- Активный пункт «модуль» в сайдбаре: тонкая акцентная грань слева. --- */
-.sb-module.is-active > .sb-module__row {
-  box-shadow: inset 2px 0 0 var(--accent);
-}
-
-/* --- Карточки быстрого входа: спокойное акцентное свечение при наведении
-       вместо резкой подсветки рамки. --- */
-.home-focus-card {
+.module-card,
+.case-row,
+.home-focus-card,
+.learning-topic-button,
+.learning-search__item,
+.practice-linked-card,
+.recommendations__case,
+.case-nav__link {
   transition:
-    border-color 0.18s ease,
     transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.18s ease;
-}
-.home-focus-card:hover {
-  border-color: var(--border-strong);
-  transform: translateY(-3px);
-  box-shadow: var(--shadow), var(--glass-highlight), 0 0 0 1px var(--accent-tint),
-    0 18px 40px -22px var(--accent-glow);
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
 }
 
-/* --- Единый «дорогой» отклик карточек-модулей: мягче и со свечением. --- */
-.module-card {
-  transition:
-    border-color 0.18s ease,
-    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.18s ease;
-}
 .module-card:hover,
-.module-card:focus-visible {
-  border-color: var(--border-strong);
+.module-card:focus-visible,
+a.case-row:hover,
+a.case-row:focus-visible,
+.home-focus-card:hover,
+.learning-topic-button:hover,
+.learning-search__item:hover,
+.practice-linked-card:hover,
+.recommendations__case:hover,
+.case-nav__link:hover {
+  border-color: rgba(var(--accent-rgb), 0.44);
   transform: translateY(-3px);
-  box-shadow: var(--shadow), var(--glass-highlight),
-    0 18px 40px -22px var(--accent-glow);
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(var(--accent-rgb), 0.12);
 }
 
-/* --- Первичные CTA: тактильный «нажим» + мягкое свечение под акцентом. --- */
-.home-hero__cta--primary,
-.case-view__submit {
-  box-shadow: 0 10px 26px -12px var(--accent-glow);
+.module-card--analytics {
+  background:
+    linear-gradient(135deg, rgba(var(--accent-rgb), 0.10), rgba(var(--accent-2-rgb), 0.13)),
+    var(--surface);
 }
-.home-hero__cta--primary:active,
-.case-view__submit:active:not(:disabled) {
+
+/* --- Main dashboard and catalog ------------------------------------------- */
+.home-hero,
+.catalog__hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(110deg, #ffffff 0%, #ffffff 44%, rgba(var(--accent-rgb), 0.08) 70%, rgba(var(--accent-2-rgb), 0.13) 100%);
+  border-color: rgba(var(--accent-rgb), 0.20);
+  box-shadow: var(--shadow-lg), var(--glass-highlight);
+}
+
+.home-hero {
+  min-height: 260px;
+}
+
+.catalog__hero {
+  min-height: 7.2rem;
+}
+
+.home-hero::after,
+.catalog__hero::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: min(42%, 30rem);
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, transparent 0 24%, rgba(67, 97, 238, 0.10) 24% 27%, transparent 27% 100%),
+    linear-gradient(160deg, transparent 0 38%, rgba(124, 58, 237, 0.11) 38% 41%, transparent 41% 100%);
+  opacity: 0.82;
+}
+
+.home-hero > *,
+.catalog__hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.catalog__grid {
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 1.05rem;
+}
+
+.home-focus__grid,
+.home-widgets {
+  gap: 1.1rem;
+}
+
+/* --- Tabs, filters, pills -------------------------------------------------- */
+.learning-tabs {
+  gap: 0.45rem;
+  padding: 0.45rem;
+  background: rgba(255, 255, 255, 0.86);
+  border-color: var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm), var(--glass-highlight);
+}
+
+.learning-tabs a {
+  min-width: min(8.5rem, 100%);
+  min-height: 2.55rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: 12px;
+  color: #334155;
+}
+
+.learning-tabs a:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.learning-tabs a.is-current,
+.learning-segmented a.is-current,
+.learning-day-pill.is-current,
+.case-list__filter[aria-pressed="true"],
+.dashboard__period[aria-pressed="true"] {
+  color: var(--accent-contrast);
+  background: var(--btn-primary-gradient);
+  border-color: transparent;
+  box-shadow: 0 14px 24px -18px rgba(var(--accent-rgb), 0.8);
+}
+
+.case-list__filter,
+.dashboard__period,
+.anomaly__choice,
+.learning-segmented a,
+.learning-day-pill,
+.badge,
+.score-pill {
+  border-radius: var(--radius-full);
+}
+
+/* --- Buttons and links ----------------------------------------------------- */
+.home-hero__cta--primary,
+.catalog__hero-cta,
+.done-notice__next,
+.analytics__empty-cta,
+.case-view__submit,
+.self-assessment__submit,
+.sql-case__run,
+.questions__check,
+.subtasks__check,
+.data-controls__confirm-yes,
+.user-case-creator__create,
+.learning-button--primary,
+.practice-card__start {
+  background: var(--btn-primary-gradient);
+  border-color: transparent;
+  color: var(--btn-primary-fg);
+  box-shadow: 0 16px 28px -18px rgba(var(--accent-rgb), 0.9), var(--glass-highlight);
+}
+
+.home-hero__cta--primary:hover,
+.catalog__hero-cta:hover,
+.done-notice__next:hover,
+.analytics__empty-cta:hover,
+.case-view__submit:hover:not(:disabled),
+.self-assessment__submit:hover:not(:disabled),
+.sql-case__run:hover:not(:disabled),
+.questions__check:hover:not(:disabled),
+.subtasks__check:hover:not(:disabled),
+.data-controls__confirm-yes:hover:not(:disabled),
+.user-case-creator__create:hover:not(:disabled),
+.learning-button--primary:hover,
+.practice-card__start:hover {
+  background: var(--btn-primary-gradient-hover);
+  border-color: transparent;
+  color: var(--btn-primary-fg);
+  filter: none;
+}
+
+.home-hero__cta--ghost,
+.learning-button,
+.learning-practice,
+.practice-card__another,
+.subtasks__reference-btn,
+.data-controls__btn,
+.data-controls__confirm-no,
+.case-nav__link,
+.artifacts__generate,
+.artifacts__copy,
+.process-builder__add,
+.reasoning-chain__add,
+.five-whys__add,
+.hypothesis-form__add,
+.hypothesis-form__insert,
+.user-case-creator__toggle {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.home-hero__cta--ghost:hover,
+.learning-button:hover,
+.learning-practice:hover,
+.practice-card__another:hover,
+.subtasks__reference-btn:hover,
+.data-controls__btn:hover:not(:disabled),
+.data-controls__confirm-no:hover,
+.case-nav__link:hover,
+.artifacts__generate:hover,
+.artifacts__copy:hover,
+.process-builder__add:hover:not(:disabled),
+.reasoning-chain__add:hover:not(:disabled),
+.five-whys__add:hover:not(:disabled),
+.hypothesis-form__add:hover:not(:disabled),
+.hypothesis-form__insert:hover:not(:disabled),
+.user-case-creator__toggle:hover {
+  color: var(--accent);
+  border-color: rgba(var(--accent-rgb), 0.42);
+  background: var(--accent-tint);
+}
+
+.data-controls__btn--danger {
+  color: var(--danger);
+  border-color: var(--danger-border);
+  background: var(--danger-bg);
+}
+
+.data-controls__btn--danger:hover:not(:disabled) {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: #fee2e2;
+}
+
+.data-controls__confirm-yes--danger {
+  color: #ffffff;
+  border-color: var(--danger);
+  background: var(--danger);
+  box-shadow: 0 16px 28px -18px rgba(220, 38, 38, 0.85), var(--glass-highlight);
+}
+
+.data-controls__confirm-yes--danger:hover:not(:disabled) {
+  color: #ffffff;
+  border-color: #b91c1c;
+  background: #b91c1c;
+}
+
+button {
+  letter-spacing: 0;
+}
+
+button:active:not(:disabled),
+a:active {
   transform: translateY(1px);
 }
 
-/* --- Вопрос кейса: чуть больше «воздуха» и мягкий градиент к акценту. --- */
-.case-view__question {
-  padding: 0.9rem 1.15rem;
-  background:
-    linear-gradient(90deg, var(--accent-tint), transparent 80%);
-  line-height: 1.5;
+/* --- Inputs and tables ----------------------------------------------------- */
+textarea,
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+select,
+.reflection-journal__filter,
+.step-card__type {
+  min-height: 2.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.025);
 }
 
-/* --- Плавное появление контента экрана при загрузке/переходе. --- */
-@media (prefers-reduced-motion: no-preference) {
-  #app {
-    animation: at-rise 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+textarea:focus,
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+select:focus {
+  outline: none;
+  border-color: rgba(var(--accent-rgb), 0.52);
+  box-shadow: 0 0 0 4px var(--accent-ring);
+}
+
+.case-view__table th,
+.result-table__table th,
+.state-panel__table thead th,
+.learning-table th {
+  background: #f8fafc;
+  color: var(--text-muted);
+}
+
+.result-table__scroll,
+.state-panel__table-wrap,
+.case-view__table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* --- Progress -------------------------------------------------------------- */
+.home-progressbar,
+.module-card__bar,
+.learning-progress__bar,
+.skill-progress__bar,
+.sb-module__bar {
+  background: #e8edf5;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.home-progressbar > span,
+.module-card__bar > span:not(.is-complete),
+.learning-progress__bar span,
+.skill-progress__bar-fill,
+.sb-module__bar > span:not(.is-complete),
+.activity-chart__bar {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+}
+
+.learning-level__score strong,
+.fav-btn.is-fav,
+.learning-search__label,
+.practice-card__eyebrow,
+.practice-linked-card__eyebrow,
+.learning-task-row__num,
+.module-card__metric,
+.home-link,
+.resource-item__label {
+  color: var(--accent);
+}
+
+/* --- Mobile shell ---------------------------------------------------------- */
+.bottom-nav {
+  background: rgba(255, 255, 255, 0.86);
+  border-color: rgba(226, 232, 240, 0.9);
+  border-radius: 18px;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(18px);
+}
+
+[data-theme="dark"] .bottom-nav {
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.bottom-nav__actions {
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+
+.bottom-nav__item.is-current {
+  color: #ffffff;
+  background: var(--btn-primary-gradient);
+}
+
+.topbar {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+}
+
+/* --- Responsive safety ----------------------------------------------------- */
+.home-focus-card,
+.home-widget,
+.module-card,
+.case-row,
+.learning-card,
+.learning-task-row,
+.learning-day-item,
+.history-row,
+.practice-linked-card {
+  min-width: 0;
+}
+
+.module-card__title,
+.case-row__title,
+.home-focus-card__title,
+.learning-card__title,
+.history-row__title,
+.resource-card__title {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 899px) {
+  .sidebar {
+    box-shadow: 24px 0 52px -28px rgba(15, 23, 42, 0.72);
+  }
+
+  .home-hero {
+    min-height: 0;
+  }
+
+  .home-hero::after,
+  .catalog__hero::after {
+    width: 34%;
+    opacity: 0.45;
   }
 }
+
+@media (max-width: 560px) {
+  .learning-tabs {
+    align-items: stretch;
+  }
+
+  .learning-tabs a {
+    flex: 1 1 8rem;
+  }
+
+  .home-hero::after,
+  .catalog__hero::after {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #app {
+    animation: at-rise 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
 @keyframes at-rise {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: none; }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
 }

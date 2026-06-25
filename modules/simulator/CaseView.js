@@ -27,7 +27,9 @@
 // ES-модуль: `import { SimulatorCaseView } from './modules/simulator/CaseView.js'`.
 
 import { CaseHeader } from '../../core/components/CaseHeader.js';
+import { mountCaseAiMentor } from '../../core/components/caseAiMentor.js';
 import { textBlock, doneNotice } from '../../core/components/caseScaffold.js';
+import { MENTOR_MODES } from '../../core/mentorContext.js';
 import { saveDraftState, getDraftState } from '../../core/db.js';
 import { saveAndFinalize } from '../../core/event.js';
 import {
@@ -114,6 +116,35 @@ export async function SimulatorCaseView({ caseData, attemptNo } = {}) {
   } catch (err) {
     console.error('[simulator] не удалось прочитать черновик', caseId, err);
   }
+
+  const aiMentor = await mountCaseAiMentor({
+    caseData,
+    modes: [
+      MENTOR_MODES.hint,
+      MENTOR_MODES.businessReview,
+      MENTOR_MODES.nextStep,
+    ],
+    getStudentAnswer: () => summarizeDecisions(decisions, rounds),
+    getStudentArtifacts: () => ({
+      simulation: {
+        decisions,
+        currentState: currentState(),
+        roundsCompleted: decisions.length,
+        totalRounds: rounds.length,
+        target,
+      },
+    }),
+    getProgressSummary: () => ({
+      roundsCompleted: decisions.length,
+      totalRounds: rounds.length,
+      finalized,
+      score: finalized ? computeSimulationScore(currentState(), target) : null,
+    }),
+    isSubmitted: () => finalized,
+    isReadyForReference: () => decisions.length > 0,
+    onFocusAnswer: () => stage.scrollIntoView?.({ behavior: 'smooth', block: 'start' }),
+  });
+  root.append(aiMentor.element);
 
   // Перерисовываем журнал применённых раундов (после восстановления и по ходу игры).
   function renderLog() {
@@ -226,6 +257,7 @@ export async function SimulatorCaseView({ caseData, attemptNo } = {}) {
 
     renderLog();
     renderStage();
+    aiMentor.refreshPreview();
     saveDraft();
   }
 
@@ -251,6 +283,7 @@ export async function SimulatorCaseView({ caseData, attemptNo } = {}) {
 
     const finalState = currentState();
     const score = computeSimulationScore(finalState, target);
+    aiMentor.refreshPreview();
 
     const final = renderFinalResult({
       finalState,
@@ -328,4 +361,3 @@ function contentError(root, header, message) {
   root.append(box);
   return root;
 }
-

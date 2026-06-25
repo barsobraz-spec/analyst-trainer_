@@ -25,6 +25,30 @@ hash-router (`#/...`), а все зависимости для браузера 
 
 Подробная инструкция: [DEPLOYMENT.md](DEPLOYMENT.md).
 
+### AI-proxy для AI-ментора
+
+AI-ментор работает через Vercel Function `POST /api/ai-review`. Секретный ключ
+DeepSeek хранится только на серверной стороне, во frontend попадает только URL
+proxy, который задаётся в `#/settings`.
+
+Минимальные переменные окружения для Vercel:
+
+```sh
+DEEPSEEK_API_KEY=...
+AI_REVIEW_ALLOWED_ORIGINS=https://your-app.vercel.app,http://localhost:8080
+```
+
+Опционально можно переопределить endpoint и модели провайдера:
+
+```sh
+DEEPSEEK_API_URL=https://api.deepseek.com/chat/completions
+DEEPSEEK_MODEL_PRO=deepseek-chat
+DEEPSEEK_MODEL_FLASH=deepseek-chat
+```
+
+Proxy ограничивает CORS указанными origin и держит server-side rate limit:
+5 запросов в минуту и 20 запросов в день на IP или anonymous session.
+
 ---
 
 ## Запуск
@@ -93,6 +117,12 @@ python3 tests/smoke.py
 
 # Если сервер уже запущен на другом порту:
 python3 tests/smoke.py --port 9090
+
+# Контракт serverless AI-proxy без реального DeepSeek:
+node tests/api-ai-review.test.mjs
+
+# Успешный AI-feedback через локальный mock proxy:
+python3 tests/smoke_ai_mock.py
 ```
 
 Выход `0` — все зелёные. Выход `1` — есть поломки (список с объяснением в stdout).

@@ -35,6 +35,8 @@ ROUTES = [
     ('/modules',                    'Каталог'),
     ('/module/5.1',                 'Список кейсов 5.1'),
     ('/module/5.1/case/detective-001', 'Кейс detective-001'),
+    ('/module/5.6/case/simulator-001', 'Кейс simulator-001'),
+    ('/module/5.7/case/automation-001', 'Кейс automation-001'),
     ('/analytics',                  'Аналитика'),
     ('/practice',                   'Практика'),
     ('/favorites',                  'Избранное'),

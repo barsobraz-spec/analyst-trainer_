@@ -23,9 +23,9 @@ echo "Применяю версию: $VERSION"
 # macOS-совместимая замена (sed -i '' вместо sed -i)
 SED="sed -i ''"
 
-FILES=$(grep -RIl --include='*.html' --include='*.js' '?v=' .)
+FILES=$(grep -RIl --include='*.html' --include='*.js' --include='*.css' '?v=' .)
 for file in $FILES; do
   eval "$SED 's/?v=[^\"'\'']*/?v=$VERSION/g' \"$file\""
 done
 
-echo "Готово. Проверь: grep -R \"?v=\" -n --include='*.html' --include='*.js' ."
+echo "Готово. Проверь: grep -R \"?v=\" -n --include='*.html' --include='*.js' --include='*.css' ."

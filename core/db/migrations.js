@@ -134,6 +134,21 @@ export const MIGRATIONS = [
       },
     ],
   },
+  {
+    version: 6,
+    steps: [
+      {
+        type: 'addStore',
+        name: 'aiMentorReviews',
+        options: { keyPath: 'reviewId' },
+        indexes: [
+          { name: 'caseId', keyPath: 'caseId' },
+          { name: 'mode', keyPath: 'mode' },
+          { name: 'createdAt', keyPath: 'createdAt' },
+        ],
+      },
+    ],
+  },
 ];
 
 // Проходит курсором по всем записям store в рамках versionchange-транзакции.

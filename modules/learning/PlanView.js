@@ -3,7 +3,7 @@
 import { getAllMonthlyExamProgress, saveMonthlyExamProgress } from '../../core/db.js';
 import { buildMonthlyExamChecklist, calculateMonthlyExamProgress } from '../../core/learningProgress.js';
 import { loadIndex } from '../../core/caseLoader.js';
-import { DayDetail, buildWeekDays, dayLabel } from './plan/DayDetail.js?v=v1.3';
+import { DayDetail, buildWeekDays, dayLabel } from './plan/DayDetail.js?v=v1.5';
 import {
   LearningSearchPanel,
   card,

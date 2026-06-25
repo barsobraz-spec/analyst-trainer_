@@ -28,7 +28,9 @@ import { CaseHeader } from '../../core/components/CaseHeader.js';
 import { ReferenceBreakdown } from '../../core/components/ReferenceBreakdown.js';
 import { SelfAssessment } from '../../core/components/SelfAssessment.js';
 import { HintsPanel } from '../../core/components/HintsPanel.js';
+import { mountCaseAiMentor } from '../../core/components/caseAiMentor.js';
 import { textBlock, doneNotice } from '../../core/components/caseScaffold.js';
+import { MENTOR_MODES } from '../../core/mentorContext.js';
 import { saveDraftState, getDraftState } from '../../core/db.js';
 import { saveAndFinalize } from '../../core/event.js';
 import {
@@ -89,18 +91,59 @@ export async function AutomationCaseView({ caseData, attemptNo } = {}) {
   if (hints) root.append(hints.element);
 
   // --- Ф1/Ф2: конструктор процесса и карточки шагов ---------------------------
+  let aiMentor = null;
   const builder = ProcessBuilder({
     initialState: draft,
-    onChange: () => { scheduleDraftSave(); checklist.refresh(builder.getState()); refreshSubmitState(); },
+    onChange: () => {
+      scheduleDraftSave();
+      checklist.refresh(builder.getState());
+      refreshSubmitState();
+      aiMentor?.refreshPreview?.();
+    },
   });
   root.append(builder.element);
 
   // --- Ф3: чек-лист готовности (авто-оценка по схеме) --------------------------
   const checklist = ReadinessChecklist({ initialSchema: builder.getState() });
   root.append(checklist.element);
+  let submitted = false;
 
   // --- Ф4: итоговые артефакты (по кнопке, из текущей схемы) --------------------
   root.append(buildArtifactsPanel(() => builder.getState()));
+
+  aiMentor = await mountCaseAiMentor({
+    caseData,
+    modes: isUserCase
+      ? [
+          MENTOR_MODES.hint,
+          MENTOR_MODES.businessReview,
+          MENTOR_MODES.nextStep,
+        ]
+      : [
+          MENTOR_MODES.hint,
+          MENTOR_MODES.businessReview,
+          MENTOR_MODES.referenceCheck,
+          MENTOR_MODES.explainError,
+          MENTOR_MODES.nextStep,
+        ],
+    getStudentAnswer: () => summarize(builder.getState(), checklist),
+    getStudentArtifacts: () => ({
+      process: builder.getState(),
+      readiness: {
+        score: checklist.getScore(),
+      },
+    }),
+    getProgressSummary: () => ({
+      readinessScore: checklist.getScore(),
+      submitted,
+      userCase: isUserCase,
+    }),
+    isSubmitted: () => submitted,
+    isReadyForReference: () => builder.isReady(),
+    onFocusAnswer: () => builder.element.scrollIntoView?.({ behavior: 'smooth', block: 'start' }),
+    onBeforeReferenceCheck: () => submitAnswerAndRevealReference(),
+  });
+  root.append(aiMentor.element);
 
   // --- Кнопка отправки --------------------------------------------------------
   const submitBar = document.createElement('div');
@@ -122,8 +165,6 @@ export async function AutomationCaseView({ caseData, attemptNo } = {}) {
   const afterHost = document.createElement('div');
   afterHost.className = 'case-view__self-host';
   root.append(afterHost);
-
-  let submitted = false;
 
   // --- Гейтинг отправки -------------------------------------------------------
   function refreshSubmitState() {
@@ -152,7 +193,15 @@ export async function AutomationCaseView({ caseData, attemptNo } = {}) {
 
   // --- Отправка ---------------------------------------------------------------
   submit.addEventListener('click', () => {
-    if (submitted || !builder.isReady()) return;
+    submitAnswerAndRevealReference();
+  });
+
+  function submitAnswerAndRevealReference() {
+    if (submitted) return true;
+    if (!builder.isReady()) {
+      refreshSubmitState();
+      throw new Error('Постройте схему перед проверкой: заполните триггер, хотя бы один шаг и итог.');
+    }
     submitted = true;
     clearTimeout(draftTimer);
 
@@ -164,12 +213,15 @@ export async function AutomationCaseView({ caseData, attemptNo } = {}) {
     submitHint.textContent = '';
 
     if (isUserCase) {
+      aiMentor.refreshPreview();
       finalizeUserCase();
     } else {
       reference.reveal();
+      aiMentor.refreshPreview();
       mountSelfAssessment();
     }
-  });
+    return true;
+  }
 
   // Свой кейс (Ф6): эталона нет → score = балл чек-листа готовности. Событие
   // пишется напрямую, без самооценки.

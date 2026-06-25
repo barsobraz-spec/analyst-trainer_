@@ -20,10 +20,15 @@
 // ES-модуль: `import { SqlCaseView } from './modules/sql/CaseView.js'`.
 
 import { CaseHeader } from '../../core/components/CaseHeader.js';
+import { TopicGraphPanel } from '../../core/components/TopicGraphPanel.js';
+import { mountCaseAiMentor } from '../../core/components/caseAiMentor.js';
 import { textBlock, doneNotice } from '../../core/components/caseScaffold.js';
 import { saveDraftState, getDraftState } from '../../core/db.js';
 import { saveAndFinalize, normalizeScore } from '../../core/event.js';
-import { loadDataset } from '../../core/caseLoader.js';
+import { loadDataset, loadIndex } from '../../core/caseLoader.js';
+import { loadLearningContent } from '../../core/learningContent.js';
+import { loadTopicGraph, topicsForCase } from '../../core/topicGraph.js';
+import { MENTOR_MODES } from '../../core/mentorContext.js';
 import { compareResultSets } from '../../core/sqlComparator.js';
 import { createSqlEngine } from './SqlEngine.js';
 import { SQLEditor } from './SQLEditor.js';
@@ -50,6 +55,8 @@ export async function SqlCaseView({ caseData, attemptNo } = {}) {
     q.textContent = payload.question;
     root.append(q);
   }
+
+  mountCaseTopicPanel(root, caseId);
 
   // --- Датасет → БД (отдельный файл, с проверкой размера) ---------------------
   const dataset = await resolveDataset(payload);
@@ -129,6 +136,7 @@ export async function SqlCaseView({ caseData, attemptNo } = {}) {
 
   // --- Выполнение запроса (Ф1) ------------------------------------------------
   let running = false;
+  let finalized = false;
   async function runQuery() {
     if (finalized || running) return null;
     const sql = editor.getValue().trim();
@@ -168,17 +176,63 @@ export async function SqlCaseView({ caseData, attemptNo } = {}) {
   });
   root.append(subtasks.element);
 
+  let lastSqlCheck = null;
+  const aiMentor = await mountCaseAiMentor({
+    caseData,
+    modes: [MENTOR_MODES.hint, MENTOR_MODES.sqlReview],
+    defaultMode: MENTOR_MODES.hint,
+    resolveModeState: (mode) => {
+      if (mode === MENTOR_MODES.hint) {
+        return lastSqlCheck
+          ? { hidden: true }
+          : { label: 'Подсказать по SQL', submitLabel: 'Получить SQL-подсказку' };
+      }
+      if (mode === MENTOR_MODES.sqlReview) {
+        return lastSqlCheck
+          ? { label: 'Объяснить ошибку SQL', submitLabel: 'Объяснить ошибку SQL' }
+          : { hidden: true };
+      }
+      return {};
+    },
+    getStudentAnswer: () => editor.getValue(),
+    getSqlContext: () => ({
+      ...(lastSqlCheck || {}),
+      userSql: lastSqlCheck?.userSql || editor.getValue().trim(),
+      subtask: lastSqlCheck?.subtask || subtasks.getCurrentSubtask(),
+      schema,
+    }),
+    getDraftSnapshot: () => ({
+      ...(draft || {}),
+      solved: subtasks.getSolvedIds(),
+    }),
+    isSubmitted: () => finalized,
+    onFocusAnswer: () => editor.focus && editor.focus(),
+  });
+  root.append(aiMentor.element);
+
   // Проверка текущей подзадачи: выполняем запрос пользователя и эталонный запрос,
   // сверяем результаты (Ф3). Запрос пользователя попадает в историю.
   async function checkCurrentSubtask(subtask) {
     const sql = editor.getValue().trim();
-    if (!sql) return { correct: false, message: 'Сначала напишите запрос в редакторе.' };
+    if (!sql) {
+      lastSqlCheck = null;
+      aiMentor.refreshPreview();
+      return { correct: false, message: 'Сначала напишите запрос в редакторе.' };
+    }
 
     let actual;
     try {
       actual = await engine.exec(sql);
     } catch (err) {
-      return { correct: false, message: 'Запрос не выполнился: ' + (err.message || err) };
+      const message = 'Запрос не выполнился: ' + (err.message || err);
+      lastSqlCheck = {
+        userSql: sql,
+        referenceSql: subtask.referenceSql,
+        subtask,
+        autograderMessage: message,
+      };
+      aiMentor.refreshPreview();
+      return { correct: false, message };
     }
     history.add(sql);
     resultHost.replaceChildren(renderResultTable(actual));
@@ -188,13 +242,26 @@ export async function SqlCaseView({ caseData, attemptNo } = {}) {
       expected = await engine.exec(subtask.referenceSql);
     } catch (err) {
       console.error('[sql] эталонный запрос подзадачи не выполнился', subtask.id, err);
+      lastSqlCheck = null;
+      aiMentor.refreshPreview();
       return { correct: false, message: 'Эталон этой подзадачи содержит ошибку — отметьте кейс как проблемный.' };
     }
 
     const correct = compareResultSets(actual, expected, !!subtask.orderSensitive);
-    return correct
-      ? { correct: true }
-      : { correct: false, message: 'Результат не совпал с эталоном. Проверьте столбцы, фильтры и агрегацию.' };
+    if (correct) {
+      lastSqlCheck = null;
+      aiMentor.refreshPreview();
+      return { correct: true };
+    }
+    const message = 'Результат не совпал с эталоном. Проверьте столбцы, фильтры и агрегацию.';
+    lastSqlCheck = {
+      userSql: sql,
+      referenceSql: subtask.referenceSql,
+      subtask,
+      autograderMessage: message,
+    };
+    aiMentor.refreshPreview();
+    return { correct: false, message };
   }
 
   async function saveProgress(solvedIds) {
@@ -222,7 +289,6 @@ export async function SqlCaseView({ caseData, attemptNo } = {}) {
   doneHost.className = 'case-view__self-host';
   root.append(doneHost);
 
-  let finalized = false;
   finishBtn.addEventListener('click', async () => {
     if (finalized) return;
     finalized = true;
@@ -275,6 +341,74 @@ export async function SqlCaseView({ caseData, attemptNo } = {}) {
     element: root,
     destroy: () => { header.stop(); engine.destroy(); },
   };
+}
+
+function mountCaseTopicPanel(root, caseId) {
+  const host = document.createElement('div');
+  host.className = 'topic-graph-panel-slot';
+  host.append(TopicGraphPanel({
+    title: 'Что повторить',
+    topics: [],
+    showEmpty: true,
+    emptyText: 'Загружаем связи тем…',
+    className: 'topic-graph-panel--case',
+  }));
+  root.append(host);
+
+  buildCaseTopicPanel(caseId)
+    .then((panel) => {
+      if (!host.isConnected) return;
+      host.replaceChildren(panel);
+    })
+    .catch((err) => {
+      console.warn('[sql] topic graph panel недоступна:', err.message || err);
+      if (!host.isConnected) return;
+      host.replaceChildren(TopicGraphPanel({
+        title: 'Что повторить',
+        topics: [],
+        graph: { error: err },
+        showEmpty: true,
+        errorText: 'Связи тем сейчас недоступны, кейс можно продолжать.',
+        className: 'topic-graph-panel--case',
+      }));
+    });
+}
+
+async function buildCaseTopicPanel(caseId) {
+  const graph = await loadTopicGraph();
+  const topics = topicsForCase(graph, caseId, 3);
+  const [content, casesById] = topics.length > 0
+    ? await Promise.all([
+      loadLearningContent().catch((err) => {
+        console.warn('[sql] learning content для topic panel недоступен:', err.message || err);
+        return null;
+      }),
+      loadCasesById().catch((err) => {
+        console.warn('[sql] case index для topic panel недоступен:', err.message || err);
+        return new Map();
+      }),
+    ])
+    : [null, new Map()];
+
+  return TopicGraphPanel({
+    title: 'Что повторить',
+    topics,
+    graph,
+    content,
+    casesById,
+    maxTopics: 3,
+    showEmpty: true,
+    emptyText: 'Для этого кейса связанные темы пока не настроены.',
+    errorText: 'Связи тем сейчас недоступны, кейс можно продолжать.',
+    className: 'topic-graph-panel--case',
+  });
+}
+
+async function loadCasesById() {
+  const { entries } = await loadIndex();
+  return new Map((entries || [])
+    .filter((item) => item.caseId && item.module && item.status !== 'error')
+    .map((item) => [item.caseId, item]));
 }
 
 // Датасет: отдельный файл по payload.datasetPath (T6.3.3) либо инлайн payload.dataset

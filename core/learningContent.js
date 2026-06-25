@@ -9,6 +9,7 @@
 //     или весь сразу через loadAllPracticeContent() — только когда экран это требует.
 
 import { APP_CACHE_VERSION } from '../config.js';
+import { loadTopicGraph } from './topicGraph.js';
 
 // Добавляет к пути данных версию кэша приложения, чтобы при обновлении контента
 // (bump APP_CACHE_VERSION) браузер гарантированно перечитывал свежий JSON, а не
@@ -53,7 +54,10 @@ export function loadLearningContent() {
       throw new LearningContentError(`Файл ${path} повреждён или не является JSON.`, { cause: err });
     }
   }))
-    .then((entries) => normalizeContent(Object.fromEntries(entries)))
+    .then(async (entries) => ({
+      ...normalizeContent(Object.fromEntries(entries)),
+      topicGraph: await loadTopicGraph(),
+    }))
     .catch((err) => {
       contentPromise = null;
       throw err instanceof LearningContentError
@@ -108,6 +112,7 @@ function normalizeContent(raw) {
     monthsByNumber,
     careerActionsByMonth,
     projectsById,
+    topicGraph: null,
   };
 }
 

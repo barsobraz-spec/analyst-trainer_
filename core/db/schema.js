@@ -5,7 +5,7 @@ export const DB_NAME = 'analyst-trainer';
 
 // Текущая версия схемы приложения. Увеличивается на 1 при каждом новом наборе
 // миграций. IndexedDB сам сравнивает её с версией данных в браузере.
-export const APP_SCHEMA_VERSION = 5;
+export const APP_SCHEMA_VERSION = 6;
 
 export const LEARNING_STORE_NAMES = Object.freeze([
   'learningSettings',

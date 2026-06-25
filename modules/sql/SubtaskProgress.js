@@ -160,6 +160,7 @@ export function SubtaskProgress({ subtasks, initialSolved = [], onCheck, onChang
     getSolvedIds: () => [...solved],
     getSolvedCount: () => solved.size,
     getTotal: () => list.length,
+    getCurrentSubtask: () => list[currentIndex()] || null,
     getFraction: () => (list.length ? solved.size / list.length : null),
     allSolved: () => list.length > 0 && solved.size === list.length,
     lock() {

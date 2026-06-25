@@ -12,7 +12,7 @@
    РЕДИЗАЙН ПО МАКЕТУ (визуальный слой). Идёт ПОСЛЕДНИМ — перекрывает базовые
    правила той же специфичности. Меняет ТОЛЬКО внешний вид:
    • тёмно-синий «чернильный» сайдбар в обеих темах;
-   • золотой акцент + тёмно-синие первичные кнопки;
+   • blue/violet accent + clear SaaS primary buttons;
    • «Текущий» и активный день недели в фирменных цветах;
    • вордмарк бренда — в Inter (UI-текст, не заголовок контента).
    =========================================================================== */
@@ -42,10 +42,10 @@
 }
 
 .sidebar__logo {
-  border-radius: 8px;
-  color: #151107;
-  background: var(--accent);
-  box-shadow: 0 8px 24px rgba(var(--accent-rgb), 0.24);
+  border-radius: 12px;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 12px 26px -14px rgba(var(--accent-rgb), 0.72);
 }
 
 .sidebar__brand-name {
@@ -68,7 +68,7 @@
   color: #fff;
   text-decoration: none;
   background:
-    linear-gradient(135deg, rgba(var(--accent-rgb), 0.22), rgba(255, 255, 255, 0.075)),
+    linear-gradient(135deg, rgba(var(--accent-rgb), 0.28), rgba(var(--accent-2-rgb), 0.16)),
     var(--sidebar-surface-2);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 14px 34px -26px rgba(0, 0, 0, 0.8);
@@ -77,7 +77,7 @@
 .sb-quick:hover {
   border-color: rgba(var(--accent-rgb), 0.6);
   background:
-    linear-gradient(135deg, rgba(var(--accent-rgb), 0.28), rgba(255, 255, 255, 0.1)),
+    linear-gradient(135deg, rgba(var(--accent-rgb), 0.36), rgba(var(--accent-2-rgb), 0.22)),
     var(--sidebar-surface-3);
 }
 
@@ -89,7 +89,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  color: var(--accent);
+  color: #ffffff;
   background: rgba(255, 255, 255, 0.09);
 }
 
@@ -158,19 +158,19 @@
   background: rgba(255, 255, 255, 0.055);
 }
 
-/* Активный пункт меню — «морозный» приподнятый чип + золотая иконка. */
+/* Активный пункт меню — заметный blue/violet чип. */
 .sidebar .sb-nav__item.is-current {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--sidebar-active);
   color: #fff;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  box-shadow: inset 3px 0 0 rgba(255, 255, 255, 0.46), 0 14px 28px -22px rgba(67, 97, 238, 0.75);
 }
-.sidebar .sb-nav__item.is-current .sb-nav__icon { color: var(--accent); }
+.sidebar .sb-nav__item.is-current .sb-nav__icon { color: #ffffff; }
 .sidebar .sb-nav__trigger.is-current {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(67, 97, 238, 0.18);
   color: #fff;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
-.sidebar .sb-nav__trigger.is-current .sb-nav__icon { color: var(--accent); }
+.sidebar .sb-nav__trigger.is-current .sb-nav__icon { color: #ffffff; }
 
 /* --- Настройки ------------------------------------------------------------- */
 .settings-card {
@@ -207,6 +207,31 @@
   line-height: 1.45;
 }
 
+.ai-review-settings__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.ai-review-settings__status {
+  min-height: 1.25rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.ai-review-settings__status[data-kind="success"] { color: var(--success); }
+.ai-review-settings__status[data-kind="error"] { color: var(--danger); }
+
+.ai-review-settings__result {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
 @media (max-width: 640px) {
   .settings-row {
     align-items: flex-start;
@@ -217,9 +242,7 @@
 /* Вордмарк бренда — в Inter (премиальный слой выше форсит дисплейную гарнитуру). */
 .sidebar__brand-name { font-family: var(--font-sans); font-weight: 700; }
 
-/* Первичные CTA: тёмно-синяя «чернильная» заливка на светлой теме, золотая — на
-   тёмной (через --btn-primary-*). Исключение — «Да, заменить» в импорте данных:
-   кнопка остаётся золотой как явное подтверждение замены. */
+/* Первичные CTA: единый blue/violet градиент через --btn-primary-*. */
 .home-hero__cta--primary,
 .catalog__hero-cta,
 .done-notice__next,
@@ -301,7 +324,7 @@
   border-radius: 12px;
 }
 
-/* Активный день недели — золотая точка с галочкой. */
+/* Активный день недели — акцентная точка с галочкой. */
 .home-week__day.is-active .home-week__dot {
   background: var(--accent);
   border-color: var(--accent);
@@ -759,4 +782,3 @@ a.resource-item__label:hover { text-decoration: underline; }
   .skill-summary { flex-direction: column; align-items: flex-start; }
   .skill-summary__stats { gap: 1.25rem; }
 }
-

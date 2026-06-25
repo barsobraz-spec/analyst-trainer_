@@ -4,7 +4,10 @@ import { getAllTaskProgress, saveTaskProgress } from '../../core/db.js';
 import { calculateChecklistProgress, groupWeakSpots, TASK_STATUS } from '../../core/learningProgress.js';
 import { moduleButton } from '../../core/learningLinks.js';
 import { navigate } from '../../core/router.js';
-import { loadPracticeSlice, enrichContentWithPractice } from '../../core/learningContent.js?v=v1.3';
+import { loadPracticeSlice, enrichContentWithPractice } from '../../core/learningContent.js?v=v1.5';
+import { loadIndex } from '../../core/caseLoader.js';
+import { topicsForSkill } from '../../core/topicGraph.js';
+import { TopicGraphPanel } from '../../core/components/TopicGraphPanel.js';
 import { LearningRemindersPanel, REMINDER_SUGGESTIONS } from './LearningReminders.js';
 import {
   TASK_STATUS_LABELS,
@@ -19,7 +22,7 @@ import {
   text,
   toProgressMap,
   withLearningContent,
-} from './learningUi.js?v=v1.3';
+} from './learningUi.js?v=v1.5';
 
 // Максимум задач в первом рендере списка. Кнопка «Показать ещё» грузит остаток.
 const TASK_PAGE_SIZE = 50;
@@ -52,6 +55,22 @@ async function renderTasks(baseContent) {
   }
 
   section.append(topicHeader(content, progressRows, selectedSkill));
+  const topicsPanel = TopicGraphPanel({
+    title: 'Связанные темы',
+    topics: topicsForSkill(content.topicGraph, selectedSkill, 5),
+    graph: content.topicGraph,
+    content,
+    casesById: await loadCasesById().catch((err) => {
+      console.warn('[learning/tasks] case index для topic panel недоступен:', err.message || err);
+      return new Map();
+    }),
+    maxTopics: 5,
+    showEmpty: true,
+    emptyText: 'Для этой темы связи пока не настроены.',
+    errorText: 'Связи тем сейчас недоступны. Список задач работает без них.',
+    className: 'topic-graph-panel--learning',
+  });
+  if (topicsPanel) section.append(topicsPanel);
   section.append(filters(selectedSkill));
 
   const filtered = filterTasks(content, progress, selectedSkill);
@@ -418,6 +437,13 @@ function currentFilters() {
 function skillByTaskId(content, taskId) {
   if (!taskId) return '';
   return content.allTasks.find((task) => task.id === taskId)?.skill || '';
+}
+
+async function loadCasesById() {
+  const { entries } = await loadIndex();
+  return new Map((entries || [])
+    .filter((item) => item.caseId && item.module && item.status !== 'error')
+    .map((item) => [item.caseId, item]));
 }
 
 function option(value, label, selected) {
