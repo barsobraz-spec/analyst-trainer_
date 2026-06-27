@@ -28,6 +28,7 @@ export function DayDetail(day, month, week, caseIndex) {
   if (facts.childElementCount > 0) box.append(facts);
 
   box.append(practiceLaunch(day, caseIndex));
+  box.append(excelDatasetLinks(day));
 
   if (Array.isArray(day.blocks) && day.blocks.length > 0) {
     const blocks = document.createElement('div');
@@ -151,6 +152,45 @@ function practiceLaunch(day, caseIndex) {
   section.append(
     text('h4', 'learning-subtitle', 'Практика в тренажёре по теме дня'),
     text('p', 'learning-muted', 'Закрепи тему сразу на кейсе тренажёра — параллельно с запросами в DBeaver.'),
+    links,
+  );
+  return section;
+}
+
+function excelDatasetLinks(day) {
+  const datasets = Array.isArray(day.excelDatasets) ? day.excelDatasets : [];
+  if (datasets.length === 0) return document.createDocumentFragment();
+
+  const links = document.createElement('div');
+  links.className = 'learning-practice-links learning-excel-datasets';
+
+  for (const dataset of datasets) {
+    if (!dataset?.href) continue;
+
+    const card = document.createElement('article');
+    card.className = 'learning-excel-dataset';
+    card.append(
+      text('strong', '', dataset.title || 'Excel-файл для практики'),
+      text('p', 'learning-muted', dataset.description || 'Скачай файл и выполни практику локально в Excel.'),
+    );
+
+    const link = document.createElement('a');
+    link.className = 'learning-practice learning-excel-dataset__link';
+    link.href = dataset.href;
+    link.download = dataset.fileName || '';
+    link.type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    link.textContent = dataset.downloadLabel || 'Открыть Excel-файл';
+    card.append(link);
+    links.append(card);
+  }
+
+  if (links.childElementCount === 0) return document.createDocumentFragment();
+
+  const section = document.createElement('section');
+  section.className = 'learning-day-section learning-day-excel';
+  section.append(
+    text('h4', 'learning-subtitle', 'Excel-файл для практики'),
+    text('p', 'learning-muted', 'Файл скачивается на компьютер как .xlsx — открывай его в Microsoft Excel и выполняй задания локально.'),
     links,
   );
   return section;

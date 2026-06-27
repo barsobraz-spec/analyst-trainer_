@@ -8,15 +8,15 @@
 export const APP_VERSION = '1.0.0';
 
 // --- Версия кэша ассетов ---
-// ЕДИНСТВЕННАЯ точка смены cache-bust суффикса ?v=v1.6
-//   index.html  <link href="styles.css?v=v1.6">  и  <script src="main.js?v=v1.6">
-//   main.js     import '…/appRoutes.js?v=v1.6'
-//   core/appRoutes.js  import '…/TasksView.js?v=v1.6'
+// ЕДИНСТВЕННАЯ точка смены cache-bust суффикса ?v=v1.7
+//   index.html  <link href="styles.css?v=v1.7">  и  <script src="main.js?v=v1.7">
+//   main.js     import '…/appRoutes.js?v=v1.7'
+//   core/appRoutes.js  import '…/TasksView.js?v=v1.7'
 //
 // Когда нужно сбросить кэш браузера — измени значение здесь, затем запусти:
 //   bash scripts/bump-cache-version.sh
 // Скрипт подставит новое значение во все четыре места.
-export const APP_CACHE_VERSION = 'v1.6';
+export const APP_CACHE_VERSION = 'v1.7';
 
 // --- Лимиты контента ---
 // Максимальный размер исходного датасета одного кейса (PRD §3: 5 MB).
