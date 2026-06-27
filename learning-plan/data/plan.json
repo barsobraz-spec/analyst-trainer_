@@ -263,7 +263,7 @@
                   "description": "Интернет-магазин выгрузил заказы, а руководитель просит быстро посчитать выручку с НДС, скидкой и доставкой.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w1d1_excel_references_orders.xlsx",
                   "fileName": "m1w1d1_excel_references_orders.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -356,7 +356,7 @@
                   "description": "Операционный менеджер хочет ежедневную сводку продаж без BI-системы.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w1d2_basic_formulas_sales_metrics.xlsx",
                   "fileName": "m1w1d2_basic_formulas_sales_metrics.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -449,7 +449,7 @@
                   "description": "CRM-команда просит разделить клиентов на A/B/C и пометить рисковые аккаунты.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w1d3_if_customer_segments.xlsx",
                   "fileName": "m1w1d3_if_customer_segments.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -536,7 +536,7 @@
                   "description": "Тестовое задание ограничено по времени: нужно быстро перемещаться по большой таблице и форматировать без мыши.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w1d4_keyboard_navigation_challenge.xlsx",
                   "fileName": "m1w1d4_keyboard_navigation_challenge.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -628,7 +628,7 @@
                   "description": "Выгрузка из CRM пришла с числами как текстом, смешанными датами и лишними пробелами.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w1d5_dirty_numbers_dates.xlsx",
                   "fileName": "m1w1d5_dirty_numbers_dates.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -711,7 +711,7 @@
                   "description": "Нужно собрать первую версию Excel-проекта: чистые данные, базовые метрики и короткий README-лист.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w1d6_week1_metrics_project.xlsx",
                   "fileName": "m1w1d6_week1_metrics_project.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             }
@@ -856,7 +856,7 @@
                   "description": "В заказах есть только customer_id и product_id, а для анализа нужны сегмент, город и категория продукта.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w2d1_lookup_orders_customers.xlsx",
                   "fileName": "m1w2d1_lookup_orders_customers.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -959,7 +959,7 @@
                   "description": "Маркетинг выгрузил лиды из разных форм, где город, канал и код кампании склеены в одну строку.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w2d2_text_functions_contacts.xlsx",
                   "fileName": "m1w2d2_text_functions_contacts.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -1057,7 +1057,7 @@
                   "description": "Два менеджера выгрузили один и тот же список заказов, часть строк задублировалась, часть колонок склеена.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w2d3_duplicates_split_replace.xlsx",
                   "fileName": "m1w2d3_duplicates_split_replace.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -1155,7 +1155,7 @@
                   "description": "Финансовая команда хочет быстро видеть отрицательные суммы, пустые ключи, дубли и подозрительно большие платежи.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w2d4_conditional_formatting_anomalies.xlsx",
                   "fileName": "m1w2d4_conditional_formatting_anomalies.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -1254,7 +1254,7 @@
                   "description": "Руководитель retention-команды просит список клиентов, которые не покупали 90+ дней.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w2d5_churn_90_days.xlsx",
                   "fileName": "m1w2d5_churn_90_days.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -1354,7 +1354,7 @@
                   "description": "Есть выгрузка из 1С и платежного шлюза. Нужно найти отсутствующие платежи и расхождения сумм.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w2d6_reconciliation_accounting_payments.xlsx",
                   "fileName": "m1w2d6_reconciliation_accounting_payments.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             }
@@ -1498,7 +1498,7 @@
                   "description": "Коммерческий директор просит выручку по сегментам и месяцам.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w3d1_pivot_table_basics.xlsx",
                   "fileName": "m1w3d1_pivot_table_basics.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -1592,7 +1592,7 @@
                   "description": "Нужно показать сезонность и долю категорий в общей выручке.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w3d2_pivot_date_grouping_percent.xlsx",
                   "fileName": "m1w3d2_pivot_date_grouping_percent.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -1686,7 +1686,7 @@
                   "description": "Руководителю нужен интерактивный Excel-отчет по каналам, категориям и менеджерам.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w3d3_slicers_pivot_charts.xlsx",
                   "fileName": "m1w3d3_slicers_pivot_charts.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -1781,7 +1781,7 @@
                   "description": "Аналитику нужно быстро ответить на вопросы без сводной таблицы, формулами по условиям.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w3d4_sumifs_countifs_averageifs.xlsx",
                   "fileName": "m1w3d4_sumifs_countifs_averageifs.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -1872,7 +1872,7 @@
                   "description": "Имитация короткого Excel-теста: несколько разных задач на одном файле.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w3d5_excel_speed_drills.xlsx",
                   "fileName": "m1w3d5_excel_speed_drills.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -1961,7 +1961,7 @@
                   "description": "Нужно собрать черновик Excel-дашборда с KPI-карточками и графиками.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w3d6_dashboard_kpi_source.xlsx",
                   "fileName": "m1w3d6_dashboard_kpi_source.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             }
@@ -2107,7 +2107,7 @@
                   "description": "В отчете есть несколько бизнес-вопросов, и под каждый нужен правильный тип графика.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w4d1_chart_type_selection.xlsx",
                   "fileName": "m1w4d1_chart_type_selection.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -2204,7 +2204,7 @@
                   "description": "Нужен дашборд на одном экране: KPI сверху, графики ниже, фильтры сбоку.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w4d2_one_page_dashboard_source.xlsx",
                   "fileName": "m1w4d2_one_page_dashboard_source.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -2302,7 +2302,7 @@
                   "description": "Каждую неделю приходит новый грязный CSV/XLSX. Нужно настроить повторяемую очистку через Power Query.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w4d3_power_query_dirty_import.xlsx",
                   "fileName": "m1w4d3_power_query_dirty_import.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -2394,7 +2394,7 @@
                   "description": "Отчет должен обновляться после замены файла-выгрузки без ручного пересчета формул.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w4d4_refreshable_report_sources.xlsx",
                   "fileName": "m1w4d4_refreshable_report_sources.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -2479,7 +2479,7 @@
                   "description": "Экзамен: грязный файл на 3000 строк. За 90 минут нужно почистить, посчитать 5 метрик, построить сводную, 2 графика и 3 вывода.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w4d5_month1_exam_dirty_sales.xlsx",
                   "fileName": "m1w4d5_month1_exam_dirty_sales.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             },
@@ -2572,7 +2572,7 @@
                   "description": "Финальный файл месяца для портфолио: чистый источник, KPI, проверка и README.",
                   "href": "./learning-plan/datasets/excel/month-1/m1w4d6_final_project_sales_dashboard.xlsx",
                   "fileName": "m1w4d6_final_project_sales_dashboard.xlsx",
-                  "downloadLabel": "Открыть Excel-файл"
+                  "downloadLabel": "Скачать .xlsx"
                 }
               ]
             }

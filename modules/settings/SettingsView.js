@@ -3,7 +3,7 @@
 // Переиспользует штатные компоненты темы и экспорта/импорта, чтобы настройки
 // страницы и сайдбара оставались одним и тем же функционалом.
 
-import { DataControls } from '../../core/components/DataControls.js?v=v1.7';
+import { DataControls } from '../../core/components/DataControls.js?v=v1.8';
 import { ThemeToggle } from '../../core/theme.js';
 import {
   getAiReviewSettings,
@@ -11,7 +11,7 @@ import {
   saveAiReviewConsent,
   saveAiReviewSettings,
   reviewAnswer,
-} from '../../core/aiReview.js?v=v1.7';
+} from '../../core/aiReview.js?v=v1.8';
 import { pageHeader, sectionTitle } from '../shared/ui.js';
 
 export function SettingsView() {

@@ -10,9 +10,9 @@
 // Вся логика выгрузки/загрузки и миграций — в core/backup.js; здесь только UI.
 // ES-модуль: `import { DataControls } from './core/components/DataControls.js'`.
 
-import { exportAll, parseBackupFile, importAll, clearProgress } from '../backup.js?v=v1.7';
+import { exportAll, parseBackupFile, importAll, clearProgress } from '../backup.js?v=v1.8';
 import { navigate } from '../router.js';
-import { PROGRESS_EVENT } from '../event.js?v=v1.7';
+import { PROGRESS_EVENT } from '../event.js?v=v1.8';
 
 export function DataControls() {
   const root = document.createElement('div');

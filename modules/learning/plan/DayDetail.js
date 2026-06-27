@@ -174,13 +174,23 @@ function excelDatasetLinks(day) {
       text('p', 'learning-muted', dataset.description || 'Скачай файл и выполни практику локально в Excel.'),
     );
 
-    const link = document.createElement('a');
-    link.className = 'learning-practice learning-excel-dataset__link';
-    link.href = dataset.href;
-    link.download = dataset.fileName || '';
-    link.type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-    link.textContent = dataset.downloadLabel || 'Открыть Excel-файл';
-    card.append(link);
+    const actions = document.createElement('div');
+    actions.className = 'learning-excel-dataset__actions';
+
+    const openLink = document.createElement('a');
+    openLink.className = 'learning-practice learning-excel-dataset__link learning-excel-dataset__open';
+    openLink.href = excelProtocolHref(dataset.href);
+    openLink.textContent = dataset.openLabel || 'Открыть в Excel';
+
+    const downloadLink = document.createElement('a');
+    downloadLink.className = 'learning-practice learning-excel-dataset__link';
+    downloadLink.href = dataset.href;
+    downloadLink.download = dataset.fileName || '';
+    downloadLink.type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    downloadLink.textContent = dataset.downloadLabel || 'Скачать .xlsx';
+
+    actions.append(openLink, downloadLink);
+    card.append(actions);
     links.append(card);
   }
 
@@ -194,6 +204,15 @@ function excelDatasetLinks(day) {
     links,
   );
   return section;
+}
+
+function excelProtocolHref(href) {
+  try {
+    const absoluteUrl = new URL(href, window.location.href).href;
+    return `ms-excel:ofe|u|${absoluteUrl}`;
+  } catch {
+    return href;
+  }
 }
 
 function dayFact(label, value) {

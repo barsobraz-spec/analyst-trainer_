@@ -699,8 +699,26 @@
   line-height: 1.25;
 }
 
+.learning-excel-dataset__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
 .learning-excel-dataset__link {
   align-self: flex-start;
+}
+
+.learning-excel-dataset__open {
+  color: var(--btn-primary-fg);
+  background: var(--btn-primary-bg);
+  border-color: var(--btn-primary-bg);
+}
+
+.learning-excel-dataset__open:hover {
+  color: var(--btn-primary-fg);
+  background: var(--btn-primary-hover);
+  border-color: var(--btn-primary-hover);
 }
 
 .learning-day-grid {

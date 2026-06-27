@@ -4,7 +4,7 @@
 import { CONFIG } from './config.js';
 import { openDB } from './core/db.js';
 // Cache-bust version — менять через scripts/bump-cache-version.sh (источник: config.js APP_CACHE_VERSION)
-import { APP_ROUTES } from './core/appRoutes.js?v=v1.7';
+import { APP_ROUTES } from './core/appRoutes.js?v=v1.8';
 import { defineRoutes, startRouter } from './core/router.js';
 import { applyStoredTheme } from './core/theme.js';
 import { installNavigation } from './core/components/Sidebar.js';
